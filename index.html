@@ -108,8 +108,15 @@ tailwind.config = {
   .screen { position: absolute; inset: 0; display: flex; flex-direction: column; overflow: hidden; opacity: 0; pointer-events: none; transition: opacity .35s ease; }
   .screen.active { opacity: 1; pointer-events: all; }
 
-  /* ── NUMPAD BTN ── */
-  .npbtn { display: flex; align-items: center; justify-content: center; height: 68px; border-radius: 50%; font-size: 1.5rem; font-weight: 300; cursor: pointer; transition: transform .15s cubic-bezier(.34,1.56,.64,1), background .15s; user-select: none; }
+    /* ── NUMPAD BTN ── */
+  .npbtn { 
+    display: flex; align-items: center; justify-content: center; height: 68px; border-radius: 50%; 
+    font-size: 1.5rem; font-weight: 300; cursor: pointer; 
+    transition: transform .15s cubic-bezier(.34,1.56,.64,1), background .15s; 
+    user-select: none; 
+    color: #0f172a; /* Cor para modo claro */
+  }
+  .dark .npbtn { color: #f8fafc; } /* Cor para modo escuro */
   .npbtn:active { transform: scale(.88); }
 
   /* ── PIN DOT ── */
