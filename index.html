@@ -725,8 +725,32 @@ function initOnboard(){
   setTimeout(()=>document.getElementById(\'ob-name\').focus(),300);
 }
 function submitName(){
+  console.log("Botão clicado!"); // Log 1
   const n = document.getElementById('ob-name').value.trim();
-  if(!n){ toast('Digite seu nome'); return; }
+  console.log("Nome capturado:", n); // Log 2
+  
+  if(!n){ 
+    console.log("Nome vazio, chamando toast..."); // Log 3
+    toast('Digite seu nome'); 
+    return; 
+  }
+  
+  try {
+      const users = allUsers();
+      console.log("Usuários carregados:", users); // Log 4
+      if(!users.includes(n)){ users.push(n); saveUsers(users); }
+      loadUser(n);
+      document.getElementById('screen-ob').style.display = 'none';
+      document.getElementById('app').style.display = 'flex';
+      initApp();
+      goNav('home');
+      console.log("App inicializado com sucesso!"); // Log 5
+  } catch (err) {
+      console.error("ERRO CRÍTICO:", err); // Log 6
+      alert("Erro ao entrar: " + err.message); // Alerta na tela para você ver
+  }
+}
+
   
   const users = allUsers();
   if(!users.includes(n)){ users.push(n); saveUsers(users); }
