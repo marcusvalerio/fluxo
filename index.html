@@ -725,14 +725,25 @@ function initOnboard(){
   setTimeout(()=>document.getElementById(\'ob-name\').focus(),300);
 }
 function submitName(){
-  const n=document.getElementById(\'ob-name\').value.trim();
-  if(!n){toast(\'Digite seu nome\');return;}
-  const users=allUsers();if(!users.includes(n)){users.push(n);saveUsers(users);}
+  const n = document.getElementById('ob-name').value.trim();
+  if(!n){ toast('Digite seu nome'); return; }
+  
+  const users = allUsers();
+  if(!users.includes(n)){ users.push(n); saveUsers(users); }
+  
   loadUser(n);
-  document.getElementById(\'screen-ob\').style.display=\'none\';
-  document.getElementById(\'app\').style.display=\'flex\';
-  initApp();
+  
+  // Esconde o onboard e mostra o app
+  document.getElementById('screen-ob').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  
+  // Segredo: aguarda 100ms para garantir que o DOM renderizou
+  setTimeout(() => {
+    initApp();
+    goNav('home');
+  }, 100);
 }
+
 function quickLogin(name){
   loadUser(name);
   document.getElementById(\'screen-ob\').style.display=\'none\';
