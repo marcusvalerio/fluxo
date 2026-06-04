@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { useFinance } from "@/lib/finance-context"
-import { formatCurrency } from "@/lib/format"
 
 export function OnboardingScreen() {
   const { setUser, completeOnboarding } = useFinance()

@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion"
 import { useFinance } from "@/lib/finance-context"
-import { Calendar, Plus } from "lucide-react"
 import { getDaysInMonth, getFirstDayOfMonth } from "@/lib/format"
 
 interface CalendarScreenProps {

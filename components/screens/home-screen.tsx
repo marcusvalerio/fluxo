@@ -1,10 +1,9 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useFinance, type Transaction } from "@/lib/finance-context"
+import { useFinance } from "@/lib/finance-context"
 import { formatCurrency, getGreeting } from "@/lib/format"
 import { TransactionItem } from "../transaction-item"
-import { Plus } from "lucide-react"
 
 interface HomeScreenProps {
   onOpenNewTransaction: (date?: string) => void
