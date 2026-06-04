@@ -1,39 +1,23 @@
 "use client"
 
-import { useState } from "react"
-import { AnimatePresence, motion } from "framer-motion"
-import { OnboardingScreen } from "@/components/onboarding-screen"
-import { HomeScreen } from "@/components/home-screen"
-import { TransactionsScreen } from "@/components/transactions-screen"
-import { GoalsScreen } from "@/components/goals-screen"
-import { CalendarScreen } from "@/components/calendar-screen"
-import { BillsScreen } from "@/components/bills-screen"
 import { AnalyticsScreen } from "@/components/analytics-screen"
+import { BillModal } from "@/components/bill-modal"
+import { BillsScreen } from "@/components/bills-screen"
 import { BottomNav } from "@/components/bottom-nav"
+import { Button } from "@/components/button"
+import { CalendarScreen } from "@/components/calendar-screen"
 import { DrawerMenu } from "@/components/drawer-menu"
 import { FloatingActionButton } from "@/components/floating-action-button"
-import { TransactionModal } from "@/components/transaction-modal"
-import { LimitModal } from "@/components/limit-modal"
 import { GoalModal } from "@/components/goal-modal"
-import { BillModal } from "@/components/bill-modal"
+import { GoalsScreen } from "@/components/goals-screen"
+import { HomeScreen } from "@/components/home-screen"
+import { LimitModal } from "@/components/limit-modal"
+import { OnboardingScreen } from "@/components/onboarding-screen"
+import { TransactionItem } from "@/components/transaction-item"
+import { TransactionModal } from "@/components/transaction-modal"
+import { TransactionsScreen } from "@/components/transactions-screen"
 import { ConfirmDialog } from "@/components/confirm-dialog"
-import { FinanceProvider } from "@/lib/finance-context"
 
-
-
-function AppContent() {
-  const { state, deleteTransaction } = useFinance()
-  const [currentScreen, setCurrentScreen] = useState<Screen>("home")
-  const [drawerOpen, setDrawerOpen] = useState(false)
-  
-  // Modal states
-  const [txModalOpen, setTxModalOpen] = useState(false)
-  const [editingTx, setEditingTx] = useState<Transaction | null>(null)
-  const [prefilledDate, setPrefilledDate] = useState<string | null>(null)
-  const [limitModalOpen, setLimitModalOpen] = useState(false)
-  const [goalModalOpen, setGoalModalOpen] = useState(false)
-  const [editingGoal, setEditingGoal] = useState<Goal | null>(null)
-  const [billModalOpen, setBillModalOpen] = useState(false)
   
   // Confirm dialog
   const [confirmOpen, setConfirmOpen] = useState(false)
