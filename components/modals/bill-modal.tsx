@@ -82,7 +82,7 @@ export function BillModal({ isOpen, onClose }: BillModalProps) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ex: Aluguel, Netflix..."
-                  className="w-full px-4 py-3 bg-secondary border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-secondary border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30"
                 />
               </div>
 
@@ -97,7 +97,7 @@ export function BillModal({ isOpen, onClose }: BillModalProps) {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0,00"
-                  className="w-full px-4 py-3 bg-secondary border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-secondary border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30"
                 />
               </div>
 
@@ -114,7 +114,7 @@ export function BillModal({ isOpen, onClose }: BillModalProps) {
                   value={dueDay}
                   onChange={(e) => setDueDay(e.target.value)}
                   placeholder="Ex: 10"
-                  className="w-full px-4 py-3 bg-secondary border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-secondary border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30"
                 />
               </div>
 
