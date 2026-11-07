@@ -8,7 +8,7 @@ import { brl, CATEGORIES, int, type Analysis } from "@/lib/finance"
 import { labelMonth, relativeDay } from "@/lib/dates"
 import { BigMoney, field, Label, Primary, rise, Sheet, spring } from "../ui"
 import { TxList } from "../tx-list"
-import { addBill, deleteBill, leaveSpace, setLimit, toggleBill } from "@/app/actions"
+import { addBill, changePassword, deleteBill, logout, setLimit, toggleBill } from "@/app/actions"
 import type { Tab } from "../fluxo-app"
 
 const WEEK = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" })
@@ -120,7 +120,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
         )}
       </div>
 
-      <SettingsSheet open={settings} onClose={() => setSettings(false)} limit={snap.space.limit} />
+      <SettingsSheet open={settings} onClose={() => setSettings(false)} limit={snap.space.limit} email={snap.user.email} admin={snap.user.role === "admin"} />
       <BillSheet open={billSheet} onClose={() => setBillSheet(false)} />
     </div>
   )
@@ -150,8 +150,11 @@ function BillRow({ b, day, ym }: { b: Bill; day: number; ym: string }) {
   )
 }
 
-function SettingsSheet({ open, onClose, limit }: { open: boolean; onClose: () => void; limit: number }) {
+function SettingsSheet({ open, onClose, limit, email, admin }: { open: boolean; onClose: () => void; limit: number; email: string; admin: boolean }) {
   const [v, setV] = useState(limit ? String(limit) : "")
+  const [cur, setCur] = useState("")
+  const [nxt, setNxt] = useState("")
+  const [msg, setMsg] = useState("")
   const [pending, start] = useTransition()
   return (
     <Sheet open={open} onClose={onClose} title="Ajustes">
@@ -162,8 +165,17 @@ function SettingsSheet({ open, onClose, limit }: { open: boolean; onClose: () =>
         <Primary disabled={pending} onClick={() => start(async () => { await setLimit(Number(v.replace(/\./g, "").replace(",", ".")) || 0); onClose() })}>
           {pending ? "Salvando…" : "Salvar"}
         </Primary>
-        <button onClick={() => start(() => leaveSpace())} className="flex h-12 w-full items-center justify-center gap-2 text-[14px] text-mute hover:text-gravy">
-          <LogOut size={15} /> Sair deste espaço
+        <div className="space-y-2 pt-3">
+          <Label>Trocar senha</Label>
+          <input type="password" autoComplete="current-password" value={cur} onChange={(e) => setCur(e.target.value)} placeholder="Senha atual" className={field} />
+          <input type="password" autoComplete="new-password" value={nxt} onChange={(e) => setNxt(e.target.value)} placeholder="Nova senha (8+ caracteres)" className={field} />
+          {msg && <p className="px-1 text-[13px] text-smoke">{msg}</p>}
+          <button disabled={pending || !cur || nxt.length < 8} onClick={() => start(async () => { const r = await changePassword(cur, nxt); setMsg(r.error ?? "Senha trocada."); if (!r.error) { setCur(""); setNxt("") } })}
+            className="h-12 w-full rounded-[24px] bg-white text-[14px] font-semibold disabled:opacity-40">Trocar senha</button>
+        </div>
+        {admin && <a href="/admin" className="flex h-12 w-full items-center justify-center rounded-[24px] bg-white text-[14px] font-semibold">Abrir painel admin</a>}
+        <button onClick={() => start(() => logout())} className="flex h-12 w-full items-center justify-center gap-2 text-[14px] text-mute hover:text-gravy">
+          <LogOut size={15} /> Sair · {email}
         </button>
       </div>
     </Sheet>

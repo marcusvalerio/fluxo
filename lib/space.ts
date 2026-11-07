@@ -1,21 +1,12 @@
 import "server-only"
-import { cookies } from "next/headers"
 import { sql } from "./db"
 import type { Snapshot } from "./types"
 import { todayISO } from "./dates"
 
-export const COOKIE = "fluxo_space"
-const UUID = /^[0-9a-f-]{36}$/i
-
-export async function currentSpaceId(): Promise<string | null> {
-  const id = (await cookies()).get(COOKIE)?.value
-  return id && UUID.test(id) ? id : null
-}
+import { currentUser, requireUser } from "./auth"
 
 export async function requireSpaceId(): Promise<string> {
-  const id = await currentSpaceId()
-  if (!id) throw new Error("Sem espaço ativo")
-  return id
+  return (await requireUser()).spaceId
 }
 
 export const monthKey = () => todayISO().slice(0, 7)
@@ -24,10 +15,11 @@ const num = (v: unknown) => Number(v)
 const day = (v: unknown) => (v instanceof Date ? v.toISOString().slice(0, 10) : String(v).slice(0, 10))
 
 export async function loadSnapshot(): Promise<Snapshot | null> {
-  const id = await currentSpaceId()
-  if (!id) return null
+  const user = await currentUser()
+  if (!user) return null
+  const id = user.spaceId
   const [spaces, txs, goals, bills] = await Promise.all([
-    sql`select id, name, monthly_limit from spaces where id = ${id}`,
+    sql`select id, name, monthly_limit, onboarded from spaces where id = ${id}`,
     sql`select id, kind, amount, description, category, occurred_on from transactions
         where space_id = ${id} and occurred_on > now() - interval '400 days'
         order by occurred_on desc, id desc`,
@@ -38,7 +30,8 @@ export async function loadSnapshot(): Promise<Snapshot | null> {
   if (!s) return null
   const mk = monthKey()
   return {
-    space: { id: s.id, name: s.name, limit: num(s.monthly_limit) },
+    space: { id: s.id, name: s.name, limit: num(s.monthly_limit), onboarded: s.onboarded },
+    user: { name: user.name, email: user.email, role: user.role, mustChangePassword: user.mustChangePassword },
     txs: txs.map((t) => ({
       id: num(t.id), kind: t.kind, amount: num(t.amount), description: t.description,
       category: t.category, date: day(t.occurred_on),

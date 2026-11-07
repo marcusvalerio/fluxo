@@ -31,10 +31,12 @@ export interface Space {
   id: string
   name: string
   limit: number
+  onboarded: boolean
 }
 
 export interface Snapshot {
   space: Space
+  user: { name: string; email: string; role: "admin" | "user"; mustChangePassword: boolean }
   txs: Tx[]
   goals: Goal[]
   bills: Bill[]

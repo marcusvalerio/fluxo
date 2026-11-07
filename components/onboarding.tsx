@@ -3,22 +3,29 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { useState, useTransition } from "react"
 import { ArrowLeft, ArrowRight } from "lucide-react"
-import { createSpace } from "@/app/actions"
+import { completeOnboarding } from "@/app/actions"
 import { int } from "@/lib/finance"
 import { spring } from "./ui"
 
 const TOTAL = 4
 
-export function Onboarding() {
+export function Onboarding({ name: initialName, needsPassword }: { name: string; needsPassword: boolean }) {
   const [step, setStep] = useState(0)
   const [dir, setDir] = useState(1)
-  const [name, setName] = useState("")
+  const [name, setName] = useState(initialName)
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
   const [limit, setLimit] = useState("")
   const [pending, start] = useTransition()
   const limitN = Number(limit.replace(/\D/g, "")) || 0
 
   const go = (n: number) => { setDir(n > step ? 1 : -1); setStep(n) }
-  const finish = (demo: boolean) => start(() => createSpace({ name: name.trim() || "Você", limit: limitN, demo }))
+  const finish = (demo: boolean) => start(async () => {
+    setError("")
+    const r = await completeOnboarding({ name: name.trim() || "Você", limit: limitN, demo, password: needsPassword ? password : undefined })
+    if (r.error) { setError(r.error); setStep(1) }
+  })
+  const blocked = step === 1 && needsPassword && password.length < 8
 
   return (
     <main className="relative mx-auto flex min-h-dvh max-w-[480px] flex-col overflow-hidden px-5 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(20px,env(safe-area-inset-top))]">
@@ -52,10 +59,19 @@ export function Onboarding() {
           >
             {step === 0 && <Welcome />}
             {step === 1 && (
-              <Ask title="Como a gente te chama?" sub="É só para o app falar com você.">
-                <input autoFocus value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && go(2)}
+              <Ask title="Como a gente te chama?" sub={needsPassword ? "E crie a sua senha. A que você recebeu era só para entrar." : "É só para o app falar com você."}>
+                <input autoFocus value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !blocked && go(2)}
                   placeholder="Seu nome" maxLength={40}
                   className="ttl w-full border-b-2 border-sand bg-transparent pb-3 text-[40px] outline-none focus-visible:outline-none focus:border-otan" aria-label="Seu nome" />
+                {needsPassword && (
+                  <label className="mt-8 block">
+                    <span className="mb-2 block text-[13px] text-mute">Sua nova senha (mínimo 8 caracteres)</span>
+                    <input type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && !blocked && go(2)}
+                      className="h-14 w-full rounded-[22px] bg-white px-5 text-[16px] outline-none ring-otan focus:ring-2 focus-visible:outline-none" />
+                  </label>
+                )}
+                {error && <p role="alert" className="mt-3 text-[14px] text-gravy">{error}</p>}
               </Ask>
             )}
             {step === 2 && (
@@ -90,8 +106,8 @@ export function Onboarding() {
       </div>
 
       {step < 3 && (
-        <motion.button whileTap={{ scale: 0.97 }} onClick={() => go(step + 1)}
-          className="relative flex h-14 w-full items-center justify-center gap-2 rounded-[28px] bg-ink font-semibold text-cotton">
+        <motion.button whileTap={{ scale: 0.97 }} disabled={blocked} onClick={() => go(step + 1)}
+          className="disabled:opacity-30 relative flex h-14 w-full items-center justify-center gap-2 rounded-[28px] bg-ink font-semibold text-cotton">
           {step === 0 ? "Começar" : step === 2 && !limitN ? "Pular" : "Continuar"} <ArrowRight size={18} />
         </motion.button>
       )}

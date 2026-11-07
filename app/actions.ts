@@ -1,9 +1,9 @@
 "use server"
 
-import { cookies } from "next/headers"
 import { revalidatePath } from "next/cache"
 import { sql } from "@/lib/db"
-import { COOKIE, requireSpaceId, monthKey } from "@/lib/space"
+import { requireSpaceId, monthKey } from "@/lib/space"
+import { endSession, hashPassword, requireUser, startSession, verifyPassword } from "@/lib/auth"
 import { addDays, todayISO } from "@/lib/dates"
 import type { Kind } from "@/lib/types"
 
@@ -23,22 +23,52 @@ const isoDate = (s: unknown) => {
   return /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : todayISO()
 }
 
-export async function createSpace(input: { name: string; limit: number; demo: boolean }) {
-  const name = text(input.name, 40)
-  const limit = Math.max(0, Number(input.limit) || 0)
-  const [row] = await sql`insert into spaces (name, monthly_limit) values (${name}, ${limit}) returning id`
-  const id: string = row.id
-  if (input.demo) await seedDemo(id)
-  ;(await cookies()).set(COOKIE, id, {
-    httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 24 * 400, path: "/",
-  })
+// ---------- conta ----------
+
+export async function login(email: string, password: string): Promise<{ error?: string }> {
+  const e = String(email ?? "").trim().toLowerCase()
+  const [u] = await sql`select id, password_hash, active from users where email = ${e}`
+  // mesma resposta para e-mail inexistente e senha errada
+  if (!u || !u.active || !(await verifyPassword(String(password ?? ""), u.password_hash))) {
+    await new Promise((r) => setTimeout(r, 400))
+    return { error: "E-mail ou senha incorretos." }
+  }
+  await startSession(u.id)
+  done()
+  return {}
+}
+
+export async function logout() {
+  await endSession()
   done()
 }
 
-export async function leaveSpace() {
-  ;(await cookies()).delete(COOKIE)
+export async function changePassword(current: string, next: string): Promise<{ error?: string }> {
+  const user = await requireUser()
+  if (String(next).length < 8) return { error: "A nova senha precisa de pelo menos 8 caracteres." }
+  const [u] = await sql`select password_hash from users where id = ${user.id}`
+  if (!(await verifyPassword(String(current ?? ""), u.password_hash))) return { error: "Senha atual incorreta." }
+  await sql`update users set password_hash = ${await hashPassword(next)}, must_change_password = false where id = ${user.id}`
+  return {}
+}
+
+/** Fim do onboarding: nome, teto, senha nova (se for a temporária) e dados de exemplo opcionais. */
+export async function completeOnboarding(input: { name: string; limit: number; demo: boolean; password?: string }): Promise<{ error?: string }> {
+  const user = await requireUser()
+  if (user.mustChangePassword) {
+    if (!input.password || input.password.length < 8) return { error: "Crie uma senha com pelo menos 8 caracteres." }
+    await sql`update users set password_hash = ${await hashPassword(input.password)}, must_change_password = false where id = ${user.id}`
+  }
+  const name = text(input.name, 40)
+  const limit = Math.max(0, Number(input.limit) || 0)
+  await sql`update users set name = ${name} where id = ${user.id}`
+  await sql`update spaces set name = ${name}, monthly_limit = ${limit}, onboarded = true where id = ${user.spaceId}`
+  if (input.demo) {
+    const [{ n }] = await sql`select count(*)::int as n from transactions where space_id = ${user.spaceId}`
+    if (n === 0) await seedDemo(user.spaceId)
+  }
   done()
+  return {}
 }
 
 export async function addTransaction(input: { kind: Kind; amount: number; description: string; category: string; date: string }) {
