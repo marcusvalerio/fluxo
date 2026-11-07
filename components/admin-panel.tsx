@@ -92,7 +92,7 @@ export function AdminPanel({ data }: { data: AdminData }) {
             <motion.span key={d.day} title={`${d.day}: ${d.n}`} initial={{ scaleY: 0 }} animate={{ scaleY: 1 }}
               transition={{ delay: 0.2 + i * 0.015, type: "spring", stiffness: 160, damping: 18 }}
               className="flex-1 origin-bottom rounded-full"
-              style={{ height: `${Math.max(4, (d.n / peak) * 100)}%`, background: i === data.daily.length - 1 ? "#FF4E20" : d.n ? "#1F282E" : "#E4E3DC" }} />
+              style={{ height: `${Math.max(4, (d.n / peak) * 100)}%`, background: i === data.daily.length - 1 ? "#FF4E20" : d.n ? "var(--c-ink)" : "var(--c-cotton)" }} />
           ))}
         </div>
       </motion.section>

@@ -12,9 +12,9 @@ export const CATEGORIES = {
 } as const
 
 /** Tons da paleta, do mais forte ao mais fraco. A maior categoria ganha o grafite. */
-export const TONES = ["#1F282E", "#414E58", "#8A939A", "#B9B7AE"] as const
+export const TONES = ["var(--c-ink)", "var(--c-smoke)", "var(--c-faint)", "var(--c-sand-3)"] as const
 export const ACCENT = "#FF4E20"
-export const GRAVY = "#B83312"
+export const GRAVY = "var(--c-gravy)"
 
 const inMonth = (t: Tx, ym: string) => t.date.startsWith(ym)
 

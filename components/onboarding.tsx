@@ -42,7 +42,7 @@ export function Onboarding({ name: initialName, needsPassword }: { name: string;
         </AnimatePresence>
         <div className="lg absolute left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full px-3 py-2.5" aria-label={`Passo ${step + 1} de ${TOTAL}`}>
           {Array.from({ length: TOTAL }, (_, i) => (
-            <motion.span key={i} animate={{ width: i === step ? 22 : 7, backgroundColor: i <= step ? "#1F282E" : "#CFCDC3" }} transition={spring} className="h-[7px] rounded-full" />
+            <motion.span key={i} animate={{ width: i === step ? 22 : 7, backgroundColor: i <= step ? "var(--c-ink)" : "var(--c-sand-2)" }} transition={spring} className="h-[7px] rounded-full" />
           ))}
         </div>
       </header>
@@ -127,7 +127,7 @@ function Welcome() {
             {Array.from({ length: 30 }, (_, i) => (
               <motion.span key={i} initial={{ scaleY: 0 }} animate={{ scaleY: 1 }}
                 transition={{ delay: 0.4 + i * 0.025, type: "spring", stiffness: 500, damping: 14 }}
-                className="flex-1 origin-bottom rounded-[3px]" style={{ background: i < 6 ? "#1F282E" : i === 6 ? "#FF4E20" : "#DAD8CF" }} />
+                className="flex-1 origin-bottom rounded-[3px]" style={{ background: i < 6 ? "var(--c-ink)" : i === 6 ? "#FF4E20" : "var(--c-sand)" }} />
             ))}
           </div>
         </div>

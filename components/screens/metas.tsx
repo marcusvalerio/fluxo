@@ -9,7 +9,7 @@ import { diffDays, labelDay } from "@/lib/dates"
 import { field, Label, Primary, rise, Sheet, spring } from "../ui"
 import { addGoal, contributeGoal, deleteGoal } from "@/app/actions"
 
-const COLORS = ["#1F282E", "#FF4E20", "#414E58", "#8A939A"]
+const COLORS = ["var(--c-ink)", "#FF4E20", "var(--c-smoke)", "var(--c-faint)"]
 
 function monthlyNeed(g: Goal, today: string) {
   if (!g.deadline) return null
@@ -45,10 +45,10 @@ export function MetasScreen({ snap }: { snap: Snapshot }) {
       <div className="flex flex-col gap-6">
         <motion.section {...rise} transition={{ ...spring, delay: 0.05 }} className="flex items-end justify-between rounded-[23px] bg-ink p-5 text-cotton">
           <div>
-            <p className="text-[13px] text-[#A9B1B7]">Guardado no total</p>
+            <p className="text-[13px] text-[var(--c-on-ink-2)]">Guardado no total</p>
             <p className="num mt-1 text-[34px] leading-none">{brl(total, false)}</p>
           </div>
-          {target > 0 && <p className="text-right text-[13px] text-[#A9B1B7]">de {brl(target, false)}<br /><span className="num text-[#FF7A50]">{Math.round((total / target) * 100)}%</span> do caminho</p>}
+          {target > 0 && <p className="text-right text-[13px] text-[var(--c-on-ink-2)]">de {brl(target, false)}<br /><span className="num text-otan">{Math.round((total / target) * 100)}%</span> do caminho</p>}
         </motion.section>
 
         {snap.goals.map((g, i) => {
@@ -70,7 +70,7 @@ export function MetasScreen({ snap }: { snap: Snapshot }) {
               <span className="mt-3 flex h-3.5 gap-[3px]" aria-hidden>
                 {Array.from({ length: 40 }, (_, k) => (
                   <motion.span key={k} initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.3 + i * 0.1 + k * 0.012, type: "spring", stiffness: 500, damping: 14 }}
-                    className="flex-1 origin-bottom rounded-[3px]" style={{ background: k < filled ? color : "#E4E3DC" }} />
+                    className="flex-1 origin-bottom rounded-[3px]" style={{ background: k < filled ? color : "var(--c-cotton)" }} />
                 ))}
               </span>
               <span className="mt-2.5 block text-[13px] text-smoke">{hint(g, snap.today)}</span>

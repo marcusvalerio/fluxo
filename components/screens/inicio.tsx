@@ -1,8 +1,8 @@
 "use client"
 
-import { motion } from "framer-motion"
-import { useState, useTransition } from "react"
-import { ArrowDownLeft, ArrowUpRight, Check, Lightbulb, LogOut, Plus, RotateCcw, TriangleAlert, Sparkles } from "lucide-react"
+import { AnimatePresence, motion } from "framer-motion"
+import { useEffect, useState, useTransition } from "react"
+import { ArrowDownLeft, ArrowUpRight, Check, ChevronRight, Gauge, KeyRound, Shield, Lightbulb, LogOut, Plus, RotateCcw, TriangleAlert, Sparkles } from "lucide-react"
 import type { Bill, Snapshot } from "@/lib/types"
 import { brl, CATEGORIES, insights, int, lastWeek, type Analysis } from "@/lib/finance"
 import { labelMonth, relativeDay } from "@/lib/dates"
@@ -58,7 +58,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
                 <motion.span key={i} initial={{ scaleY: 0 }} animate={{ scaleY: 1 }}
                   transition={{ delay: 0.3 + i * 0.02, type: "spring", stiffness: 500, damping: 14 }}
                   className="flex-1 origin-bottom rounded-[3px]"
-                  style={{ background: i + 1 < a.dayOfMonth ? "#1F282E" : i + 1 === a.dayOfMonth ? "#FF4E20" : "#DAD8CF" }} />
+                  style={{ background: i + 1 < a.dayOfMonth ? "var(--c-ink)" : i + 1 === a.dayOfMonth ? "#FF4E20" : "var(--c-sand)" }} />
               ))}
             </div>
             <div className="num mt-2 flex justify-between text-[11px] font-semibold text-mute">
@@ -89,7 +89,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
               {week.map((d, i) => (
                 <div key={d.iso} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
                   <motion.span initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.35 + i * 0.04, type: "spring", stiffness: 200, damping: 16 }}
-                    className="w-[9px] origin-bottom rounded-full" style={{ height: `${Math.max(10, (d.total / weekPeak) * 100)}%`, background: i === 6 ? "#FF4E20" : d.total > a.dailyCap && a.dailyCap > 0 ? "#B83312" : d.total ? "#1F282E" : "#E4E3DC" }} />
+                    className="w-[9px] origin-bottom rounded-full" style={{ height: `${Math.max(10, (d.total / weekPeak) * 100)}%`, background: i === 6 ? "#FF4E20" : d.total > a.dailyCap && a.dailyCap > 0 ? "var(--c-gravy)" : d.total ? "var(--c-ink)" : "var(--c-cotton)" }} />
                   <span className="text-[9px] uppercase text-faint">{["D","S","T","Q","Q","S","S"][new Date(d.iso + "T12:00:00Z").getUTCDay()]}</span>
                 </div>
               ))}
@@ -107,7 +107,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
                   className={`w-[calc(50%-6px)] shrink-0 snap-start rounded-[23px] p-4 ${t.tone === "warn" ? "bg-ink text-cotton" : "bg-white"}`}>
                   <span className={`grid size-8 place-items-center rounded-full ${t.tone === "warn" ? "bg-otan text-white" : t.tone === "good" ? "bg-otan/12 text-gravy" : "bg-cotton text-smoke"}`}><Icon size={15} /></span>
                   <p className="ttl mt-3 text-[17px] leading-tight">{t.title}</p>
-                  <p className={`mt-1 text-[13px] leading-snug ${t.tone === "warn" ? "text-[#C3C9CD]" : "text-smoke"}`}>{t.text}</p>
+                  <p className={`mt-1 text-[13px] leading-snug ${t.tone === "warn" ? "text-[var(--c-on-ink-2)]" : "text-smoke"}`}>{t.text}</p>
                 </motion.div>
               )
             })}
@@ -191,7 +191,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
                     </div>
                     <div className="mt-1.5 flex h-2.5 gap-[2px]">
                       {Array.from({ length: 30 }, (_, k) => (
-                        <span key={k} className="flex-1 rounded-[2px]" style={{ background: k < Math.round(pct * 30) ? (i === 0 ? "#1F282E" : "#FF4E20") : "#E4E3DC" }} />
+                        <span key={k} className="flex-1 rounded-[2px]" style={{ background: k < Math.round(pct * 30) ? (i === 0 ? "var(--c-ink)" : "#FF4E20") : "var(--c-cotton)" }} />
                       ))}
                     </div>
                     <p className="mt-1 text-[12px] text-mute">{brl(g.saved, false)} de {brl(g.target, false)}</p>
@@ -217,7 +217,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
         )}
       </div>
 
-      <SettingsSheet key={settings ? "o" : "c"} open={settings} onClose={() => setSettings(false)} limit={snap.space.limit} email={snap.user.email} admin={snap.user.role === "admin"} />
+      <SettingsSheet key={settings ? "o" : "c"} open={settings} onClose={() => setSettings(false)} limit={snap.space.limit} email={snap.user.email} admin={snap.user.role === "admin"} name={snap.user.name} />
       <BillSheet open={billSheet} onClose={() => setBillSheet(false)} />
     </div>
   )
@@ -257,35 +257,74 @@ function PaidChip({ b }: { b: Bill }) {
   )
 }
 
-function SettingsSheet({ open, onClose, limit, email, admin }: { open: boolean; onClose: () => void; limit: number; email: string; admin: boolean }) {
+function SettingsSheet({ open, onClose, limit, email, admin, name }: { open: boolean; onClose: () => void; limit: number; email: string; admin: boolean; name: string }) {
   const [v, setV] = useState(limit ? String(limit) : "")
   const [cur, setCur] = useState("")
   const [nxt, setNxt] = useState("")
   const [msg, setMsg] = useState("")
+  const [panel, setPanel] = useState<"teto" | "senha" | null>(null)
   const [pending, start] = useTransition()
+  useEffect(() => {
+    if (!open) return
+    const k = (e: KeyboardEvent) => e.key === "Escape" && onClose()
+    window.addEventListener("keydown", k)
+    return () => window.removeEventListener("keydown", k)
+  }, [open, onClose])
+  const row = "flex h-[52px] w-full items-center gap-3 px-4 text-left text-[15px]"
   return (
-    <Sheet open={open} onClose={onClose} title="Ajustes">
-      <div className="space-y-4 px-1">
-        <label className="block"><Label>Teto de gastos por mês (R$)</Label>
-          <input inputMode="decimal" value={v} onChange={(e) => setV(e.target.value)} className={`${field} num text-[22px]`} />
-        </label>
-        <Primary disabled={pending} onClick={() => start(async () => { await setLimit(Number(v.replace(/\./g, "").replace(",", ".")) || 0); onClose() })}>
-          {pending ? "Salvando…" : "Salvar"}
-        </Primary>
-        <div className="space-y-2 pt-3">
-          <Label>Trocar senha</Label>
-          <input type="password" autoComplete="current-password" value={cur} onChange={(e) => setCur(e.target.value)} placeholder="Senha atual" className={field} />
-          <input type="password" autoComplete="new-password" value={nxt} onChange={(e) => setNxt(e.target.value)} placeholder="Nova senha (8+ caracteres)" className={field} />
-          {msg && <p className="px-1 text-[13px] text-smoke">{msg}</p>}
-          <button disabled={pending || !cur || nxt.length < 8} onClick={() => start(async () => { const r = await changePassword(cur, nxt); setMsg(r.error ?? "Senha trocada."); if (!r.error) { setCur(""); setNxt("") } })}
-            className="h-12 w-full rounded-[24px] bg-white text-[14px] font-semibold disabled:opacity-40">Trocar senha</button>
-        </div>
-        {admin && <a href="/admin" className="flex h-12 w-full items-center justify-center rounded-[24px] bg-white text-[14px] font-semibold">Abrir painel admin</a>}
-        <button onClick={() => start(() => logout())} className="flex h-12 w-full items-center justify-center gap-2 text-[14px] text-mute hover:text-gravy">
-          <LogOut size={15} /> Sair · {email}
-        </button>
-      </div>
-    </Sheet>
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div className="fixed inset-0 z-40 bg-ink/10 backdrop-blur-[2px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
+          <motion.div role="dialog" aria-modal aria-label="Conta"
+            initial={{ opacity: 0, scale: 0.6, y: -10, filter: "blur(8px)" }} animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }} exit={{ opacity: 0, scale: 0.7, y: -8, filter: "blur(6px)" }}
+            transition={{ type: "spring", stiffness: 420, damping: 30 }}
+            style={{ transformOrigin: "calc(100% - 23px) -23px" }}
+            className="fixed right-4 border border-white/70 bg-paper/92 shadow-[inset_0_1px_1px_#fff,0_24px_60px_-12px_rgb(31_40_46/0.35)] backdrop-blur-2xl backdrop-saturate-150 top-[max(108px,calc(env(safe-area-inset-top)+108px))] z-50 w-[min(320px,calc(100vw-32px))] overflow-hidden rounded-[23px] bg-paper/80 sm:right-[max(16px,calc(50vw-224px))]">
+            <div className="flex items-center gap-3 border-b border-white/60 px-4 py-4">
+              <span className="ttl grid size-11 place-items-center rounded-full bg-ink text-[16px] text-cotton">{name[0]?.toUpperCase()}</span>
+              <div className="min-w-0"><p className="ttl truncate text-[16px]">{name}</p><p className="truncate text-[12px] text-mute">{email}</p></div>
+            </div>
+
+            <button className={row} onClick={() => setPanel(panel === "teto" ? null : "teto")} aria-expanded={panel === "teto"}>
+              <Gauge size={18} className="text-smoke" /><span className="flex-1">Teto do mês</span>
+              <span className="num text-[14px] text-mute">{limit ? brl(limit, false) : "—"}</span>
+            </button>
+            <AnimatePresence initial={false}>
+              {panel === "teto" && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                  <div className="flex gap-2 px-4 pb-3">
+                    <input inputMode="decimal" value={v} onChange={(e) => setV(e.target.value)} aria-label="Teto mensal" className="num h-11 min-w-0 flex-1 rounded-[14px] bg-white px-3 text-[16px] outline-none focus-visible:outline-none focus:ring-2 focus:ring-otan" />
+                    <button disabled={pending} onClick={() => start(async () => { await setLimit(Number(v.replace(/\./g, "").replace(",", ".")) || 0); setPanel(null) })}
+                      className="h-11 rounded-[14px] bg-ink px-4 text-[14px] font-semibold text-cotton disabled:opacity-40">{pending ? "…" : "Salvar"}</button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <button className={row} onClick={() => setPanel(panel === "senha" ? null : "senha")} aria-expanded={panel === "senha"}>
+              <KeyRound size={18} className="text-smoke" /><span className="flex-1">Trocar senha</span>
+            </button>
+            <AnimatePresence initial={false}>
+              {panel === "senha" && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                  <div className="space-y-2 px-4 pb-3">
+                    <input type="password" autoComplete="current-password" value={cur} onChange={(e) => setCur(e.target.value)} placeholder="Senha atual" className="h-11 w-full rounded-[14px] bg-white px-3 text-[16px] outline-none focus-visible:outline-none focus:ring-2 focus:ring-otan" />
+                    <input type="password" autoComplete="new-password" value={nxt} onChange={(e) => setNxt(e.target.value)} placeholder="Nova senha (8+)" className="h-11 w-full rounded-[14px] bg-white px-3 text-[16px] outline-none focus-visible:outline-none focus:ring-2 focus:ring-otan" />
+                    {msg && <p className="text-[13px] text-smoke">{msg}</p>}
+                    <button disabled={pending || !cur || nxt.length < 8} onClick={() => start(async () => { const r = await changePassword(cur, nxt); setMsg(r.error ?? "Senha trocada."); if (!r.error) { setCur(""); setNxt("") } })}
+                      className="h-11 w-full rounded-[14px] bg-ink text-[14px] font-semibold text-cotton disabled:opacity-40">Trocar</button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {admin && <a href="/admin" className={row}><Shield size={18} className="text-smoke" /><span className="flex-1">Painel admin</span><ChevronRight size={16} className="text-faint" /></a>}
+            <button onClick={() => start(() => logout())} className={`${row} border-t border-white/60 text-gravy`}><LogOut size={18} /><span>Sair</span></button>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   )
 }
 

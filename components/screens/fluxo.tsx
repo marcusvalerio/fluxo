@@ -133,7 +133,7 @@ export function FluxoScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
                       {d.over && <span className="mb-1 size-1.5 rounded-full bg-otan" />}
                       <motion.span initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.15 + i * 0.02, type: "spring", stiffness: 160, damping: 18 }}
                         className={`flex w-full origin-bottom flex-col-reverse overflow-hidden rounded-full ${d.future ? "ghost" : ""} ${d.today ? "ring-2 ring-otan ring-offset-1" : ""} ${sel === d.day ? "opacity-100" : "opacity-90"}`}
-                        style={{ height: d.future ? "34%" : `${Math.max(4, (d.total / peakDay) * 100)}%`, background: !d.future && !d.total ? "#E4E3DC" : undefined }}>
+                        style={{ height: d.future ? "34%" : `${Math.max(4, (d.total / peakDay) * 100)}%`, background: !d.future && !d.total ? "var(--c-cotton)" : undefined }}>
                         {!d.future && d.segments.map((s) => <span key={s.name} style={{ flexGrow: s.value, background: s.color }} />)}
                       </motion.span>
                       {sel === d.day && <motion.span layoutId="sel" className="absolute -bottom-2.5 size-1 rounded-full bg-ink" />}
@@ -150,7 +150,7 @@ export function FluxoScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
                       <span className="num text-[11px] text-mute">{m.total ? (m.total / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + "k" : ""}</span>
                       <motion.span initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.1 + i * 0.06, type: "spring", stiffness: 120, damping: 16 }}
                         className={`flex w-full max-w-[34px] origin-bottom flex-col-reverse overflow-hidden rounded-[12px] ${cur ? "ring-2 ring-otan ring-offset-2" : ""}`}
-                        style={{ height: `${Math.max(3, (m.total / peakMonth) * 80)}%`, background: m.total ? undefined : "#E4E3DC" }}>
+                        style={{ height: `${Math.max(3, (m.total / peakMonth) * 80)}%`, background: m.total ? undefined : "var(--c-cotton)" }}>
                         {m.segments.map((s) => <span key={s.name} style={{ flexGrow: s.value, background: s.color }} />)}
                       </motion.span>
                       <span className={`num text-[11px] ${cur ? "text-gravy" : "text-mute"}`}>{MS[Number(m.ym.slice(5)) - 1]}</span>

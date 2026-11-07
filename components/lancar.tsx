@@ -110,7 +110,7 @@ export function Lancar({ open, onClose, snap, a }: { open: boolean; onClose: () 
 
         <div className="mt-3 grid grid-cols-3 gap-1.5">
           {KEYS.map((k) => (
-            <motion.button key={k} whileTap={{ scale: 0.92, backgroundColor: "#DAD8CF" }} onClick={() => press(k)} aria-label={k === "del" ? "Apagar" : k}
+            <motion.button key={k} whileTap={{ scale: 0.92, backgroundColor: "var(--c-sand)" }} onClick={() => press(k)} aria-label={k === "del" ? "Apagar" : k}
               disabled={k === ","}
               className={`num grid h-[58px] place-items-center rounded-[18px] text-[24px] ${k === "del" || k === "," ? "bg-transparent" : "bg-white"} ${k === "," ? "opacity-0" : ""}`}>
               {k === "del" ? <Delete size={22} /> : k}

@@ -15,7 +15,7 @@ export function CatIcon({ category, income, size = 40 }: { category: string; inc
   const Icon = ICONS[category] ?? CircleDashed
   return (
     <span aria-hidden className="grid shrink-0 place-items-center rounded-full"
-      style={{ width: size, height: size, background: income ? "rgb(255 78 32 / 0.12)" : "#E4E3DC", color: income ? "#B83312" : "#414E58" }}>
+      style={{ width: size, height: size, background: income ? "rgb(255 78 32 / 0.12)" : "var(--c-cotton)", color: income ? "var(--c-gravy)" : "var(--c-smoke)" }}>
       <Icon size={Math.round(size * 0.45)} strokeWidth={1.9} />
     </span>
   )
