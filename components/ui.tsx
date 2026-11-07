@@ -47,7 +47,7 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
           <motion.div className="fixed inset-0 z-40 bg-ink/25 backdrop-blur-[2px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
           <motion.div
             role="dialog" aria-modal aria-label={title}
-            className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[480px] rounded-t-[36px] bg-cotton px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-3 shadow-[0_-20px_60px_-20px_rgb(31_40_46/0.4)]"
+            className="fixed inset-x-0 bottom-0 z-50 mx-auto max-h-[94dvh] max-w-[480px] overflow-y-auto rounded-t-[36px] bg-cotton px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-3 shadow-[0_-20px_60px_-20px_rgb(31_40_46/0.4)]"
             initial={{ y: "105%" }} animate={{ y: 0 }} exit={{ y: "105%" }} transition={spring}
             drag="y" dragConstraints={{ top: 0, bottom: 0 }} dragElastic={{ top: 0, bottom: 0.6 }}
             onDragEnd={(_, i) => (i.offset.y > 110 || i.velocity.y > 600) && onClose()}

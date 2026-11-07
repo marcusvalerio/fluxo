@@ -32,13 +32,15 @@ export function analyze(s: Snapshot) {
   const daysLeft = dim - dayOfMonth + 1 // inclui hoje
 
   const unpaid = s.bills.filter((b) => !b.paid)
-  const upcomingBills = unpaid.reduce((a, b) => a + b.amount, 0)
+  const unpaidSubs = s.subs.filter((x) => x.dueThisMonth && !x.paid)
+  const upcomingBills = unpaid.reduce((a, b) => a + b.amount, 0) + unpaidSubs.reduce((a, x) => a + x.amount, 0)
 
   // Quanto ainda cabe: teto (limite, ou o que entrou) menos o que saiu e as contas que faltam.
   const budget = s.space.limit > 0 ? s.space.limit : income
   const free = budget - expense - upcomingBills
   const perDay = Math.max(0, free) / Math.max(1, daysLeft)
-  const dailyCap = budget > 0 ? (budget - s.bills.reduce((a, b) => a + b.amount, 0)) / dim : 0
+  const fixed = s.bills.reduce((a, b) => a + b.amount, 0) + s.subs.filter((x) => x.dueThisMonth).reduce((a, x) => a + x.amount, 0)
+  const dailyCap = budget > 0 ? Math.max(0, budget - fixed) / dim : 0
 
   // categorias do mês e do mês anterior
   const prevYm = addDays(ym + "-01", -1).slice(0, 7)
@@ -75,7 +77,8 @@ export function analyze(s: Snapshot) {
     days.push({ iso, day: d, total, future: d > dayOfMonth, today: d === dayOfMonth, over: dailyCap > 0 && total > dailyCap, segments })
   }
 
-  return { ym, income, expense, free, perDay, dailyCap, budget, upcomingBills, daysLeft, dayOfMonth, dim, categories, days, vsPrev }
+  const byCategory = Object.fromEntries(byCat)
+  return { byCategory, prevExpense, ym, income, expense, free, perDay, dailyCap, budget, upcomingBills, daysLeft, dayOfMonth, dim, categories, days, vsPrev }
 }
 
 export type Analysis = ReturnType<typeof analyze>
@@ -106,6 +109,13 @@ export function insights(s: Snapshot, a: Analysis): Insight[] {
   const month = s.txs.filter((t) => t.kind === "expense" && t.date.startsWith(a.ym))
   const big = month.reduce<Tx | null>((m, t) => (!m || t.amount > m.amount ? t : m), null)
   if (big) out.push({ tone: "info", title: "Maior gasto", text: `${big.description} · ${brl(big.amount, false)}` })
+  for (const [cat, lim] of Object.entries(s.limits)) {
+    const v = a.byCategory[cat] ?? 0
+    if (v >= lim) { out.unshift({ tone: "warn", title: `${cat} estourou`, text: `${brl(v - lim, false)} acima do limite de ${brl(lim, false)}.` }); break }
+    if (v >= lim * 0.8) { out.unshift({ tone: "warn", title: `${cat}: ${Math.round((v / lim) * 100)}%`, text: `Restam ${brl(lim - v, false)} do limite do mês.` }); break }
+  }
+  const subTotal = s.subs.reduce((x, y) => x + (y.cycle === "yearly" ? y.amount / 12 : y.amount), 0)
+  if (subTotal > 0) out.push({ tone: "info", title: `${brl(subTotal * 12, false)}/ano`, text: `em ${s.subs.length} assinaturas.` })
   const near = s.goals.find((g) => g.saved / g.target >= 0.75 && g.saved < g.target)
   if (near) out.push({ tone: "good", title: "Quase lá", text: `Faltam ${brl(near.target - near.saved, false)} para ${near.name}.` })
   if (a.budget > 0 && a.free < 0) out.push({ tone: "warn", title: "Acima do teto", text: `${brl(-a.free, false)} além do que você planejou.` })

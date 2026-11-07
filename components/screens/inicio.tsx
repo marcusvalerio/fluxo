@@ -8,6 +8,8 @@ import { brl, CATEGORIES, insights, int, lastWeek, type Analysis } from "@/lib/f
 import { labelMonth, relativeDay } from "@/lib/dates"
 import { BigMoney, field, Label, Primary, rise, Sheet, spring } from "../ui"
 import { TxList } from "../tx-list"
+import { HealthCard } from "../health-card"
+import { health } from "@/lib/plan"
 import { addBill, changePassword, deleteBill, logout, setLimit, toggleBill } from "@/app/actions"
 import type { Tab } from "../fluxo-app"
 
@@ -66,6 +68,9 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
             </div>
           </div>
         </motion.section>
+
+        {/* Saúde financeira */}
+        <motion.div {...rise} transition={{ ...spring, delay: 0.07 }}><HealthCard h={health(snap, a)} /></motion.div>
 
         {/* Entrou / saiu / semana */}
         <motion.div {...rise} transition={{ ...spring, delay: 0.08 }} className="grid grid-cols-2 gap-3">
@@ -137,7 +142,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
                   <div key={c.name}>
                     <div className="mb-1.5 flex items-baseline justify-between text-[14px]">
                       <span className="flex items-center gap-2"><span className="size-2 rounded-[2px]" style={{ background: c.color }} />{c.name}</span>
-                      <span><span className="num text-[15px]">{brl(c.value, false)}</span><span className="text-[12px] text-mute"> · {Math.round(c.share * 100)}%</span></span>
+                      <span><span className="num text-[15px]">{brl(c.value, false)}</span><span className="text-[12px] text-mute">{snap.limits[c.name] ? ` de ${brl(snap.limits[c.name], false)}` : ` · ${Math.round(c.share * 100)}%`}</span></span>
                     </div>
                     <div className="hatch h-2 overflow-hidden rounded">
                       <motion.div className="h-full origin-left rounded" style={{ background: c.color, width: `${(c.value / a.categories[0].value) * 100}%` }}
@@ -177,7 +182,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
           <motion.div {...rise} transition={{ ...spring, delay: 0.21 }}>
             <div className="mb-3 flex items-center justify-between px-1">
               <p className="ttl text-[17px]">Metas</p>
-              <button onClick={() => go("metas")} className="text-[13px] font-semibold text-mute">Ver todas</button>
+              <button onClick={() => go("carteira")} className="text-[13px] font-semibold text-mute">Ver todas</button>
             </div>
             <section className="rounded-[23px] bg-white p-5">
             <div className="space-y-4">
@@ -211,7 +216,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
               <button onClick={() => go("fluxo")} className="text-[13px] font-semibold text-mute">Ver tudo</button>
             </div>
             <section className="rounded-[23px] bg-white px-5 py-1">
-              <TxList items={snap.txs.slice(0, 4)} meta={(t) => `${relativeDay(t.date, snap.today)} · ${t.category}`} />
+              <TxList items={snap.txs.filter((t) => t.date <= snap.today).slice(0, 4)} meta={(t) => `${relativeDay(t.date, snap.today)} · ${t.category}`} />
             </section>
           </motion.div>
         )}

@@ -8,7 +8,7 @@ const KEYWORDS: [RegExp, string][] = [
   [/almo[cç]o|jantar|caf[eé]|restaurante|padaria|comida|bar\b/i, "Alimentação"],
   [/uber|99|taxi|t[aá]xi|gasolina|combust|[oô]nibus|metr[oô]|estacionamento|ped[aá]gio/i, "Transporte"],
   [/aluguel|condom[ií]nio|iptu/i, "Moradia"],
-  [/luz|energia|[aá]gua|internet|telefone|celular|g[aá]s/i, "Contas"],
+  [/luz|energia|[aá]gua|internet|telefone|conta de celular|g[aá]s/i, "Contas"],
   [/farm[aá]cia|m[eé]dico|academia|dentista|rem[eé]dio|consulta/i, "Saúde"],
   [/cinema|show|viagem|passeio|jogo|festa|ingresso/i, "Lazer"],
   [/netflix|spotify|prime|disney|youtube|icloud|assinatura|hbo/i, "Assinaturas"],

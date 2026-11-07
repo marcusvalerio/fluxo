@@ -7,6 +7,8 @@ export interface Tx {
   description: string
   category: string
   date: string // YYYY-MM-DD
+  cardId: number | null
+  installment: { no: number; total: number } | null
 }
 
 export interface Goal {
@@ -27,6 +29,27 @@ export interface Bill {
   paid: boolean
 }
 
+export interface Card {
+  id: number
+  name: string
+  closingDay: number
+  dueDay: number
+  limit: number
+}
+
+export interface Subscription {
+  id: number
+  name: string
+  amount: number
+  billingDay: number
+  cycle: "monthly" | "yearly"
+  billingMonth: number | null
+  cardId: number | null
+  /** cobra neste mês (mensal sempre; anual só no mês dela) */
+  dueThisMonth: boolean
+  paid: boolean
+}
+
 export interface Space {
   id: string
   name: string
@@ -40,5 +63,8 @@ export interface Snapshot {
   txs: Tx[]
   goals: Goal[]
   bills: Bill[]
+  cards: Card[]
+  subs: Subscription[]
+  limits: Record<string, number>
   today: string
 }

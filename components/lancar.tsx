@@ -18,17 +18,19 @@ export function Lancar({ open, onClose, snap, a }: { open: boolean; onClose: () 
   const [desc, setDesc] = useState("")
   const [cat, setCat] = useState<string | null>(null)
   const [when, setWhen] = useState<0 | -1>(0)
+  const [cardId, setCardId] = useState<number | null>(null)
+  const [parts, setParts] = useState(1)
   const [pending, start] = useTransition()
 
   useEffect(() => {
-    if (open) { setKind("expense"); setCents(""); setDesc(""); setCat(null); setWhen(0) }
+    if (open) { setKind("expense"); setCents(""); setDesc(""); setCat(null); setWhen(0); setCardId(null); setParts(1) }
   }, [open])
 
   const amount = (Number(cents) || 0) / 100
   const guessed = useMemo(() => (desc ? parseEntry(desc, snap.today).category : null), [desc, snap.today])
   const cats = CATEGORIES[kind] as readonly string[]
   const category = cat && cats.includes(cat) ? cat : guessed && cats.includes(guessed) ? guessed : cats[0]
-  const after = kind === "expense" ? a.free - amount : a.free + (snap.space.limit > 0 ? 0 : amount)
+  const after = kind === "expense" ? a.free - (cardId ? amount / parts : amount) : a.free + (snap.space.limit > 0 ? 0 : amount)
   const perDay = Math.max(0, after) / Math.max(1, a.daysLeft)
 
   const press = (k: string) => {
@@ -52,7 +54,7 @@ export function Lancar({ open, onClose, snap, a }: { open: boolean; onClose: () 
   const submit = () => {
     if (!amount || pending) return
     start(async () => {
-      await addTransaction({ kind, amount, description: desc.trim() || category, category, date: addDays(snap.today, when) })
+      await addTransaction({ kind, amount, description: desc.trim() || category, category, date: addDays(snap.today, when), cardId: kind === "expense" ? cardId : null, installments: cardId ? parts : 1 })
       if (navigator.vibrate) navigator.vibrate([8, 40, 12])
       onClose()
     })
@@ -97,6 +99,26 @@ export function Lancar({ open, onClose, snap, a }: { open: boolean; onClose: () 
           ))}
         </div>
 
+        {kind === "expense" && snap.cards.length > 0 && (
+          <div className="no-scrollbar -mx-4 flex items-center gap-2 overflow-x-auto px-4 py-2">
+            <span className="shrink-0 text-[12px] text-mute">Pagar com</span>
+            {[{ id: null as number | null, name: "Débito/Pix" }, ...snap.cards].map((c) => (
+              <button key={String(c.id)} onClick={() => { setCardId(c.id); if (!c.id) setParts(1) }}
+                className={`h-10 shrink-0 rounded-full px-4 text-[13px] font-medium ${cardId === c.id ? "bg-ink text-cotton" : "bg-white text-smoke"}`}>{c.name}</button>
+            ))}
+          </div>
+        )}
+        <AnimatePresence>
+          {kind === "expense" && cardId && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+              <div className="mt-1 flex items-center justify-between rounded-[20px] bg-white px-2 py-1.5">
+                <button onClick={() => setParts((p) => Math.max(1, p - 1))} className="grid size-10 place-items-center rounded-full text-[20px]" aria-label="Menos parcelas">−</button>
+                <span className="text-[14px]">{parts === 1 ? "À vista" : <><span className="num">{parts}x</span> de <span className="num">{brl(amount / parts)}</span></>}</span>
+                <button onClick={() => setParts((p) => Math.min(24, p + 1))} className="grid size-10 place-items-center rounded-full text-[20px]" aria-label="Mais parcelas">+</button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         <AnimatePresence>
           {amount > 0 && a.budget > 0 && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">

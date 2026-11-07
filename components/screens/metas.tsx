@@ -26,21 +26,23 @@ function hint(g: Goal, today: string) {
   return `Faltam ${brl(left, false)}.`
 }
 
-export function MetasScreen({ snap }: { snap: Snapshot }) {
+export function MetasScreen({ snap, embedded }: { snap: Snapshot; embedded?: boolean }) {
   const [creating, setCreating] = useState(false)
   const [active, setActive] = useState<Goal | null>(null)
   const total = snap.goals.reduce((s, g) => s + g.saved, 0)
   const target = snap.goals.reduce((s, g) => s + g.target, 0)
 
   return (
-    <div className="px-4 pt-[max(52px,env(safe-area-inset-top))]">
-      <motion.header {...rise} transition={spring} className="flex items-end justify-between px-1 pb-6">
+    <div className={embedded ? "" : "px-4 pt-[max(52px,env(safe-area-inset-top))]"}>
+      {embedded ? (
+        <div className="mb-3 flex justify-end"><button onClick={() => setCreating(true)} className="flex h-8 items-center gap-1 text-[13px] font-semibold text-mute"><Plus size={14} /> Nova meta</button></div>
+      ) : <motion.header {...rise} transition={spring} className="flex items-end justify-between px-1 pb-6">
         <div>
           <p className="text-[13px] text-mute">O que você está construindo</p>
           <h1 className="ttl text-[30px] leading-tight">Metas</h1>
         </div>
         <button onClick={() => setCreating(true)} className="lg grid size-[46px] place-items-center rounded-full" aria-label="Nova meta"><Plus size={19} /></button>
-      </motion.header>
+      </motion.header>}
 
       <div className="flex flex-col gap-6">
         <motion.section {...rise} transition={{ ...spring, delay: 0.05 }} className="flex items-end justify-between rounded-[23px] bg-ink p-5 text-cotton">

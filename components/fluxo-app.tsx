@@ -2,19 +2,21 @@
 
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion"
 import { useEffect, useMemo, useState } from "react"
-import { BarChart3, House, Plus, Target } from "lucide-react"
+import { BarChart3, CalendarDays, House, Plus, Wallet } from "lucide-react"
 import type { Snapshot } from "@/lib/types"
 import { analyze } from "@/lib/finance"
 import { InicioScreen } from "./screens/inicio"
 import { FluxoScreen } from "./screens/fluxo"
-import { MetasScreen } from "./screens/metas"
+import { AgendaScreen } from "./screens/agenda"
+import { CarteiraScreen } from "./screens/carteira"
 import { Lancar } from "./lancar"
 
-export type Tab = "inicio" | "fluxo" | "metas"
+export type Tab = "inicio" | "fluxo" | "agenda" | "carteira"
 const TABS: { id: Tab; label: string; icon: typeof House }[] = [
   { id: "inicio", label: "Início", icon: House },
   { id: "fluxo", label: "Fluxo", icon: BarChart3 },
-  { id: "metas", label: "Metas", icon: Target },
+  { id: "agenda", label: "Agenda", icon: CalendarDays },
+  { id: "carteira", label: "Carteira", icon: Wallet },
 ]
 
 export function FluxoApp({ snap }: { snap: Snapshot }) {
@@ -40,7 +42,8 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
           exit={{ opacity: 0, y: -6, filter: "blur(6px)" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}>
           {tab === "inicio" && <InicioScreen snap={snap} a={a} go={setTab} />}
           {tab === "fluxo" && <FluxoScreen snap={snap} a={a} />}
-          {tab === "metas" && <MetasScreen snap={snap} />}
+          {tab === "agenda" && <AgendaScreen snap={snap} a={a} />}
+          {tab === "carteira" && <CarteiraScreen snap={snap} a={a} />}
         </motion.main>
       </AnimatePresence>
 
@@ -53,7 +56,7 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
               const on = tab === t.id
               return (
                 <button key={t.id} onClick={() => setTab(t.id)} aria-current={on ? "page" : undefined} aria-label={t.label}
-                  className="relative flex h-[54px] min-w-[54px] items-center justify-center gap-2 rounded-[27px] px-4 text-[13px] font-semibold">
+                  className="relative flex h-[54px] min-w-[50px] items-center justify-center gap-2 rounded-[27px] px-3.5 text-[13px] font-semibold">
                   {on && <motion.span layoutId="pill" className="lg-pill absolute inset-0 rounded-[27px]" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
                   <Icon size={19} strokeWidth={2} className={`relative ${on ? "text-otan" : "text-smoke"}`} />
                   <AnimatePresence initial={false}>

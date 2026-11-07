@@ -1,6 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { randomUUID } from "node:crypto"
 import { sql } from "@/lib/db"
 import { requireSpaceId, monthKey } from "@/lib/space"
 import { endSession, hashPassword, requireUser, startSession, verifyPassword } from "@/lib/auth"
@@ -71,11 +72,107 @@ export async function completeOnboarding(input: { name: string; limit: number; d
   return {}
 }
 
-export async function addTransaction(input: { kind: Kind; amount: number; description: string; category: string; date: string }) {
+export async function addTransaction(input: { kind: Kind; amount: number; description: string; category: string; date: string; cardId?: number | null; installments?: number }) {
   const id = await requireSpaceId()
   const kind = input.kind === "income" ? "income" : "expense"
-  await sql`insert into transactions (space_id, kind, amount, description, category, occurred_on)
-            values (${id}, ${kind}, ${money(input.amount)}, ${text(input.description)}, ${text(input.category, 30)}, ${isoDate(input.date)})`
+  const total = money(input.amount)
+  const desc = text(input.description)
+  const cat = text(input.category, 30)
+  const date = isoDate(input.date)
+  let cardId: number | null = null
+  if (kind === "expense" && input.cardId) {
+    const [c] = await sql`select id from cards where id = ${input.cardId} and space_id = ${id}`
+    cardId = c ? Number(c.id) : null
+  }
+  const n = cardId ? Math.min(48, Math.max(1, Math.round(Number(input.installments) || 1))) : 1
+  if (n === 1) {
+    await sql`insert into transactions (space_id, kind, amount, description, category, occurred_on, card_id)
+              values (${id}, ${kind}, ${total}, ${desc}, ${cat}, ${date}, ${cardId})`
+  } else {
+    // parcela em centavos; a primeira absorve a diferença do arredondamento
+    const cents = Math.round(total * 100)
+    const base = Math.floor(cents / n)
+    const group = randomUUID()
+    for (let i = 0; i < n; i++) {
+      const v = (i === 0 ? cents - base * (n - 1) : base) / 100
+      const d = new Date(date + "T12:00:00Z")
+      const target = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + i, 1))
+      const last = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate()
+      target.setUTCDate(Math.min(d.getUTCDate(), last))
+      await sql`insert into transactions (space_id, kind, amount, description, category, occurred_on, card_id, installment_group, installment_no, installment_total)
+                values (${id}, 'expense', ${v}, ${desc}, ${cat}, ${target.toISOString().slice(0, 10)}, ${cardId}, ${group}, ${i + 1}, ${n})`
+    }
+  }
+  done()
+}
+
+// ---------- cartões ----------
+
+const dayOf = (n: unknown) => Math.min(31, Math.max(1, Math.round(Number(n) || 1)))
+
+export async function addCard(input: { name: string; closingDay: number; dueDay: number; limit: number }) {
+  const id = await requireSpaceId()
+  await sql`insert into cards (space_id, name, closing_day, due_day, credit_limit)
+            values (${id}, ${text(input.name, 30)}, ${dayOf(input.closingDay)}, ${dayOf(input.dueDay)}, ${Math.max(0, Number(input.limit) || 0)})`
+  done()
+}
+
+export async function deleteCard(cardId: number) {
+  const id = await requireSpaceId()
+  await sql`delete from cards where id = ${cardId} and space_id = ${id}`
+  done()
+}
+
+// ---------- assinaturas ----------
+
+export async function addSubscription(input: { name: string; amount: number; billingDay: number; cycle: "monthly" | "yearly"; billingMonth?: number | null; cardId?: number | null }) {
+  const id = await requireSpaceId()
+  const cycle = input.cycle === "yearly" ? "yearly" : "monthly"
+  const bm = cycle === "yearly" ? Math.min(12, Math.max(1, Math.round(Number(input.billingMonth) || 1))) : null
+  let cardId: number | null = null
+  if (input.cardId) {
+    const [c] = await sql`select id from cards where id = ${input.cardId} and space_id = ${id}`
+    cardId = c ? Number(c.id) : null
+  }
+  await sql`insert into subscriptions (space_id, name, amount, billing_day, cycle, billing_month, card_id)
+            values (${id}, ${text(input.name, 40)}, ${money(input.amount)}, ${dayOf(input.billingDay)}, ${cycle}, ${bm}, ${cardId})`
+  done()
+}
+
+export async function deleteSubscription(subId: number) {
+  const id = await requireSpaceId()
+  await sql`delete from subscriptions where id = ${subId} and space_id = ${id}`
+  done()
+}
+
+/** Marcar como cobrada lança a despesa (no cartão, se tiver); desmarcar remove. */
+export async function toggleSubscription(subId: number) {
+  const id = await requireSpaceId()
+  const mk = monthKey()
+  const [x] = await sql`select name, amount, card_id, paid_month from subscriptions where id = ${subId} and space_id = ${id}`
+  if (!x) return
+  if (x.paid_month === mk) {
+    await sql`update subscriptions set paid_month = null where id = ${subId}`
+    await sql`delete from transactions where id = (
+      select id from transactions where space_id = ${id} and description = ${x.name} and amount = ${x.amount}
+      and category = 'Assinaturas' and to_char(occurred_on, 'YYYY-MM') = ${mk} order by id desc limit 1)`
+  } else {
+    await sql`update subscriptions set paid_month = ${mk} where id = ${subId}`
+    await sql`insert into transactions (space_id, kind, amount, description, category, occurred_on, card_id)
+              values (${id}, 'expense', ${x.amount}, ${x.name}, 'Assinaturas', ${todayISO()}, ${x.card_id})`
+  }
+  done()
+}
+
+// ---------- limites por categoria ----------
+
+export async function setCategoryLimit(category: string, amount: number) {
+  const id = await requireSpaceId()
+  const cat = text(category, 30)
+  const v = Math.round(Number(amount) * 100) / 100
+  if (!v || v <= 0) await sql`delete from category_limits where space_id = ${id} and category = ${cat}`
+  else await sql`insert into category_limits (space_id, category, amount) values (${id}, ${cat}, ${v})
+                 on conflict (space_id, category) do update set amount = excluded.amount`
   done()
 }
 
@@ -183,6 +280,21 @@ async function seedDemo(id: string) {
     (${id}, 'Reserva de emergência', 30000, 18400, '', null),
     (${id}, 'Japão 2027', 22000, 6100, '', ${addDays(t, 300)}),
     (${id}, 'MacBook novo', 14000, 11200, '', ${addDays(t, 90)})`
+  const [nu] = await sql`insert into cards (space_id, name, closing_day, due_day, credit_limit) values (${id}, 'Nubank', 3, 10, 8000) returning id`
+  await sql`insert into cards (space_id, name, closing_day, due_day, credit_limit) values (${id}, 'Inter', 20, 27, 4000)`
+  await sql`insert into subscriptions (space_id, name, amount, billing_day, cycle, billing_month, card_id) values
+    (${id}, 'Netflix', 44.9, 12, 'monthly', null, ${nu.id}),
+    (${id}, 'Spotify', 21.9, 5, 'monthly', null, ${nu.id}),
+    (${id}, 'iCloud', 14.9, 18, 'monthly', null, ${nu.id}),
+    (${id}, 'ChatGPT', 110, 22, 'monthly', null, ${nu.id}),
+    (${id}, 'Amazon Prime', 166.8, 9, 'yearly', 3, ${nu.id})`
+  await sql`insert into category_limits (space_id, category, amount) values
+    (${id}, 'Delivery', 400), (${id}, 'Mercado', 1200), (${id}, 'Lazer', 500), (${id}, 'Transporte', 450)`
+  const g = randomUUID()
+  for (let i = 0; i < 6; i++) {
+    await sql`insert into transactions (space_id, kind, amount, description, category, occurred_on, card_id, installment_group, installment_no, installment_total)
+              values (${id}, 'expense', 349.9, 'Fone de ouvido', 'Compras', ${addDays(t, -25 + i * 30)}, ${nu.id}, ${g}, ${i + 1}, 6)`
+  }
   await sql`insert into bills (space_id, name, amount, due_day, category) values
     (${id}, 'Internet', 129.9, 10, 'Contas'),
     (${id}, 'Energia', 214, 15, 'Contas'),
