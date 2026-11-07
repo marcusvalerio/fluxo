@@ -19,6 +19,7 @@ export function Login() {
     start(async () => {
       const r = await login(email, password)
       if (r.error) setError(r.error)
+      else window.location.href = "/"
     })
   }
 
@@ -26,9 +27,9 @@ export function Login() {
     <main className="relative mx-auto flex min-h-dvh max-w-[480px] flex-col overflow-hidden px-5 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(56px,env(safe-area-inset-top))]">
       <div className="blob pointer-events-none absolute -right-24 -top-20 size-72 rounded-full bg-[radial-gradient(circle,rgb(255_78_32/0.25),transparent_70%)]" />
 
-      <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={spring} className="ttl relative text-[22px]">
+      <motion.a href="/" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={spring} className="ttl relative text-[22px]">
         fluxo<span className="text-otan">.</span>
-      </motion.p>
+      </motion.a>
 
       <motion.div initial={{ opacity: 0, y: 20, filter: "blur(8px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ ...spring, delay: 0.08 }}
         className="relative mt-auto">
