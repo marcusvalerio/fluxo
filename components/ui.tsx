@@ -2,7 +2,12 @@
 
 import { animate, AnimatePresence, motion, useMotionValue, useTransform } from "framer-motion"
 import { useEffect, type ReactNode } from "react"
-import { X } from "lucide-react"
+
+export const spring = { type: "spring", stiffness: 380, damping: 32 } as const
+export const rise = {
+  initial: { opacity: 0, y: 18, scale: 0.98, filter: "blur(6px)" },
+  animate: { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" },
+}
 
 export function Ticker({ value, format, className }: { value: number; format: (n: number) => string; className?: string }) {
   const mv = useMotionValue(value)
@@ -14,21 +19,21 @@ export function Ticker({ value, format, className }: { value: number; format: (n
   return <motion.span className={className}>{text}</motion.span>
 }
 
-/** Valor em BRL com centavos menores, estilo instrumento. */
-export function Money({ value, className, size = "lg" }: { value: number; className?: string; size?: "lg" | "md" | "sm" }) {
+/** R$ grande com centavos menores. */
+export function BigMoney({ value, size = 48 }: { value: number; size?: number }) {
   const neg = value < 0
   const abs = Math.abs(value)
-  const sizes = { lg: ["text-[64px] leading-[0.9]", "text-[26px]", "text-[22px]"], md: ["text-[34px] leading-none", "text-[16px]", "text-[14px]"], sm: ["text-[20px] leading-none", "text-[12px]", "text-[11px]"] }[size]
+  const small = Math.round(size * 0.46)
   return (
-    <span className={`num inline-flex items-start ${className ?? ""}`}>
-      <span className={`${sizes[2]} mr-1.5 mt-[0.2em] text-fg-3`}>{neg ? "−R$" : "R$"}</span>
-      <Ticker value={Math.floor(abs)} format={(n) => Math.round(n).toLocaleString("pt-BR")} className={sizes[0]} />
-      <Ticker value={Math.round((abs % 1) * 100)} format={(n) => "," + String(Math.round(n)).padStart(2, "0")} className={`${sizes[1]} mt-[0.12em] text-fg-3`} />
-    </span>
+    <p className="num m-0 leading-none" style={{ fontSize: size }}>
+      <span className="mr-1 text-faint" style={{ fontSize: small }}>{neg ? "−R$" : "R$"}</span>
+      <Ticker value={Math.floor(abs)} format={(n) => Math.round(n).toLocaleString("pt-BR")} />
+      <Ticker value={Math.round((abs % 1) * 100)} format={(n) => "," + String(Math.round(n)).padStart(2, "0")} className="text-faint" />
+    </p>
   )
 }
 
-export function Sheet({ open, onClose, children, title }: { open: boolean; onClose: () => void; children: ReactNode; title?: string }) {
+export function Sheet({ open, onClose, title, children }: { open: boolean; onClose: () => void; title?: string; children: ReactNode }) {
   useEffect(() => {
     if (!open) return
     const k = (e: KeyboardEvent) => e.key === "Escape" && onClose()
@@ -39,22 +44,16 @@ export function Sheet({ open, onClose, children, title }: { open: boolean; onClo
     <AnimatePresence>
       {open && (
         <>
-          <motion.div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
+          <motion.div className="fixed inset-0 z-40 bg-ink/25 backdrop-blur-[2px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
           <motion.div
             role="dialog" aria-modal aria-label={title}
-            className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[520px] rounded-t-[32px] border border-line-2 bg-ink-2/95 px-5 pb-[max(20px,env(safe-area-inset-bottom))] pt-3 shadow-2xl backdrop-blur-2xl sm:bottom-6 sm:rounded-[32px]"
-            initial={{ y: "105%" }} animate={{ y: 0 }} exit={{ y: "105%" }}
-            transition={{ type: "spring", stiffness: 380, damping: 36 }}
+            className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[480px] rounded-t-[36px] bg-cotton px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-3 shadow-[0_-20px_60px_-20px_rgb(31_40_46/0.4)]"
+            initial={{ y: "105%" }} animate={{ y: 0 }} exit={{ y: "105%" }} transition={spring}
             drag="y" dragConstraints={{ top: 0, bottom: 0 }} dragElastic={{ top: 0, bottom: 0.6 }}
             onDragEnd={(_, i) => (i.offset.y > 110 || i.velocity.y > 600) && onClose()}
           >
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/15" />
-            {title && (
-              <div className="mb-5 flex items-center justify-between">
-                <h2 className="font-serif text-[28px] italic leading-none">{title}</h2>
-                <button onClick={onClose} className="grid size-9 place-items-center rounded-full bg-white/5 text-fg-2" aria-label="Fechar"><X size={16} /></button>
-              </div>
-            )}
+            <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-sand-2" />
+            {title && <h2 className="ttl mb-4 px-2 text-[24px]">{title}</h2>}
             {children}
           </motion.div>
         </>
@@ -63,23 +62,16 @@ export function Sheet({ open, onClose, children, title }: { open: boolean; onClo
   )
 }
 
-export function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <label className="block">
-      <span className="eyebrow mb-2 block">{label}</span>
-      {children}
-    </label>
-  )
-}
+export const field = "w-full rounded-[18px] border border-sand bg-white px-4 py-3.5 outline-none transition focus:border-otan"
 
-export const inputCls = "w-full rounded-2xl border border-line bg-white/[0.03] px-4 py-3.5 outline-none transition focus:border-acid/50 focus:bg-white/[0.05]"
+export function Label({ children }: { children: ReactNode }) {
+  return <span className="mb-1.5 block px-1 text-[13px] text-mute">{children}</span>
+}
 
 export function Primary({ children, disabled, onClick, type = "button" }: { children: ReactNode; disabled?: boolean; onClick?: () => void; type?: "button" | "submit" }) {
   return (
-    <motion.button
-      type={type} disabled={disabled} onClick={onClick} whileTap={{ scale: 0.97 }}
-      className="relative w-full overflow-hidden rounded-2xl bg-acid py-4 font-medium text-ink transition disabled:opacity-30"
-    >
+    <motion.button type={type} disabled={disabled} onClick={onClick} whileTap={{ scale: 0.97 }}
+      className="h-14 w-full rounded-[28px] bg-ink font-semibold text-cotton transition disabled:opacity-30">
       {children}
     </motion.button>
   )

@@ -150,9 +150,9 @@ async function seedDemo(id: string) {
               values (${id}, ${kind}, ${amount}, ${description}, ${category}, ${addDays(t, offset)})`
   }
   await sql`insert into goals (space_id, name, target, saved, emoji, deadline) values
-    (${id}, 'Reserva de emergência', 30000, 18400, '◎', null),
-    (${id}, 'Japão 2027', 22000, 6100, '✈', ${addDays(t, 300)}),
-    (${id}, 'MacBook novo', 14000, 11200, '⌘', ${addDays(t, 90)})`
+    (${id}, 'Reserva de emergência', 30000, 18400, '', null),
+    (${id}, 'Japão 2027', 22000, 6100, '', ${addDays(t, 300)}),
+    (${id}, 'MacBook novo', 14000, 11200, '', ${addDays(t, 90)})`
   await sql`insert into bills (space_id, name, amount, due_day, category) values
     (${id}, 'Internet', 129.9, 10, 'Contas'),
     (${id}, 'Energia', 214, 15, 'Contas'),
