@@ -33,17 +33,17 @@ export function MetasScreen({ snap }: { snap: Snapshot }) {
   const target = snap.goals.reduce((s, g) => s + g.target, 0)
 
   return (
-    <div className="px-3 pt-[max(56px,env(safe-area-inset-top))]">
-      <motion.header {...rise} transition={spring} className="flex items-end justify-between px-2 pb-4">
+    <div className="px-4 pt-[max(52px,env(safe-area-inset-top))]">
+      <motion.header {...rise} transition={spring} className="flex items-end justify-between px-1 pb-6">
         <div>
           <p className="text-[13px] text-mute">O que você está construindo</p>
-          <h1 className="ttl text-[34px] leading-tight">Metas</h1>
+          <h1 className="ttl text-[30px] leading-tight">Metas</h1>
         </div>
         <button onClick={() => setCreating(true)} className="lg grid size-[46px] place-items-center rounded-full" aria-label="Nova meta"><Plus size={19} /></button>
       </motion.header>
 
-      <div className="flex flex-col gap-3">
-        <motion.section {...rise} transition={{ ...spring, delay: 0.05 }} className="flex items-end justify-between rounded-[30px] bg-ink p-5 text-cotton">
+      <div className="flex flex-col gap-6">
+        <motion.section {...rise} transition={{ ...spring, delay: 0.05 }} className="flex items-end justify-between rounded-[23px] bg-ink p-5 text-cotton">
           <div>
             <p className="text-[13px] text-[#A9B1B7]">Guardado no total</p>
             <p className="num mt-1 text-[34px] leading-none">{brl(total, false)}</p>
@@ -57,7 +57,7 @@ export function MetasScreen({ snap }: { snap: Snapshot }) {
           const filled = Math.round(pct * 40)
           return (
             <motion.button key={g.id} {...rise} transition={{ ...spring, delay: 0.1 + i * 0.06 }} whileTap={{ scale: 0.98 }}
-              onClick={() => setActive(g)} className="block w-full rounded-[30px] bg-white p-[18px] text-left">
+              onClick={() => setActive(g)} className="block w-full rounded-[23px] bg-white p-[18px] text-left">
               <span className="flex items-baseline justify-between">
                 <span className="text-[15px] font-semibold">{g.name}</span>
                 <span className="text-[12px] text-mute">{g.deadline ? labelDay(g.deadline) : "Sem prazo"}</span>
@@ -79,7 +79,7 @@ export function MetasScreen({ snap }: { snap: Snapshot }) {
         })}
 
         {snap.goals.length === 0 && (
-          <button onClick={() => setCreating(true)} className="h-28 rounded-[30px] border-2 border-dashed border-sand-2 text-[15px] font-semibold text-smoke">Criar sua primeira meta</button>
+          <button onClick={() => setCreating(true)} className="h-28 rounded-[23px] border-2 border-dashed border-sand-2 text-[15px] font-semibold text-smoke">Criar sua primeira meta</button>
         )}
       </div>
 

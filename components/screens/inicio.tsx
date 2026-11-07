@@ -28,8 +28,8 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
   const goals = snap.goals.filter((g) => g.saved < g.target).slice(0, 2)
 
   return (
-    <div className="px-3 pt-[max(56px,env(safe-area-inset-top))]">
-      <motion.header {...rise} transition={spring} className="flex items-center justify-between px-2 pb-4">
+    <div className="px-4 pt-[max(52px,env(safe-area-inset-top))]">
+      <motion.header {...rise} transition={spring} className="flex items-center justify-between px-1 pb-6">
         <div>
           <p className="text-[13px] text-mute first-letter:uppercase">{today}</p>
           <h1 className="ttl text-[30px] leading-tight">Oi, {first}</h1>
@@ -39,14 +39,14 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
         </button>
       </motion.header>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-6">
         {/* Livre até o fim do mês */}
-        <motion.section {...rise} transition={{ ...spring, delay: 0.05 }} className="rounded-[30px] bg-paper p-1.5 shadow-[inset_0_1px_0_#fff,0_10px_30px_-18px_rgb(31_40_46/0.4)]">
+        <motion.section {...rise} transition={{ ...spring, delay: 0.05 }} className="rounded-[23px] bg-paper p-1.5 shadow-[inset_0_1px_0_#fff,0_10px_30px_-18px_rgb(31_40_46/0.4)]">
           <div className="flex justify-between px-3 pb-3 pt-2.5 text-[14px] text-smoke">
             <span>{tight ? "Passou do teto" : `Livre até dia ${a.dim}`}</span>
             <span className="num text-[13px] text-mute">{a.daysLeft} {a.daysLeft === 1 ? "dia" : "dias"}</span>
           </div>
-          <div className="rounded-[24px] bg-white p-[18px]">
+          <div className="rounded-[17px] bg-white p-[18px]">
             <BigMoney value={a.free} />
             <p className="mt-2.5 text-[14px] text-smoke">
               {a.budget <= 0 ? "Defina um teto mensal nos ajustes para ver quanto cabe." :
@@ -69,17 +69,17 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
 
         {/* Entrou / saiu / semana */}
         <motion.div {...rise} transition={{ ...spring, delay: 0.08 }} className="grid grid-cols-2 gap-3">
-          <div className="rounded-[26px] bg-white p-4">
+          <div className="rounded-[23px] bg-white p-4">
             <span className="flex items-center gap-1.5 text-[13px] text-mute"><span className="grid size-6 place-items-center rounded-full bg-otan/12 text-gravy"><ArrowDownLeft size={13} /></span>Entrou</span>
             <p className="num mt-2 text-[22px] leading-none">{brl(a.income, false)}</p>
             <p className="mt-1 text-[11px] text-mute">neste mês</p>
           </div>
-          <div className="rounded-[26px] bg-white p-4">
+          <div className="rounded-[23px] bg-white p-4">
             <span className="flex items-center gap-1.5 text-[13px] text-mute"><span className="grid size-6 place-items-center rounded-full bg-cotton text-smoke"><ArrowUpRight size={13} /></span>Saiu</span>
             <p className="num mt-2 text-[22px] leading-none">{brl(a.expense, false)}</p>
             <p className="mt-1 text-[11px] text-mute">{a.income > 0 ? `${Math.round((a.expense / a.income) * 100)}% do que entrou` : "neste mês"}</p>
           </div>
-          <div className="col-span-2 flex items-end gap-4 rounded-[26px] bg-white p-4">
+          <div className="col-span-2 flex items-end gap-4 rounded-[23px] bg-white p-4">
             <div className="shrink-0">
               <p className="text-[13px] text-mute">Últimos 7 dias</p>
               <p className="num mt-1 text-[22px] leading-none">{brl(weekTotal, false)}</p>
@@ -99,12 +99,12 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
 
         {/* Leituras */}
         {tips.length > 0 && (
-          <motion.div {...rise} transition={{ ...spring, delay: 0.1 }} className="no-scrollbar -mx-3 flex snap-x gap-2.5 overflow-x-auto px-3 pb-1">
+          <motion.div {...rise} transition={{ ...spring, delay: 0.1 }} className="no-scrollbar -mx-4 -my-3 flex snap-x scroll-px-4 gap-3 overflow-x-auto px-4 py-3">
             {tips.map((t, i) => {
               const Icon = t.tone === "warn" ? TriangleAlert : t.tone === "good" ? Sparkles : Lightbulb
               return (
                 <motion.div key={i} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ ...spring, delay: 0.15 + i * 0.05 }}
-                  className={`w-[210px] shrink-0 snap-start rounded-[24px] p-4 ${t.tone === "warn" ? "bg-ink text-cotton" : "bg-white"}`}>
+                  className={`w-[210px] shrink-0 snap-start rounded-[23px] p-4 ${t.tone === "warn" ? "bg-ink text-cotton" : "bg-white"}`}>
                   <span className={`grid size-8 place-items-center rounded-full ${t.tone === "warn" ? "bg-otan text-white" : t.tone === "good" ? "bg-otan/12 text-gravy" : "bg-cotton text-smoke"}`}><Icon size={15} /></span>
                   <p className="ttl mt-3 text-[17px] leading-tight">{t.title}</p>
                   <p className={`mt-1 text-[13px] leading-snug ${t.tone === "warn" ? "text-[#C3C9CD]" : "text-smoke"}`}>{t.text}</p>
@@ -115,7 +115,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
         )}
 
         {/* Para onde foi */}
-        <motion.section {...rise} transition={{ ...spring, delay: 0.12 }} className="rounded-[30px] bg-white p-5">
+        <motion.section {...rise} transition={{ ...spring, delay: 0.12 }} className="rounded-[23px] bg-white p-5">
           <div className="flex items-end justify-between">
             <div>
               <p className="text-[14px] text-mute">Para onde foi</p>
@@ -155,12 +155,13 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
         </motion.section>
 
         {/* Contas */}
-        <motion.section {...rise} transition={{ ...spring, delay: 0.18 }} className="rounded-[30px] bg-white px-5 py-2">
-          <div className="flex items-center justify-between pb-1 pt-3">
-            <p className="text-[14px] text-mute">Pela frente · <span className="num text-ink">{brl(a.upcomingBills, false)}</span></p>
-            <button onClick={() => setBillSheet(true)} className="flex h-9 items-center gap-1 rounded-full px-2 text-[13px] font-semibold text-smoke" aria-label="Adicionar conta fixa"><Plus size={14} /> Conta</button>
+        <motion.div {...rise} transition={{ ...spring, delay: 0.18 }}>
+          <div className="mb-3 flex items-center justify-between px-1">
+            <p className="ttl text-[17px]">Pela frente <span className="num ml-1 text-[15px] text-mute">{brl(a.upcomingBills, false)}</span></p>
+            <button onClick={() => setBillSheet(true)} className="flex h-8 items-center gap-1 text-[13px] font-semibold text-mute" aria-label="Adicionar conta fixa"><Plus size={14} /> Conta</button>
           </div>
-          {upcoming.length === 0 ? <p className="pb-4 pt-1 text-[14px] text-mute">Nenhuma conta pendente este mês.</p> :
+          <section className="rounded-[23px] bg-white px-5 py-1">
+          {upcoming.length === 0 ? <p className="py-4 text-[14px] text-mute">Nenhuma conta pendente este mês.</p> :
             upcoming.map((b) => <BillRow key={b.id} b={b} day={a.dayOfMonth} ym={a.ym} />)}
           {paid.length > 0 && (
             <div className="flex flex-wrap gap-1.5 border-t border-cotton pb-3 pt-3">
@@ -168,16 +169,18 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
               {paid.map((b) => <PaidChip key={b.id} b={b} />)}
             </div>
           )}
-        </motion.section>
+          </section>
+        </motion.div>
 
         {/* Metas */}
         {goals.length > 0 && (
-          <motion.section {...rise} transition={{ ...spring, delay: 0.21 }} className="rounded-[30px] bg-white p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-[14px] text-mute">Metas</p>
-              <button onClick={() => go("metas")} className="text-[13px] font-semibold text-smoke">Ver todas</button>
+          <motion.div {...rise} transition={{ ...spring, delay: 0.21 }}>
+            <div className="mb-3 flex items-center justify-between px-1">
+              <p className="ttl text-[17px]">Metas</p>
+              <button onClick={() => go("metas")} className="text-[13px] font-semibold text-mute">Ver todas</button>
             </div>
-            <div className="mt-3 space-y-4">
+            <section className="rounded-[23px] bg-white p-5">
+            <div className="space-y-4">
               {goals.map((g, i) => {
                 const pct = Math.min(1, g.saved / g.target)
                 return (
@@ -196,15 +199,21 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
                 )
               })}
             </div>
-          </motion.section>
+            </section>
+          </motion.div>
         )}
 
         {/* Recentes */}
         {snap.txs.length > 0 && (
-          <motion.section {...rise} transition={{ ...spring, delay: 0.24 }} className="rounded-[30px] bg-white px-5 py-2">
-            <p className="pb-1 pt-3 text-[14px] text-mute">Recentes</p>
-            <TxList items={snap.txs.slice(0, 4)} meta={(t) => `${relativeDay(t.date, snap.today)} · ${t.category}`} />
-          </motion.section>
+          <motion.div {...rise} transition={{ ...spring, delay: 0.24 }}>
+            <div className="mb-3 flex items-center justify-between px-1">
+              <p className="ttl text-[17px]">Recentes</p>
+              <button onClick={() => go("fluxo")} className="text-[13px] font-semibold text-mute">Ver tudo</button>
+            </div>
+            <section className="rounded-[23px] bg-white px-5 py-1">
+              <TxList items={snap.txs.slice(0, 4)} meta={(t) => `${relativeDay(t.date, snap.today)} · ${t.category}`} />
+            </section>
+          </motion.div>
         )}
       </div>
 

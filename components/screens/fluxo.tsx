@@ -67,11 +67,11 @@ export function FluxoScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
   }, [monthTx])
 
   return (
-    <div className="px-3 pt-[max(56px,env(safe-area-inset-top))]">
-      <motion.header {...rise} transition={spring} className="flex items-end justify-between px-2 pb-4">
+    <div className="px-4 pt-[max(52px,env(safe-area-inset-top))]">
+      <motion.header {...rise} transition={spring} className="flex items-end justify-between px-1 pb-6">
         <div>
           <p className="text-[13px] text-mute">Seu fluxo</p>
-          <h1 className="ttl text-[34px] leading-tight first-letter:uppercase">{view === "mes" ? labelMonth(snap.today) : "6 meses"}</h1>
+          <h1 className="ttl text-[30px] leading-tight first-letter:uppercase">{view === "mes" ? labelMonth(snap.today) : "6 meses"}</h1>
         </div>
         <div className="lg flex gap-0.5 rounded-[22px] p-1">
           <LayoutGroup>
@@ -85,8 +85,8 @@ export function FluxoScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
         </div>
       </motion.header>
 
-      <div className="flex flex-col gap-3">
-        <motion.section {...rise} transition={{ ...spring, delay: 0.05 }} className="rounded-[30px] bg-white px-[18px] pb-4 pt-5">
+      <div className="flex flex-col gap-6">
+        <motion.section {...rise} transition={{ ...spring, delay: 0.05 }} className="rounded-[23px] bg-white px-[18px] pb-4 pt-5">
           <div className="flex items-baseline gap-2.5">
             <p className="num text-[36px] leading-none">{brl(view === "mes" ? a.expense : months.reduce((s, m) => s + m.total, 0), false)}</p>
             {view === "mes" && a.vsPrev !== null && (
@@ -170,13 +170,13 @@ export function FluxoScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
         </motion.section>
 
         {view === "mes" && (
-          <motion.div {...rise} transition={{ ...spring, delay: 0.08 }} className="grid grid-cols-3 gap-2.5">
+          <motion.div {...rise} transition={{ ...spring, delay: 0.08 }} className="grid grid-cols-3 gap-3">
             {[
               ["Dia mais caro", biggest && biggest.total ? `R$ ${int(biggest.total)}` : "—", biggest && biggest.total ? `dia ${biggest.day}` : ""],
               ["Por dia", `R$ ${int(a.expense / Math.max(1, a.dayOfMonth))}`, a.dailyCap > 0 ? `teto R$ ${int(a.dailyCap)}` : "média"],
               ["Lançamentos", String(monthTx.length), `${monthTx.filter((t) => t.kind === "income").length} entradas`],
             ].map(([t, v, sub]) => (
-              <div key={t} className="rounded-[22px] bg-white p-3.5">
+              <div key={t} className="rounded-[23px] bg-white p-4">
                 <p className="text-[11px] text-mute">{t}</p>
                 <p className="num mt-1 text-[19px] leading-none">{v}</p>
                 <p className="mt-1 text-[11px] text-faint">{sub}</p>
@@ -186,8 +186,9 @@ export function FluxoScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
         )}
 
         {view === "mes" && a.categories.length > 0 && (
-          <motion.section {...rise} transition={{ ...spring, delay: 0.1 }} className="rounded-[30px] bg-white px-5 py-2">
-            <p className="pb-1 pt-3 text-[14px] text-mute">Por categoria · vs mês passado</p>
+          <motion.div {...rise} transition={{ ...spring, delay: 0.1 }}>
+            <div className="mb-3 flex items-center justify-between px-1"><p className="ttl text-[17px]">Por categoria</p><span className="text-[12px] text-mute">vs mês passado</span></div>
+            <section className="rounded-[23px] bg-white px-5 py-1">
             {catRows.map((c) => (
               <div key={c.name} className="flex items-center gap-3 border-t border-cotton py-3 first-of-type:border-0">
                 <CatIcon category={c.name} size={36} />
@@ -201,10 +202,13 @@ export function FluxoScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
                 <span className="num w-[86px] text-right text-[15px]">{brl(c.value, false)}</span>
               </div>
             ))}
-          </motion.section>
+            </section>
+          </motion.div>
         )}
 
-        <motion.section {...rise} transition={{ ...spring, delay: 0.12 }} className="rounded-[30px] bg-white px-5 py-2">
+        <motion.div {...rise} transition={{ ...spring, delay: 0.12 }}>
+        <div className="mb-3 flex items-center justify-between px-1"><p className="ttl text-[17px]">Lançamentos</p><span className="text-[12px] text-mute">{monthTx.length} no mês</span></div>
+        <section className="rounded-[23px] bg-white px-5 py-2">
           {groups.length === 0 && <p className="py-4 text-[14px] text-mute">Nenhum lançamento este mês.</p>}
           {groups.map(([iso, list]) => (
             <div key={iso} className="pt-3">
@@ -216,7 +220,8 @@ export function FluxoScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
             </div>
           ))}
           {groups.length > 0 && <p className="py-3 text-center text-[12px] text-faint">Arraste para a esquerda para apagar.</p>}
-        </motion.section>
+        </section>
+        </motion.div>
       </div>
     </div>
   )
