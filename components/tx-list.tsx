@@ -22,7 +22,7 @@ export function TxRow({ tx, meta, onOpen }: { tx: Tx; meta: string; onOpen: () =
       <motion.button drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={{ left: 0.5, right: 0 }} style={{ x }}
         onDragEnd={(_, i) => i.offset.x < -100 && start(() => deleteTransaction(tx.id))}
         onTap={onOpen} aria-label={`${tx.description}, ${brl(tx.amount)}`}
-        className="relative flex w-full items-center gap-3 bg-white py-3 text-left">
+        className="relative flex w-full items-center gap-3 bg-card py-3 text-left">
         <CatIcon category={tx.category} income={income} />
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[15px]">{tx.description}</span>
@@ -50,7 +50,7 @@ export function TxList({ items, meta }: { items: Tx[]; meta: (t: Tx) => string }
               <p className="mt-3 text-[15px] text-smoke">{open.description}</p>
               <p className={`num mt-1 text-[40px] leading-none ${open.kind === "income" ? "text-gravy" : ""}`}>{open.kind === "income" ? "+" : "−"}{brl(open.amount)}</p>
             </div>
-            <dl className="rounded-[22px] bg-white px-4">
+            <dl className="rounded-[22px] bg-card px-4">
               {[
                 ["Tipo", open.kind === "income" ? "Entrada" : "Saída"],
                 ["Categoria", open.category],
@@ -62,7 +62,7 @@ export function TxList({ items, meta }: { items: Tx[]; meta: (t: Tx) => string }
               ))}
             </dl>
             <button disabled={pending} onClick={() => start(async () => { await deleteTransaction(open.id); setOpen(null) })}
-              className="mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-[28px] bg-white text-[15px] font-semibold text-gravy disabled:opacity-40">
+              className="mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-[28px] bg-card text-[15px] font-semibold text-gravy disabled:opacity-40">
               <Trash2 size={16} /> {pending ? "Apagando…" : "Apagar lançamento"}
             </button>
           </div>

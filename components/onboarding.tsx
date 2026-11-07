@@ -68,20 +68,26 @@ export function Onboarding({ name: initialName, needsPassword }: { name: string;
                     <span className="mb-2 block text-[13px] text-mute">Sua nova senha (mínimo 8 caracteres)</span>
                     <input type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && !blocked && go(2)}
-                      className="h-14 w-full rounded-[22px] bg-white px-5 text-[16px] outline-none ring-otan focus:ring-2 focus-visible:outline-none" />
+                      className="h-14 w-full rounded-[22px] bg-card px-5 text-[16px] outline-none ring-otan focus:ring-2 focus-visible:outline-none" />
                   </label>
                 )}
                 {error && <p role="alert" className="mt-3 text-[14px] text-gravy">{error}</p>}
               </Ask>
             )}
             {step === 2 && (
-              <Ask title="Quanto você quer gastar por mês?" sub="Seu teto. Dá para mudar depois, e pode deixar em branco.">
+              <Ask title="Quanto você quer gastar por mês?" sub="É o seu teto: o app mostra quanto ainda cabe até o fim do mês. Muda quando quiser.">
                 <div className="flex items-baseline gap-2 border-b-2 border-sand pb-3 focus-within:border-otan">
                   <span className="num text-[24px] text-faint">R$</span>
                   <input autoFocus inputMode="numeric" value={limit} aria-label="Limite mensal"
                     onChange={(e) => { const n = Number(e.target.value.replace(/\D/g, "")); setLimit(n ? n.toLocaleString("pt-BR") : "") }}
                     onKeyDown={(e) => e.key === "Enter" && go(3)}
-                    placeholder="6.000" className="num w-full bg-transparent text-[48px] outline-none focus-visible:outline-none" />
+                    placeholder="0" className="num w-full bg-transparent text-[48px] outline-none focus-visible:outline-none" />
+                </div>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {[3000, 5000, 8000, 12000].map((v) => (
+                    <button key={v} onClick={() => setLimit(v.toLocaleString("pt-BR"))}
+                      className={`num h-10 rounded-full px-4 text-[14px] ${limitN === v ? "bg-ink text-cotton" : "bg-card text-smoke"}`}>R$ {v.toLocaleString("pt-BR")}</button>
+                  ))}
                 </div>
                 <AnimatePresence>
                   {limitN > 0 && (
@@ -93,10 +99,10 @@ export function Onboarding({ name: initialName, needsPassword }: { name: string;
               </Ask>
             )}
             {step === 3 && (
-              <Ask title={`Tudo pronto${name.trim() ? `, ${name.trim().split(" ")[0]}` : ""}.`} sub="Quer ver o app funcionando com dados de exemplo, ou começar do seu jeito?">
+              <Ask title={`Tudo pronto${name.trim() ? `, ${name.trim().split(" ")[0]}` : ""}.`} sub="Depois, lance seus gastos pelo botão + e cadastre cartões e assinaturas na Carteira.">
                 <div className="mt-2 space-y-3">
-                  <Choice disabled={pending} onClick={() => finish(true)} title="Ver com exemplo" text="Um mês já preenchido para você explorar." />
-                  <Choice disabled={pending} onClick={() => finish(false)} title="Começar do zero" text="Você lança os seus primeiros gastos." />
+                  <Choice disabled={pending} onClick={() => finish(false)} title="Começar do zero" text="Para usar de verdade com o seu dinheiro." primary />
+                  <Choice disabled={pending} onClick={() => finish(true)} title="Só explorar" text="Entra com um mês de exemplo preenchido." />
                 </div>
                 {pending && <p className="mt-4 text-center text-sm text-mute">Preparando seu mês…</p>}
               </Ask>
@@ -121,7 +127,7 @@ function Welcome() {
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, ...spring }}
         className="rounded-[30px] bg-paper p-1.5 shadow-[inset_0_1px_0_#fff,0_20px_40px_-24px_rgb(31_40_46/0.5)]">
         <div className="flex justify-between px-3 pb-3 pt-2.5 text-sm text-smoke"><span>Livre até dia 30</span><span className="num text-mute">23 dias</span></div>
-        <div className="rounded-[24px] bg-white p-5">
+        <div className="rounded-[24px] bg-card p-5">
           <p className="num text-[44px] leading-none"><span className="mr-1 text-[20px] text-faint">R$</span>3.272<span className="text-[20px] text-faint">,40</span></p>
           <div className="mt-5 flex h-4 gap-[3px]">
             {Array.from({ length: 30 }, (_, i) => (
@@ -150,15 +156,15 @@ function Ask({ title, sub, children }: { title: string; sub: string; children: R
   )
 }
 
-function Choice({ title, text, onClick, disabled }: { title: string; text: string; onClick: () => void; disabled: boolean }) {
+function Choice({ title, text, onClick, disabled, primary }: { title: string; text: string; onClick: () => void; disabled: boolean; primary?: boolean }) {
   return (
     <motion.button whileTap={{ scale: 0.98 }} disabled={disabled} onClick={onClick}
-      className="flex w-full items-center justify-between rounded-[26px] bg-white p-5 text-left transition disabled:opacity-40">
+      className={`flex w-full items-center justify-between rounded-[23px] p-5 text-left transition disabled:opacity-40 ${primary ? "bg-ink text-cotton" : "bg-card"}`}>
       <span>
         <span className="ttl block text-[18px]">{title}</span>
-        <span className="mt-0.5 block text-sm text-mute">{text}</span>
+        <span className={`mt-0.5 block text-sm ${primary ? "opacity-70" : "text-mute"}`}>{text}</span>
       </span>
-      <span className="grid size-10 place-items-center rounded-full bg-cotton"><ArrowRight size={16} /></span>
+      <span className={`grid size-10 place-items-center rounded-full ${primary ? "bg-otan text-white" : "bg-cotton"}`}><ArrowRight size={16} /></span>
     </motion.button>
   )
 }

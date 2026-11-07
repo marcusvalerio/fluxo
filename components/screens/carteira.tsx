@@ -102,7 +102,7 @@ function CardBlock({ snap, card, index }: { snap: Snapshot; card: Card; index: n
           </div>
         )}
       </div>
-      <div className="mt-3 rounded-[23px] bg-white px-5 py-1">
+      <div className="mt-3 rounded-[23px] bg-card px-5 py-1">
         <Row label={`Próxima fatura · ${fmtDay(sum.next.due)}`} value={brl(sum.next.total)} />
         {sum.future.slice(1, 4).map((f) => <Row key={f.key} label={`Fatura de ${MES[Number(f.key.slice(5)) - 1]}`} value={brl(f.total)} muted />)}
         {items.slice(0, 4).map((t) => (
@@ -149,7 +149,7 @@ function Assinaturas({ snap }: { snap: Snapshot }) {
           <p className="num mt-1 text-[24px] leading-none">{brl(sum.monthly, false)}</p>
           <p className="mt-1 text-[11px] opacity-60">{sum.count} {sum.count === 1 ? "assinatura" : "assinaturas"}</p>
         </div>
-        <div className="rounded-[23px] bg-white p-4">
+        <div className="rounded-[23px] bg-card p-4">
           <p className="text-[12px] text-mute">Por ano</p>
           <p className="num mt-1 text-[24px] leading-none text-gravy">{brl(sum.yearly, false)}</p>
           <p className="mt-1 text-[11px] text-mute">o custo real delas</p>
@@ -176,7 +176,7 @@ function Assinaturas({ snap }: { snap: Snapshot }) {
         {sorted.length === 0 ? (
           <Empty icon={<RotateCcw size={22} />} title="Nenhuma assinatura" text="Netflix, Spotify, academia… Cadastre e veja quanto elas custam por ano." action="Adicionar assinatura" onClick={() => setAdding(true)} />
         ) : (
-          <div className="rounded-[23px] bg-white px-5 py-1">
+          <div className="rounded-[23px] bg-card px-5 py-1">
             {sorted.map((x) => <SubRow key={x.id} x={x} day={day} card={snap.cards.find((c) => c.id === x.cardId)?.name} />)}
           </div>
         )}
@@ -226,7 +226,7 @@ function NewSubSheet({ open, onClose, cards }: { open: boolean; onClose: () => v
         <label className="block"><Label>Nome</Label><input required value={name} onChange={(e) => setName(e.target.value)} placeholder="Netflix" className={field} /></label>
         <div className="flex gap-2">
           {(["monthly", "yearly"] as const).map((c) => (
-            <button type="button" key={c} onClick={() => setCycle(c)} className={`h-10 flex-1 rounded-full text-[13px] font-semibold ${cycle === c ? "bg-ink text-cotton" : "bg-white text-smoke"}`}>{c === "monthly" ? "Mensal" : "Anual"}</button>
+            <button type="button" key={c} onClick={() => setCycle(c)} className={`h-10 flex-1 rounded-full text-[13px] font-semibold ${cycle === c ? "bg-ink text-cotton" : "bg-card text-smoke"}`}>{c === "monthly" ? "Mensal" : "Anual"}</button>
           ))}
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -241,8 +241,8 @@ function NewSubSheet({ open, onClose, cards }: { open: boolean; onClose: () => v
         {cards.length > 0 && (
           <div><Label>Cobrada em</Label>
             <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={() => setCard(null)} className={`h-10 rounded-full px-4 text-[13px] font-medium ${card === null ? "bg-ink text-cotton" : "bg-white text-smoke"}`}>Débito/Pix</button>
-              {cards.map((c) => <button type="button" key={c.id} onClick={() => setCard(c.id)} className={`h-10 rounded-full px-4 text-[13px] font-medium ${card === c.id ? "bg-ink text-cotton" : "bg-white text-smoke"}`}>{c.name}</button>)}
+              <button type="button" onClick={() => setCard(null)} className={`h-10 rounded-full px-4 text-[13px] font-medium ${card === null ? "bg-ink text-cotton" : "bg-card text-smoke"}`}>Débito/Pix</button>
+              {cards.map((c) => <button type="button" key={c.id} onClick={() => setCard(c.id)} className={`h-10 rounded-full px-4 text-[13px] font-medium ${card === c.id ? "bg-ink text-cotton" : "bg-card text-smoke"}`}>{c.name}</button>)}
             </div>
           </div>
         )}
@@ -264,7 +264,7 @@ function Limites({ snap, a }: { snap: Snapshot; a: Analysis }) {
       {used.length > 0 && (
         <motion.div {...rise} transition={spring}>
           <div className={H}><p className="ttl text-[17px]">Neste mês</p><span className="text-[12px] text-mute">linha = onde deveria estar hoje</span></div>
-          <div className="rounded-[23px] bg-white px-5 py-1">
+          <div className="rounded-[23px] bg-card px-5 py-1">
             {used.map((l) => {
               const pct = l.spent / l.lim
               const tone = pct >= 1 ? "#FF4E20" : pct > expected + 0.1 ? "var(--c-gravy)" : "var(--c-ink)"
@@ -295,7 +295,7 @@ function Limites({ snap, a }: { snap: Snapshot; a: Analysis }) {
         {!used.length && <p className="mb-3 px-1 text-[14px] text-smoke">Escolha uma categoria e quanto quer gastar nela por mês. O app avisa quando chegar perto.</p>}
         <div className="flex flex-wrap gap-2">
           {free.map((c) => (
-            <button key={c} onClick={() => setEdit(c)} className="flex h-10 items-center gap-1.5 rounded-full bg-white px-4 text-[13px] font-medium text-smoke"><Plus size={13} />{c}</button>
+            <button key={c} onClick={() => setEdit(c)} className="flex h-10 items-center gap-1.5 rounded-full bg-card px-4 text-[13px] font-medium text-smoke"><Plus size={13} />{c}</button>
           ))}
         </div>
       </motion.div>
@@ -337,7 +337,7 @@ function Row({ label, value, muted }: { label: string; value: string; muted?: bo
 
 function Empty({ icon, title, text, action, onClick }: { icon: React.ReactNode; title: string; text: string; action: string; onClick: () => void }) {
   return (
-    <div className="flex flex-col items-center rounded-[23px] bg-white px-6 py-8 text-center">
+    <div className="flex flex-col items-center rounded-[23px] bg-card px-6 py-8 text-center">
       <span className="grid size-12 place-items-center rounded-full bg-cotton text-smoke">{icon}</span>
       <p className="ttl mt-3 text-[18px]">{title}</p>
       <p className="mt-1 text-[14px] text-smoke">{text}</p>

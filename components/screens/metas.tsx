@@ -59,7 +59,7 @@ export function MetasScreen({ snap, embedded }: { snap: Snapshot; embedded?: boo
           const filled = Math.round(pct * 40)
           return (
             <motion.button key={g.id} {...rise} transition={{ ...spring, delay: 0.1 + i * 0.06 }} whileTap={{ scale: 0.98 }}
-              onClick={() => setActive(g)} className="block w-full rounded-[23px] bg-white p-[18px] text-left">
+              onClick={() => setActive(g)} className="block w-full rounded-[23px] bg-card p-[18px] text-left">
               <span className="flex items-baseline justify-between">
                 <span className="text-[15px] font-semibold">{g.name}</span>
                 <span className="text-[12px] text-mute">{g.deadline ? labelDay(g.deadline) : "Sem prazo"}</span>
@@ -102,7 +102,7 @@ function ContributeSheet({ goal, onClose }: { goal: Goal | null; onClose: () => 
         <div className="space-y-4 px-1">
           <div className="flex gap-2">
             {[50, 100, 250, 500].map((q) => (
-              <button key={q} onClick={() => setV(String(q))} className="num h-11 flex-1 rounded-full bg-white text-[15px]">+{q}</button>
+              <button key={q} onClick={() => setV(String(q))} className="num h-11 flex-1 rounded-full bg-card text-[15px]">+{q}</button>
             ))}
           </div>
           <label className="block"><Label>Valor</Label>
@@ -110,7 +110,7 @@ function ContributeSheet({ goal, onClose }: { goal: Goal | null; onClose: () => 
           </label>
           <div className="grid grid-cols-[1fr_auto] gap-2">
             <Primary disabled={pending || !n} onClick={() => act(1)}>Guardar</Primary>
-            <button disabled={pending || !n} onClick={() => act(-1)} className="h-14 rounded-[28px] bg-white px-6 text-[15px] font-semibold text-smoke disabled:opacity-30">Retirar</button>
+            <button disabled={pending || !n} onClick={() => act(-1)} className="h-14 rounded-[28px] bg-card px-6 text-[15px] font-semibold text-smoke disabled:opacity-30">Retirar</button>
           </div>
           <button onClick={() => start(async () => { await deleteGoal(goal.id); onClose() })} className="flex h-11 w-full items-center justify-center gap-2 text-[13px] text-mute hover:text-gravy">
             <Trash2 size={13} /> Excluir meta

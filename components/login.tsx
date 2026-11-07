@@ -41,12 +41,12 @@ export function Login() {
         <label className="block">
           <span className="sr-only">E-mail</span>
           <input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com"
-            className="h-14 w-full rounded-[22px] bg-white px-5 text-[16px] outline-none ring-otan transition focus:ring-2 focus-visible:outline-none" />
+            className="h-14 w-full rounded-[22px] bg-card px-5 text-[16px] outline-none ring-otan transition focus:ring-2 focus-visible:outline-none" />
         </label>
         <label className="relative block">
           <span className="sr-only">Senha</span>
           <input type={show ? "text" : "password"} autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Senha"
-            className="h-14 w-full rounded-[22px] bg-white pl-5 pr-14 text-[16px] outline-none ring-otan transition focus:ring-2 focus-visible:outline-none" />
+            className="h-14 w-full rounded-[22px] bg-card pl-5 pr-14 text-[16px] outline-none ring-otan transition focus:ring-2 focus-visible:outline-none" />
           <button type="button" onClick={() => setShow((s) => !s)} aria-label={show ? "Esconder senha" : "Mostrar senha"}
             className="absolute right-2 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full text-mute">
             {show ? <EyeOff size={18} /> : <Eye size={18} />}

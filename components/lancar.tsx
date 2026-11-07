@@ -92,11 +92,11 @@ export function Lancar({ open, onClose, snap, a, onDone }: { open: boolean; onCl
 
         <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 py-2">
           {([0, -1] as const).map((d) => (
-            <button key={d} onClick={() => setWhen(d)} className={`h-10 shrink-0 rounded-full px-4 text-[13px] font-medium ${when === d ? "bg-ink text-cotton" : "bg-white text-smoke"}`}>{d === 0 ? "Hoje" : "Ontem"}</button>
+            <button key={d} onClick={() => setWhen(d)} className={`h-10 shrink-0 rounded-full px-4 text-[13px] font-medium ${when === d ? "bg-ink text-cotton" : "bg-card text-smoke"}`}>{d === 0 ? "Hoje" : "Ontem"}</button>
           ))}
           <span className="mx-1 w-px shrink-0 bg-sand" />
           {[category, ...cats.filter((c) => c !== category)].map((c) => (
-            <button key={c} onClick={() => setCat(c)} className={`h-10 shrink-0 rounded-full px-4 text-[13px] font-medium transition ${c === category ? "bg-ink text-cotton" : "bg-white text-smoke"}`}>{c}</button>
+            <button key={c} onClick={() => setCat(c)} className={`h-10 shrink-0 rounded-full px-4 text-[13px] font-medium transition ${c === category ? "bg-ink text-cotton" : "bg-card text-smoke"}`}>{c}</button>
           ))}
         </div>
 
@@ -105,14 +105,14 @@ export function Lancar({ open, onClose, snap, a, onDone }: { open: boolean; onCl
             <span className="shrink-0 text-[12px] text-mute">Pagar com</span>
             {[{ id: null as number | null, name: "Débito/Pix" }, ...snap.cards].map((c) => (
               <button key={String(c.id)} onClick={() => { setCardId(c.id); if (!c.id) setParts(1) }}
-                className={`h-10 shrink-0 rounded-full px-4 text-[13px] font-medium ${cardId === c.id ? "bg-ink text-cotton" : "bg-white text-smoke"}`}>{c.name}</button>
+                className={`h-10 shrink-0 rounded-full px-4 text-[13px] font-medium ${cardId === c.id ? "bg-ink text-cotton" : "bg-card text-smoke"}`}>{c.name}</button>
             ))}
           </div>
         )}
         <AnimatePresence>
           {kind === "expense" && cardId && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-              <div className="mt-1 flex items-center justify-between rounded-[20px] bg-white px-2 py-1.5">
+              <div className="mt-1 flex items-center justify-between rounded-[20px] bg-card px-2 py-1.5">
                 <button onClick={() => setParts((p) => Math.max(1, p - 1))} className="grid size-10 place-items-center rounded-full text-[20px]" aria-label="Menos parcelas">−</button>
                 <span className="text-[14px]">{parts === 1 ? "À vista" : <><span className="num">{parts}x</span> de <span className="num">{brl(amount / parts)}</span></>}</span>
                 <button onClick={() => setParts((p) => Math.min(24, p + 1))} className="grid size-10 place-items-center rounded-full text-[20px]" aria-label="Mais parcelas">+</button>
@@ -123,7 +123,7 @@ export function Lancar({ open, onClose, snap, a, onDone }: { open: boolean; onCl
         <AnimatePresence>
           {amount > 0 && a.budget > 0 && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-              <div className="mt-2 flex items-center justify-between rounded-[20px] bg-white px-4 py-3">
+              <div className="mt-2 flex items-center justify-between rounded-[20px] bg-card px-4 py-3">
                 <span className="text-[13px] text-smoke">Depois disso, {after < 0 ? "passa do teto em" : "sobram"}</span>
                 <span className={`num text-[14px] ${after < 0 ? "text-gravy" : ""}`}>{brl(Math.abs(after), false)}{after >= 0 && <span className="text-mute"> · R$ {int(perDay)}/dia</span>}</span>
               </div>
@@ -135,7 +135,7 @@ export function Lancar({ open, onClose, snap, a, onDone }: { open: boolean; onCl
           {KEYS.map((k) => (
             <motion.button key={k} whileTap={{ scale: 0.92, backgroundColor: "var(--c-sand)" }} onClick={() => press(k)} aria-label={k === "del" ? "Apagar" : k}
               disabled={k === ","}
-              className={`num grid h-[58px] place-items-center rounded-[18px] text-[24px] ${k === "del" || k === "," ? "bg-transparent" : "bg-white"} ${k === "," ? "opacity-0" : ""}`}>
+              className={`num grid h-[58px] place-items-center rounded-[18px] text-[24px] ${k === "del" || k === "," ? "bg-transparent" : "bg-card"} ${k === "," ? "opacity-0" : ""}`}>
               {k === "del" ? <Delete size={22} /> : k}
             </motion.button>
           ))}

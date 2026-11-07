@@ -38,7 +38,7 @@ export function AgendaScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
       </motion.header>
 
       <div className="flex flex-col gap-6">
-        <motion.section {...rise} transition={{ ...spring, delay: 0.05 }} className="rounded-[23px] bg-white p-4">
+        <motion.section {...rise} transition={{ ...spring, delay: 0.05 }} className="rounded-[23px] bg-card p-4">
           <div className="grid grid-cols-7 gap-1 pb-2">
             {WD.map((w, i) => <span key={i} className="text-center text-[11px] font-semibold text-faint">{w}</span>)}
           </div>
@@ -79,7 +79,7 @@ export function AgendaScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
           </div>
           <AnimatePresence mode="wait">
             <motion.section key={sel} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}
-              className="rounded-[23px] bg-white px-5 py-1">
+              className="rounded-[23px] bg-card px-5 py-1">
               {selEvents.length === 0 ? <p className="py-4 text-[14px] text-mute">Nada marcado para este dia.</p> : selEvents.map((e, i) => <EventRow key={i} e={e} />)}
             </motion.section>
           </AnimatePresence>
@@ -90,7 +90,7 @@ export function AgendaScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
             <p className="ttl text-[17px]">Até o fim do mês</p>
             <span className="num text-[15px] text-mute">{brl(aheadTotal, false)}</span>
           </div>
-          <section className="rounded-[23px] bg-white px-5 py-1">
+          <section className="rounded-[23px] bg-card px-5 py-1">
             {ahead.length === 0 ? <p className="py-4 text-[14px] text-mute">Nada mais para pagar este mês.</p> :
               ahead.map(({ d, e }, i) => (
                 <div key={i} className="flex items-center gap-3 border-t border-cotton py-3 first:border-0">

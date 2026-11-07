@@ -62,7 +62,7 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
   )
 }
 
-export const field = "w-full rounded-[18px] border border-sand bg-white px-4 py-3.5 outline-none transition focus:border-otan"
+export const field = "w-full rounded-[18px] border border-sand bg-card px-4 py-3.5 outline-none transition focus:border-otan"
 
 export function Label({ children }: { children: ReactNode }) {
   return <span className="mb-1.5 block px-1 text-[13px] text-mute">{children}</span>

@@ -74,7 +74,7 @@ export function AdminPanel({ data }: { data: AdminData }) {
           ["Saiu no mês", brl(data.totals.gastoMes, false), "somando todas as contas"],
           ["Entrou no mês", brl(data.totals.entradaMes, false), "somando todas as contas"],
         ].map(([t, v, s], i) => (
-          <motion.section key={t} {...rise} transition={{ ...spring, delay: 0.04 * i }} className="rounded-[26px] bg-white p-5">
+          <motion.section key={t} {...rise} transition={{ ...spring, delay: 0.04 * i }} className="rounded-[26px] bg-card p-5">
             <p className="text-[13px] text-mute">{t}</p>
             <p className="num mt-1 text-[28px] leading-tight">{v}</p>
             <p className="mt-1 text-[12px] text-mute">{s}</p>
@@ -82,7 +82,7 @@ export function AdminPanel({ data }: { data: AdminData }) {
         ))}
       </div>
 
-      <motion.section {...rise} transition={{ ...spring, delay: 0.15 }} className="mt-3 rounded-[26px] bg-white p-5">
+      <motion.section {...rise} transition={{ ...spring, delay: 0.15 }} className="mt-3 rounded-[26px] bg-card p-5">
         <div className="flex items-baseline justify-between">
           <p className="text-[14px] font-semibold">Lançamentos por dia</p>
           <p className="text-[12px] text-mute">últimos 30 dias</p>
@@ -98,7 +98,7 @@ export function AdminPanel({ data }: { data: AdminData }) {
       </motion.section>
 
       <div className="mt-3 grid gap-3 lg:grid-cols-[1.4fr_1fr]">
-        <motion.section {...rise} transition={{ ...spring, delay: 0.2 }} className="rounded-[26px] bg-white p-2">
+        <motion.section {...rise} transition={{ ...spring, delay: 0.2 }} className="rounded-[26px] bg-card p-2">
           <p className="px-3 pb-1 pt-3 text-[14px] font-semibold">Contas</p>
           <ul>
             {data.users.map((u) => (
@@ -129,7 +129,7 @@ export function AdminPanel({ data }: { data: AdminData }) {
           </ul>
         </motion.section>
 
-        <motion.section {...rise} transition={{ ...spring, delay: 0.25 }} className="rounded-[26px] bg-white p-2">
+        <motion.section {...rise} transition={{ ...spring, delay: 0.25 }} className="rounded-[26px] bg-card p-2">
           <p className="px-3 pb-1 pt-3 text-[14px] font-semibold">Últimos lançamentos</p>
           {data.feed.length === 0 && <p className="px-3 py-4 text-[14px] text-mute">Nada por aqui ainda.</p>}
           <ul className="max-h-[560px] overflow-y-auto">
@@ -174,7 +174,7 @@ function NewUserSheet({ open, onClose, onCreated }: { open: boolean; onClose: ()
         <label className="block"><Label>E-mail</Label><input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ana@email.com" className={field} /></label>
         <div className="flex gap-2 pt-1">
           {(["user", "admin"] as const).map((r) => (
-            <button type="button" key={r} onClick={() => setRole(r)} className={`h-10 flex-1 rounded-full text-[13px] font-semibold ${role === r ? "bg-ink text-cotton" : "bg-white text-smoke"}`}>
+            <button type="button" key={r} onClick={() => setRole(r)} className={`h-10 flex-1 rounded-full text-[13px] font-semibold ${role === r ? "bg-ink text-cotton" : "bg-card text-smoke"}`}>
               {r === "user" ? "Usuário" : "Admin"}
             </button>
           ))}
@@ -194,7 +194,7 @@ function SecretSheet({ secret, onClose }: { secret: { name: string; email: strin
       {secret && (
         <div className="space-y-4 px-1">
           <p className="text-[14px] text-smoke">Envie para <b>{secret.name}</b>. Esta senha <b>só aparece agora</b>; no primeiro acesso a pessoa cria a própria.</p>
-          <div className="rounded-[20px] bg-white p-4">
+          <div className="rounded-[20px] bg-card p-4">
             <p className="text-[12px] text-mute">{secret.email}</p>
             <p className="num mt-1 select-all text-[26px] tracking-wide">{secret.password}</p>
           </div>

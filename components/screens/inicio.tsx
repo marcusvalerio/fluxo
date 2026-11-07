@@ -52,17 +52,17 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
 
         {/* Entrou / saiu / semana */}
         <motion.div {...rise} transition={{ ...spring, delay: 0.08 }} className="grid grid-cols-2 gap-3">
-          <div className="rounded-[23px] bg-white p-4">
+          <div className="rounded-[23px] bg-card p-4">
             <span className="flex items-center gap-1.5 text-[13px] text-mute"><span className="grid size-6 place-items-center rounded-full bg-otan/12 text-gravy"><ArrowDownLeft size={13} /></span>Entrou</span>
             <p className="num mt-2 text-[22px] leading-none">{brl(a.income, false)}</p>
             <p className="mt-1 text-[11px] text-mute">neste mês</p>
           </div>
-          <div className="rounded-[23px] bg-white p-4">
+          <div className="rounded-[23px] bg-card p-4">
             <span className="flex items-center gap-1.5 text-[13px] text-mute"><span className="grid size-6 place-items-center rounded-full bg-cotton text-smoke"><ArrowUpRight size={13} /></span>Saiu</span>
             <p className="num mt-2 text-[22px] leading-none">{brl(a.expense, false)}</p>
             <p className="mt-1 text-[11px] text-mute">{a.income > 0 ? `${Math.round((a.expense / a.income) * 100)}% do que entrou` : "neste mês"}</p>
           </div>
-          <div className="col-span-2 flex items-end gap-4 rounded-[23px] bg-white p-4">
+          <div className="col-span-2 flex items-end gap-4 rounded-[23px] bg-card p-4">
             <div className="shrink-0">
               <p className="text-[13px] text-mute">Últimos 7 dias</p>
               <p className="num mt-1 text-[22px] leading-none">{brl(weekTotal, false)}</p>
@@ -87,7 +87,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
               const Icon = t.tone === "warn" ? TriangleAlert : t.tone === "good" ? Sparkles : Lightbulb
               return (
                 <motion.div key={i} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ ...spring, delay: 0.15 + i * 0.05 }}
-                  className={`w-[calc(50%-6px)] shrink-0 snap-start rounded-[23px] p-4 ${t.tone === "warn" ? "bg-ink text-cotton" : "bg-white"}`}>
+                  className={`w-[calc(50%-6px)] shrink-0 snap-start rounded-[23px] p-4 ${t.tone === "warn" ? "bg-ink text-cotton" : "bg-card"}`}>
                   <span className={`grid size-8 place-items-center rounded-full ${t.tone === "warn" ? "bg-otan text-white" : t.tone === "good" ? "bg-otan/12 text-gravy" : "bg-cotton text-smoke"}`}><Icon size={15} /></span>
                   <p className="ttl mt-3 text-[17px] leading-tight">{t.title}</p>
                   <p className={`mt-1 text-[13px] leading-snug ${t.tone === "warn" ? "text-[var(--c-on-ink-2)]" : "text-smoke"}`}>{t.text}</p>
@@ -103,7 +103,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
             <p className="ttl text-[17px]">Para onde foi</p>
             <button onClick={() => go("fluxo")} className="text-[13px] font-semibold text-mute">Ver fluxo</button>
           </div>
-          <section className="rounded-[23px] bg-white p-5">
+          <section className="rounded-[23px] bg-card p-5">
           <p className="num text-[30px] leading-none">{brl(a.expense, false)}</p>
           {a.categories.length === 0 ? (
             <p className="mt-4 text-[14px] text-mute">Nenhum gasto este mês ainda.</p>
@@ -143,7 +143,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
             <p className="ttl text-[17px]">Pela frente <span className="num ml-1 text-[15px] text-mute">{brl(a.upcomingBills, false)}</span></p>
             <button onClick={() => setBillSheet(true)} className="flex h-8 items-center gap-1 text-[13px] font-semibold text-mute" aria-label="Adicionar conta fixa"><Plus size={14} /> Conta</button>
           </div>
-          <section className="rounded-[23px] bg-white px-5 py-1">
+          <section className="rounded-[23px] bg-card px-5 py-1">
           {upcoming.length === 0 ? <p className="py-4 text-[14px] text-mute">Nenhuma conta pendente este mês.</p> :
             upcoming.map((b) => <BillRow key={b.id} b={b} day={a.dayOfMonth} ym={a.ym} />)}
           {paid.length > 0 && (
@@ -162,7 +162,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
               <p className="ttl text-[17px]">Metas</p>
               <button onClick={() => go("carteira")} className="text-[13px] font-semibold text-mute">Ver todas</button>
             </div>
-            <section className="rounded-[23px] bg-white p-5">
+            <section className="rounded-[23px] bg-card p-5">
             <div className="space-y-4">
               {goals.map((g, i) => {
                 const pct = Math.min(1, g.saved / g.target)
@@ -193,7 +193,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
               <p className="ttl text-[17px]">Recentes</p>
               <button onClick={() => go("fluxo")} className="text-[13px] font-semibold text-mute">Ver tudo</button>
             </div>
-            <section className="rounded-[23px] bg-white px-5 py-1">
+            <section className="rounded-[23px] bg-card px-5 py-1">
               <TxList items={snap.txs.filter((t) => t.date <= snap.today).slice(0, 4)} meta={(t) => `${relativeDay(t.date, snap.today)} · ${t.category}`} />
             </section>
           </motion.div>
@@ -277,7 +277,7 @@ function SettingsSheet({ open, onClose, limit, email, admin, name }: { open: boo
               {panel === "teto" && (
                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                   <div className="flex gap-2 px-4 pb-3">
-                    <input inputMode="decimal" value={v} onChange={(e) => setV(e.target.value)} aria-label="Teto mensal" className="num h-11 min-w-0 flex-1 rounded-[14px] bg-white px-3 text-[16px] outline-none focus-visible:outline-none focus:ring-2 focus:ring-otan" />
+                    <input inputMode="decimal" value={v} onChange={(e) => setV(e.target.value)} aria-label="Teto mensal" className="num h-11 min-w-0 flex-1 rounded-[14px] bg-card px-3 text-[16px] outline-none focus-visible:outline-none focus:ring-2 focus:ring-otan" />
                     <button disabled={pending} onClick={() => start(async () => { await setLimit(Number(v.replace(/\./g, "").replace(",", ".")) || 0); setPanel(null) })}
                       className="h-11 rounded-[14px] bg-ink px-4 text-[14px] font-semibold text-cotton disabled:opacity-40">{pending ? "…" : "Salvar"}</button>
                   </div>
@@ -292,8 +292,8 @@ function SettingsSheet({ open, onClose, limit, email, admin, name }: { open: boo
               {panel === "senha" && (
                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                   <div className="space-y-2 px-4 pb-3">
-                    <input type="password" autoComplete="current-password" value={cur} onChange={(e) => setCur(e.target.value)} placeholder="Senha atual" className="h-11 w-full rounded-[14px] bg-white px-3 text-[16px] outline-none focus-visible:outline-none focus:ring-2 focus:ring-otan" />
-                    <input type="password" autoComplete="new-password" value={nxt} onChange={(e) => setNxt(e.target.value)} placeholder="Nova senha (8+)" className="h-11 w-full rounded-[14px] bg-white px-3 text-[16px] outline-none focus-visible:outline-none focus:ring-2 focus:ring-otan" />
+                    <input type="password" autoComplete="current-password" value={cur} onChange={(e) => setCur(e.target.value)} placeholder="Senha atual" className="h-11 w-full rounded-[14px] bg-card px-3 text-[16px] outline-none focus-visible:outline-none focus:ring-2 focus:ring-otan" />
+                    <input type="password" autoComplete="new-password" value={nxt} onChange={(e) => setNxt(e.target.value)} placeholder="Nova senha (8+)" className="h-11 w-full rounded-[14px] bg-card px-3 text-[16px] outline-none focus-visible:outline-none focus:ring-2 focus:ring-otan" />
                     {msg && <p className="text-[13px] text-smoke">{msg}</p>}
                     <button disabled={pending || !cur || nxt.length < 8} onClick={() => start(async () => { const r = await changePassword(cur, nxt); setMsg(r.error ?? "Senha trocada."); if (!r.error) { setCur(""); setNxt("") } })}
                       className="h-11 w-full rounded-[14px] bg-ink text-[14px] font-semibold text-cotton disabled:opacity-40">Trocar</button>

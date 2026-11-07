@@ -63,6 +63,7 @@ export interface Health { score: number; label: string; factors: { name: string;
 
 /** Nota de 0 a 100 a partir de cinco hábitos. */
 export function health(s: Snapshot, a: Analysis): Health {
+  if (a.income === 0 && a.expense === 0) return { score: -1, label: "Sem dados", factors: [] }
   const f: Health["factors"] = []
   // 1. quanto do que entrou ficou
   const rate = a.income > 0 ? (a.income - a.expense) / a.income : 0
@@ -85,7 +86,11 @@ export function health(s: Snapshot, a: Analysis): Health {
   const monthCost = Math.max(1, a.prevExpense || a.expense / Math.max(1, a.dayOfMonth) * a.dim)
   const months = saved / monthCost
   f.push({ name: "Reserva", max: 15, points: Math.round(Math.min(1, months / 6) * 15), tip: `${months.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} meses de gastos guardados.` })
-  const score = f.reduce((x, y) => x + y.points, 0)
+  // hábitos sem dados ainda não contam: a nota é proporcional aos que dá para medir
+  const has: Record<string, boolean> = { "Sobra do mês": a.income > 0, "Dentro do teto": a.budget > 0, "Contas em dia": true, Limites: Object.keys(s.limits).length > 0, Reserva: s.goals.length > 0 }
+  for (const x of f) if (!has[x.name]) x.points = -1
+  const counted = f.filter((x) => x.points >= 0)
+  const score = Math.round((counted.reduce((x, y) => x + y.points, 0) / Math.max(1, counted.reduce((x, y) => x + y.max, 0))) * 100)
   const label = score >= 80 ? "Ótima" : score >= 60 ? "Boa" : score >= 40 ? "Atenção" : "Crítica"
   return { score, label, factors: f }
 }

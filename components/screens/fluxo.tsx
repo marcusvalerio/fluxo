@@ -86,7 +86,7 @@ export function FluxoScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
       </motion.header>
 
       <div className="flex flex-col gap-6">
-        <motion.section {...rise} transition={{ ...spring, delay: 0.05 }} className="rounded-[23px] bg-white px-[18px] pb-4 pt-5">
+        <motion.section {...rise} transition={{ ...spring, delay: 0.05 }} className="rounded-[23px] bg-card px-[18px] pb-4 pt-5">
           <div className="flex items-baseline gap-2.5">
             <p className="num text-[36px] leading-none">{brl(view === "mes" ? a.expense : months.reduce((s, m) => s + m.total, 0), false)}</p>
             {view === "mes" && a.vsPrev !== null && (
@@ -176,7 +176,7 @@ export function FluxoScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
               ["Por dia", `R$ ${int(a.expense / Math.max(1, a.dayOfMonth))}`, a.dailyCap > 0 ? `teto R$ ${int(a.dailyCap)}` : "média"],
               ["Lançamentos", String(monthTx.length), `${monthTx.filter((t) => t.kind === "income").length} entradas`],
             ].map(([t, v, sub]) => (
-              <div key={t} className="rounded-[23px] bg-white p-4">
+              <div key={t} className="rounded-[23px] bg-card p-4">
                 <p className="text-[11px] text-mute">{t}</p>
                 <p className="num mt-1 text-[19px] leading-none">{v}</p>
                 <p className="mt-1 text-[11px] text-faint">{sub}</p>
@@ -188,7 +188,7 @@ export function FluxoScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
         {view === "mes" && a.categories.length > 0 && (
           <motion.div {...rise} transition={{ ...spring, delay: 0.1 }}>
             <div className="mb-3 flex items-center justify-between px-1"><p className="ttl text-[17px]">Por categoria</p><span className="text-[12px] text-mute">vs mês passado</span></div>
-            <section className="rounded-[23px] bg-white px-5 py-1">
+            <section className="rounded-[23px] bg-card px-5 py-1">
             {catRows.map((c) => (
               <div key={c.name} className="flex items-center gap-3 border-t border-cotton py-3 first-of-type:border-0">
                 <CatIcon category={c.name} size={36} />
@@ -208,7 +208,7 @@ export function FluxoScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
 
         <motion.div {...rise} transition={{ ...spring, delay: 0.12 }}>
         <div className="mb-3 flex items-center justify-between px-1"><p className="ttl text-[17px]">Lançamentos</p><span className="text-[12px] text-mute">{monthTx.length} no mês</span></div>
-        <section className="rounded-[23px] bg-white px-5 py-2">
+        <section className="rounded-[23px] bg-card px-5 py-2">
           {groups.length === 0 && <p className="py-4 text-[14px] text-mute">Nenhum lançamento este mês.</p>}
           {groups.map(([iso, list]) => (
             <div key={iso} className="pt-3">
