@@ -12,7 +12,7 @@ import { Sheet, spring } from "./ui"
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0", "del"]
 
-export function Lancar({ open, onClose, snap, a }: { open: boolean; onClose: () => void; snap: Snapshot; a: Analysis }) {
+export function Lancar({ open, onClose, snap, a, onDone }: { open: boolean; onClose: () => void; snap: Snapshot; a: Analysis; onDone?: (r: { amount: number; kind: Kind; label: string; parts: number }) => void }) {
   const [kind, setKind] = useState<Kind>("expense")
   const [cents, setCents] = useState("") // dígitos digitados
   const [desc, setDesc] = useState("")
@@ -56,6 +56,7 @@ export function Lancar({ open, onClose, snap, a }: { open: boolean; onClose: () 
     start(async () => {
       await addTransaction({ kind, amount, description: desc.trim() || category, category, date: addDays(snap.today, when), cardId: kind === "expense" ? cardId : null, installments: cardId ? parts : 1 })
       if (navigator.vibrate) navigator.vibrate([8, 40, 12])
+      onDone?.({ amount, kind, label: desc.trim() || category, parts: cardId ? parts : 1 })
       onClose()
     })
   }

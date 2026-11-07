@@ -9,6 +9,7 @@ import { labelMonth, relativeDay } from "@/lib/dates"
 import { BigMoney, field, Label, Primary, rise, Sheet, spring } from "../ui"
 import { TxList } from "../tx-list"
 import { HealthCard } from "../health-card"
+import { HeroCard } from "../hero-card"
 import { health } from "@/lib/plan"
 import { addBill, changePassword, deleteBill, logout, setLimit, toggleBill } from "@/app/actions"
 import type { Tab } from "../fluxo-app"
@@ -22,6 +23,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
   const today = WEEK.format(new Date(snap.today + "T12:00:00Z"))
   const upcoming = snap.bills.filter((b) => !b.paid).sort((x, y) => x.dueDay - y.dueDay)
   const tight = a.free < 0
+  const hs = health(snap, a)
   const paid = snap.bills.filter((b) => b.paid)
   const tips = insights(snap, a)
   const week = lastWeek(snap)
@@ -43,34 +45,10 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
 
       <div className="flex flex-col gap-6">
         {/* Livre até o fim do mês */}
-        <motion.section {...rise} transition={{ ...spring, delay: 0.05 }} className="rounded-[23px] bg-paper p-1.5 shadow-[inset_0_1px_0_#fff,0_10px_30px_-18px_rgb(31_40_46/0.4)]">
-          <div className="flex justify-between px-3 pb-3 pt-2.5 text-[14px] text-smoke">
-            <span>{tight ? "Passou do teto" : `Livre até dia ${a.dim}`}</span>
-            <span className="num text-[13px] text-mute">{a.daysLeft} {a.daysLeft === 1 ? "dia" : "dias"}</span>
-          </div>
-          <div className="rounded-[17px] bg-white p-[18px]">
-            <BigMoney value={a.free} />
-            <p className="mt-2.5 text-[14px] text-smoke">
-              {a.budget <= 0 ? "Defina um teto mensal nos ajustes para ver quanto cabe." :
-                tight ? <>Você está <span className="num text-gravy">{brl(-a.free, false)}</span> acima do teto do mês.</> :
-                <>Dá uns <span className="num text-ink">R$ {int(a.perDay)}</span> por dia sem apertar.</>}
-            </p>
-            <div className="mt-[18px] flex h-4 gap-[3px]" aria-hidden>
-              {Array.from({ length: a.dim }, (_, i) => (
-                <motion.span key={i} initial={{ scaleY: 0 }} animate={{ scaleY: 1 }}
-                  transition={{ delay: 0.3 + i * 0.02, type: "spring", stiffness: 500, damping: 14 }}
-                  className="flex-1 origin-bottom rounded-[3px]"
-                  style={{ background: i + 1 < a.dayOfMonth ? "var(--c-ink)" : i + 1 === a.dayOfMonth ? "#FF4E20" : "var(--c-sand)" }} />
-              ))}
-            </div>
-            <div className="num mt-2 flex justify-between text-[11px] font-semibold text-mute">
-              <span>1 {labelMonth(snap.today).slice(0, 3)}</span><span className="text-gravy">hoje</span><span>{a.dim} {labelMonth(snap.today).slice(0, 3)}</span>
-            </div>
-          </div>
-        </motion.section>
+        <motion.div {...rise} transition={{ ...spring, delay: 0.05 }}><HeroCard snap={snap} a={a} score={hs.score} /></motion.div>
 
         {/* Saúde financeira */}
-        <motion.div {...rise} transition={{ ...spring, delay: 0.07 }}><HealthCard h={health(snap, a)} /></motion.div>
+        <motion.div {...rise} transition={{ ...spring, delay: 0.07 }}><HealthCard h={hs} /></motion.div>
 
         {/* Entrou / saiu / semana */}
         <motion.div {...rise} transition={{ ...spring, delay: 0.08 }} className="grid grid-cols-2 gap-3">
