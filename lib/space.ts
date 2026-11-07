@@ -23,7 +23,7 @@ export async function loadSnapshot(): Promise<Snapshot | null> {
     sql`select id, kind, amount, description, category, occurred_on from transactions
         where space_id = ${id} and occurred_on > now() - interval '400 days'
         order by occurred_on desc, id desc`,
-    sql`select id, name, target, saved, emoji, deadline from goals where space_id = ${id} order by created_at`,
+    sql`select id, name, target, saved, emoji, deadline from goals where space_id = ${id} order by created_at, id`,
     sql`select id, name, amount, due_day, category, paid_month from bills where space_id = ${id} order by due_day`,
   ])
   const s = spaces[0]

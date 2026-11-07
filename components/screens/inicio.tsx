@@ -2,9 +2,9 @@
 
 import { motion } from "framer-motion"
 import { useState, useTransition } from "react"
-import { Check, ChevronRight, LogOut, Plus } from "lucide-react"
+import { ArrowDownLeft, ArrowUpRight, Check, ChevronRight, Lightbulb, LogOut, Plus, RotateCcw, TriangleAlert, Sparkles } from "lucide-react"
 import type { Bill, Snapshot } from "@/lib/types"
-import { brl, CATEGORIES, int, type Analysis } from "@/lib/finance"
+import { brl, CATEGORIES, insights, int, lastWeek, type Analysis } from "@/lib/finance"
 import { labelMonth, relativeDay } from "@/lib/dates"
 import { BigMoney, field, Label, Primary, rise, Sheet, spring } from "../ui"
 import { TxList } from "../tx-list"
@@ -20,6 +20,12 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
   const today = WEEK.format(new Date(snap.today + "T12:00:00Z"))
   const upcoming = snap.bills.filter((b) => !b.paid).sort((x, y) => x.dueDay - y.dueDay)
   const tight = a.free < 0
+  const paid = snap.bills.filter((b) => b.paid)
+  const tips = insights(snap, a)
+  const week = lastWeek(snap)
+  const weekTotal = week.reduce((x, d) => x + d.total, 0)
+  const weekPeak = Math.max(1, ...week.map((d) => d.total))
+  const goals = snap.goals.filter((g) => g.saved < g.target).slice(0, 2)
 
   return (
     <div className="px-3 pt-[max(56px,env(safe-area-inset-top))]">
@@ -60,6 +66,53 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
             </div>
           </div>
         </motion.section>
+
+        {/* Entrou / saiu / semana */}
+        <motion.div {...rise} transition={{ ...spring, delay: 0.08 }} className="grid grid-cols-2 gap-3">
+          <div className="rounded-[26px] bg-white p-4">
+            <span className="flex items-center gap-1.5 text-[13px] text-mute"><span className="grid size-6 place-items-center rounded-full bg-otan/12 text-gravy"><ArrowDownLeft size={13} /></span>Entrou</span>
+            <p className="num mt-2 text-[22px] leading-none">{brl(a.income, false)}</p>
+            <p className="mt-1 text-[11px] text-mute">neste mês</p>
+          </div>
+          <div className="rounded-[26px] bg-white p-4">
+            <span className="flex items-center gap-1.5 text-[13px] text-mute"><span className="grid size-6 place-items-center rounded-full bg-cotton text-smoke"><ArrowUpRight size={13} /></span>Saiu</span>
+            <p className="num mt-2 text-[22px] leading-none">{brl(a.expense, false)}</p>
+            <p className="mt-1 text-[11px] text-mute">{a.income > 0 ? `${Math.round((a.expense / a.income) * 100)}% do que entrou` : "neste mês"}</p>
+          </div>
+          <div className="col-span-2 flex items-end gap-4 rounded-[26px] bg-white p-4">
+            <div className="shrink-0">
+              <p className="text-[13px] text-mute">Últimos 7 dias</p>
+              <p className="num mt-1 text-[22px] leading-none">{brl(weekTotal, false)}</p>
+              <p className="mt-1 text-[11px] text-mute">média R$ {int(weekTotal / 7)}/dia</p>
+            </div>
+            <div className="flex h-[58px] flex-1 items-end gap-1.5">
+              {week.map((d, i) => (
+                <div key={d.iso} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
+                  <motion.span initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.35 + i * 0.04, type: "spring", stiffness: 200, damping: 16 }}
+                    className="w-[9px] origin-bottom rounded-full" style={{ height: `${Math.max(10, (d.total / weekPeak) * 100)}%`, background: i === 6 ? "#FF4E20" : d.total > a.dailyCap && a.dailyCap > 0 ? "#B83312" : d.total ? "#1F282E" : "#E4E3DC" }} />
+                  <span className="text-[9px] uppercase text-faint">{["D","S","T","Q","Q","S","S"][new Date(d.iso + "T12:00:00Z").getUTCDay()]}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Leituras */}
+        {tips.length > 0 && (
+          <motion.div {...rise} transition={{ ...spring, delay: 0.1 }} className="no-scrollbar -mx-3 flex snap-x gap-2.5 overflow-x-auto px-3 pb-1">
+            {tips.map((t, i) => {
+              const Icon = t.tone === "warn" ? TriangleAlert : t.tone === "good" ? Sparkles : Lightbulb
+              return (
+                <motion.div key={i} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ ...spring, delay: 0.15 + i * 0.05 }}
+                  className={`w-[210px] shrink-0 snap-start rounded-[24px] p-4 ${t.tone === "warn" ? "bg-ink text-cotton" : "bg-white"}`}>
+                  <span className={`grid size-8 place-items-center rounded-full ${t.tone === "warn" ? "bg-otan text-white" : t.tone === "good" ? "bg-otan/12 text-gravy" : "bg-cotton text-smoke"}`}><Icon size={15} /></span>
+                  <p className="ttl mt-3 text-[17px] leading-tight">{t.title}</p>
+                  <p className={`mt-1 text-[13px] leading-snug ${t.tone === "warn" ? "text-[#C3C9CD]" : "text-smoke"}`}>{t.text}</p>
+                </motion.div>
+              )
+            })}
+          </motion.div>
+        )}
 
         {/* Para onde foi */}
         <motion.section {...rise} transition={{ ...spring, delay: 0.12 }} className="rounded-[30px] bg-white p-5">
@@ -109,7 +162,42 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
           </div>
           {upcoming.length === 0 ? <p className="pb-4 pt-1 text-[14px] text-mute">Nenhuma conta pendente este mês.</p> :
             upcoming.map((b) => <BillRow key={b.id} b={b} day={a.dayOfMonth} ym={a.ym} />)}
+          {paid.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 border-t border-cotton pb-3 pt-3">
+              <span className="mr-1 self-center text-[12px] text-mute">Pagas:</span>
+              {paid.map((b) => <PaidChip key={b.id} b={b} />)}
+            </div>
+          )}
         </motion.section>
+
+        {/* Metas */}
+        {goals.length > 0 && (
+          <motion.section {...rise} transition={{ ...spring, delay: 0.21 }} className="rounded-[30px] bg-white p-5">
+            <div className="flex items-center justify-between">
+              <p className="text-[14px] text-mute">Metas</p>
+              <button onClick={() => go("metas")} className="text-[13px] font-semibold text-smoke">Ver todas</button>
+            </div>
+            <div className="mt-3 space-y-4">
+              {goals.map((g, i) => {
+                const pct = Math.min(1, g.saved / g.target)
+                return (
+                  <div key={g.id}>
+                    <div className="flex items-baseline justify-between text-[14px]">
+                      <span>{g.name}</span>
+                      <span className="num text-[14px]">{Math.round(pct * 100)}%</span>
+                    </div>
+                    <div className="mt-1.5 flex h-2.5 gap-[2px]">
+                      {Array.from({ length: 30 }, (_, k) => (
+                        <span key={k} className="flex-1 rounded-[2px]" style={{ background: k < Math.round(pct * 30) ? (i === 0 ? "#1F282E" : "#FF4E20") : "#E4E3DC" }} />
+                      ))}
+                    </div>
+                    <p className="mt-1 text-[12px] text-mute">{brl(g.saved, false)} de {brl(g.target, false)}</p>
+                  </div>
+                )
+              })}
+            </div>
+          </motion.section>
+        )}
 
         {/* Recentes */}
         {snap.txs.length > 0 && (
@@ -120,7 +208,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
         )}
       </div>
 
-      <SettingsSheet open={settings} onClose={() => setSettings(false)} limit={snap.space.limit} email={snap.user.email} admin={snap.user.role === "admin"} />
+      <SettingsSheet key={settings ? "o" : "c"} open={settings} onClose={() => setSettings(false)} limit={snap.space.limit} email={snap.user.email} admin={snap.user.role === "admin"} />
       <BillSheet open={billSheet} onClose={() => setBillSheet(false)} />
     </div>
   )
@@ -147,6 +235,16 @@ function BillRow({ b, day, ym }: { b: Bill; day: number; ym: string }) {
       </button>
       <button onClick={() => start(() => deleteBill(b.id))} className="hidden text-[12px] text-mute hover:text-gravy group-hover:block" aria-label={`Remover ${b.name}`}>×</button>
     </div>
+  )
+}
+
+function PaidChip({ b }: { b: Bill }) {
+  const [pending, start] = useTransition()
+  return (
+    <button disabled={pending} onClick={() => start(() => toggleBill(b.id))} title="Desfazer pagamento" aria-label={`Desfazer pagamento de ${b.name}`}
+      className={`flex h-8 items-center gap-1.5 rounded-full bg-cotton px-3 text-[12px] text-smoke ${pending ? "opacity-40" : ""}`}>
+      <Check size={12} className="text-gravy" /> {b.name} <RotateCcw size={11} className="text-faint" />
+    </button>
   )
 }
 

@@ -79,3 +79,44 @@ export function analyze(s: Snapshot) {
 }
 
 export type Analysis = ReturnType<typeof analyze>
+
+export type Insight = { tone: "good" | "warn" | "info"; title: string; text: string }
+
+/** Leituras curtas do mês, em linguagem de gente. */
+export function insights(s: Snapshot, a: Analysis): Insight[] {
+  const out: Insight[] = []
+  if (a.vsPrev !== null && Math.abs(a.vsPrev) >= 0.05) {
+    out.push(a.vsPrev < 0
+      ? { tone: "good", title: `${Math.round(-a.vsPrev * 100)}% a menos`, text: "que no mesmo ponto do mês passado. Bom ritmo." }
+      : { tone: "warn", title: `${Math.round(a.vsPrev * 100)}% a mais`, text: "que no mesmo ponto do mês passado." })
+  }
+  for (const c of a.categories) {
+    if (c.name === "Outros" || c.prev < 50 || a.dayOfMonth < 7) continue
+    const expected = c.prev * (a.dayOfMonth / a.dim)
+    const d = (c.value - expected) / expected
+    if (d > 0.3 && d < 3) { out.push({ tone: "warn", title: c.name, text: `${Math.round(d * 100)}% acima do ritmo do mês passado.` }); break }
+  }
+  const next = s.bills.filter((b) => !b.paid && b.dueDay >= a.dayOfMonth).sort((x, y) => x.dueDay - y.dueDay)[0]
+  if (next) {
+    const d = next.dueDay - a.dayOfMonth
+    out.push({ tone: "info", title: d === 0 ? "Vence hoje" : d === 1 ? "Vence amanhã" : `Em ${d} dias`, text: `${next.name} · ${brl(next.amount)}` })
+  }
+  const late = s.bills.filter((b) => !b.paid && b.dueDay < a.dayOfMonth)
+  if (late.length) out.push({ tone: "warn", title: late.length === 1 ? "1 conta atrasada" : `${late.length} contas atrasadas`, text: late.map((b) => b.name).join(", ") })
+  const month = s.txs.filter((t) => t.kind === "expense" && t.date.startsWith(a.ym))
+  const big = month.reduce<Tx | null>((m, t) => (!m || t.amount > m.amount ? t : m), null)
+  if (big) out.push({ tone: "info", title: "Maior gasto", text: `${big.description} · ${brl(big.amount, false)}` })
+  const near = s.goals.find((g) => g.saved / g.target >= 0.75 && g.saved < g.target)
+  if (near) out.push({ tone: "good", title: "Quase lá", text: `Faltam ${brl(near.target - near.saved, false)} para ${near.name}.` })
+  if (a.budget > 0 && a.free < 0) out.push({ tone: "warn", title: "Acima do teto", text: `${brl(-a.free, false)} além do que você planejou.` })
+  return out
+}
+
+/** Últimos 7 dias de gasto, do mais antigo para hoje. */
+export function lastWeek(s: Snapshot) {
+  return Array.from({ length: 7 }, (_, i) => {
+    const iso = addDays(s.today, i - 6)
+    const total = s.txs.filter((t) => t.kind === "expense" && t.date === iso).reduce((x, t) => x + t.amount, 0)
+    return { iso, total }
+  })
+}

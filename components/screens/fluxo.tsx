@@ -7,6 +7,7 @@ import { addDays, labelMonth, relativeDay } from "@/lib/dates"
 import { brl, int, TONES, type Analysis } from "@/lib/finance"
 import { rise, spring } from "../ui"
 import { TxList } from "../tx-list"
+import { CatIcon } from "../cat-icon"
 
 type View = "mes" | "meses"
 const WD = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "short", timeZone: "UTC" })
@@ -44,6 +45,21 @@ export function FluxoScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
   const avgMonth = months.filter((m) => m.total > 0).reduce((s, m, _, arr) => s + m.total / arr.length, 0)
 
   const monthTx = snap.txs.filter((t) => t.date.startsWith(a.ym))
+  const catRows = useMemo(() => {
+    const prevYm = addDays(a.ym + "-01", -1).slice(0, 7)
+    const m = new Map<string, { value: number; count: number; prev: number }>()
+    for (const t of snap.txs) {
+      if (t.kind !== "expense") continue
+      const e = m.get(t.category) ?? { value: 0, count: 0, prev: 0 }
+      if (t.date.startsWith(a.ym)) { e.value += t.amount; e.count++ } else if (t.date.startsWith(prevYm)) e.prev += t.amount
+      m.set(t.category, e)
+    }
+    return [...m.entries()].filter(([, e]) => e.value > 0).sort((x, y) => y[1].value - x[1].value).map(([name, e]) => {
+      const exp = e.prev * (a.dayOfMonth / a.dim)
+      return { name, ...e, delta: a.dayOfMonth >= 5 && exp > 30 ? (e.value - exp) / exp : null }
+    })
+  }, [snap.txs, a])
+
   const groups = useMemo(() => {
     const m = new Map<string, typeof monthTx>()
     for (const t of monthTx) m.set(t.date, [...(m.get(t.date) ?? []), t])
@@ -153,13 +169,48 @@ export function FluxoScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
           </div>
         </motion.section>
 
+        {view === "mes" && (
+          <motion.div {...rise} transition={{ ...spring, delay: 0.08 }} className="grid grid-cols-3 gap-2.5">
+            {[
+              ["Dia mais caro", biggest && biggest.total ? `R$ ${int(biggest.total)}` : "—", biggest && biggest.total ? `dia ${biggest.day}` : ""],
+              ["Por dia", `R$ ${int(a.expense / Math.max(1, a.dayOfMonth))}`, a.dailyCap > 0 ? `teto R$ ${int(a.dailyCap)}` : "média"],
+              ["Lançamentos", String(monthTx.length), `${monthTx.filter((t) => t.kind === "income").length} entradas`],
+            ].map(([t, v, sub]) => (
+              <div key={t} className="rounded-[22px] bg-white p-3.5">
+                <p className="text-[11px] text-mute">{t}</p>
+                <p className="num mt-1 text-[19px] leading-none">{v}</p>
+                <p className="mt-1 text-[11px] text-faint">{sub}</p>
+              </div>
+            ))}
+          </motion.div>
+        )}
+
+        {view === "mes" && a.categories.length > 0 && (
+          <motion.section {...rise} transition={{ ...spring, delay: 0.1 }} className="rounded-[30px] bg-white px-5 py-2">
+            <p className="pb-1 pt-3 text-[14px] text-mute">Por categoria · vs mês passado</p>
+            {catRows.map((c) => (
+              <div key={c.name} className="flex items-center gap-3 border-t border-cotton py-3 first-of-type:border-0">
+                <CatIcon category={c.name} size={36} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[15px]">{c.name}</p>
+                  <p className="text-[12px] text-mute">{c.count} {c.count === 1 ? "lançamento" : "lançamentos"} · {Math.round((c.value / a.expense) * 100)}%</p>
+                </div>
+                {c.delta !== null && Math.abs(c.delta) >= 0.1 && c.delta < 3 && (
+                  <span className={`num rounded-full px-2 py-0.5 text-[12px] ${c.delta > 0 ? "bg-otan/12 text-gravy" : "bg-cotton text-smoke"}`}>{c.delta > 0 ? "↑" : "↓"}{Math.min(999, Math.round(Math.abs(c.delta) * 100))}%</span>
+                )}
+                <span className="num w-[86px] text-right text-[15px]">{brl(c.value, false)}</span>
+              </div>
+            ))}
+          </motion.section>
+        )}
+
         <motion.section {...rise} transition={{ ...spring, delay: 0.12 }} className="rounded-[30px] bg-white px-5 py-2">
           {groups.length === 0 && <p className="py-4 text-[14px] text-mute">Nenhum lançamento este mês.</p>}
           {groups.map(([iso, list]) => (
             <div key={iso} className="pt-3">
               <div className="flex justify-between text-[12px] text-mute">
                 <span>{relativeDay(iso, snap.today)}</span>
-                <span className="num">{brl(list.reduce((s, t) => s + (t.kind === "income" ? t.amount : -t.amount), 0))}</span>
+                <span className="num">{(() => { const out = list.filter((t) => t.kind === "expense").reduce((x, t) => x + t.amount, 0); const inc = list.filter((t) => t.kind === "income").reduce((x, t) => x + t.amount, 0); return <>{out > 0 && `−${brl(out)}`}{out > 0 && inc > 0 && " · "}{inc > 0 && <span className="text-gravy">+{brl(inc)}</span>}</> })()}</span>
               </div>
               <TxList items={list} meta={(t) => t.category} />
             </div>
