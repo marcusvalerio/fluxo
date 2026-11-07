@@ -10,6 +10,7 @@ import { FluxoScreen } from "./screens/fluxo"
 import { AgendaScreen } from "./screens/agenda"
 import { CarteiraScreen } from "./screens/carteira"
 import { Lancar } from "./lancar"
+import { InstallGuide, useInstallPrompt } from "./install-guide"
 
 export type Tab = "inicio" | "fluxo" | "agenda" | "carteira"
 const TABS: { id: Tab; label: string; icon: typeof House }[] = [
@@ -22,6 +23,7 @@ const TABS: { id: Tab; label: string; icon: typeof House }[] = [
 export function FluxoApp({ snap }: { snap: Snapshot }) {
   const [tab, setTab] = useState<Tab>("inicio")
   const [lancar, setLancar] = useState(false)
+  const install = useInstallPrompt()
   const [done, setDone] = useState<{ id: number; amount: number; kind: "income" | "expense"; label: string; parts: number } | null>(null)
   useEffect(() => {
     if (!done) return
@@ -82,6 +84,7 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
         </motion.div>
       </nav>
 
+      <InstallGuide open={install.open} onClose={install.close} />
       <Lancar open={lancar} onClose={() => setLancar(false)} snap={snap} a={a} onDone={(r) => setDone({ ...r, id: Date.now() })} />
 
       {/* confirmação: a cor enche a tela e um aviso de vidro aparece */}

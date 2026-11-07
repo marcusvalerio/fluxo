@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useState, useTransition } from "react"
-import { ArrowDownLeft, ArrowUpRight, Check, ChevronRight, Gauge, KeyRound, Shield, Lightbulb, LogOut, Plus, RotateCcw, TriangleAlert, Sparkles } from "lucide-react"
+import { ArrowDownLeft, ArrowUpRight, Check, ChevronRight, Gauge, KeyRound, Shield, Smartphone, Lightbulb, LogOut, Plus, RotateCcw, TriangleAlert, Sparkles } from "lucide-react"
 import type { Bill, Snapshot } from "@/lib/types"
 import { brl, CATEGORIES, insights, int, lastWeek, type Analysis } from "@/lib/finance"
 import { labelMonth, relativeDay } from "@/lib/dates"
@@ -302,6 +302,9 @@ function SettingsSheet({ open, onClose, limit, email, admin, name }: { open: boo
               )}
             </AnimatePresence>
 
+            <button className={row} onClick={() => { onClose(); window.dispatchEvent(new Event("fluxo:install")) }}>
+              <Smartphone size={18} className="text-smoke" /><span className="flex-1">Instalar no iPhone</span><ChevronRight size={16} className="text-faint" />
+            </button>
             {admin && <a href="/admin" className={row}><Shield size={18} className="text-smoke" /><span className="flex-1">Painel admin</span><ChevronRight size={16} className="text-faint" /></a>}
             <button onClick={() => start(() => logout())} className={`${row} border-t border-white/60 text-gravy`}><LogOut size={18} /><span>Sair</span></button>
           </motion.div>
