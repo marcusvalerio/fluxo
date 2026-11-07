@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import { useState, useTransition } from "react"
-import { ArrowDownLeft, ArrowUpRight, Check, ChevronRight, Lightbulb, LogOut, Plus, RotateCcw, TriangleAlert, Sparkles } from "lucide-react"
+import { ArrowDownLeft, ArrowUpRight, Check, Lightbulb, LogOut, Plus, RotateCcw, TriangleAlert, Sparkles } from "lucide-react"
 import type { Bill, Snapshot } from "@/lib/types"
 import { brl, CATEGORIES, insights, int, lastWeek, type Analysis } from "@/lib/finance"
 import { labelMonth, relativeDay } from "@/lib/dates"
@@ -99,12 +99,12 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
 
         {/* Leituras */}
         {tips.length > 0 && (
-          <motion.div {...rise} transition={{ ...spring, delay: 0.1 }} className="no-scrollbar -mx-4 -my-3 flex snap-x scroll-px-4 gap-3 overflow-x-auto px-4 py-3">
+          <motion.div {...rise} transition={{ ...spring, delay: 0.1 }} className="no-scrollbar -mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4">
             {tips.map((t, i) => {
               const Icon = t.tone === "warn" ? TriangleAlert : t.tone === "good" ? Sparkles : Lightbulb
               return (
                 <motion.div key={i} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ ...spring, delay: 0.15 + i * 0.05 }}
-                  className={`w-[210px] shrink-0 snap-start rounded-[23px] p-4 ${t.tone === "warn" ? "bg-ink text-cotton" : "bg-white"}`}>
+                  className={`w-[calc(50%-6px)] shrink-0 snap-start rounded-[23px] p-4 ${t.tone === "warn" ? "bg-ink text-cotton" : "bg-white"}`}>
                   <span className={`grid size-8 place-items-center rounded-full ${t.tone === "warn" ? "bg-otan text-white" : t.tone === "good" ? "bg-otan/12 text-gravy" : "bg-cotton text-smoke"}`}><Icon size={15} /></span>
                   <p className="ttl mt-3 text-[17px] leading-tight">{t.title}</p>
                   <p className={`mt-1 text-[13px] leading-snug ${t.tone === "warn" ? "text-[#C3C9CD]" : "text-smoke"}`}>{t.text}</p>
@@ -115,14 +115,13 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
         )}
 
         {/* Para onde foi */}
-        <motion.section {...rise} transition={{ ...spring, delay: 0.12 }} className="rounded-[23px] bg-white p-5">
-          <div className="flex items-end justify-between">
-            <div>
-              <p className="text-[14px] text-mute">Para onde foi</p>
-              <p className="num mt-1 text-[30px]">{brl(a.expense, false)}</p>
-            </div>
-            <button onClick={() => go("fluxo")} className="lg grid size-11 place-items-center rounded-full" aria-label="Ver o fluxo do mês"><ChevronRight size={18} /></button>
+        <motion.div {...rise} transition={{ ...spring, delay: 0.12 }}>
+          <div className="mb-3 flex items-center justify-between px-1">
+            <p className="ttl text-[17px]">Para onde foi</p>
+            <button onClick={() => go("fluxo")} className="text-[13px] font-semibold text-mute">Ver fluxo</button>
           </div>
+          <section className="rounded-[23px] bg-white p-5">
+          <p className="num text-[30px] leading-none">{brl(a.expense, false)}</p>
           {a.categories.length === 0 ? (
             <p className="mt-4 text-[14px] text-mute">Nenhum gasto este mês ainda.</p>
           ) : (
@@ -152,7 +151,8 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
               </div>
             </>
           )}
-        </motion.section>
+          </section>
+        </motion.div>
 
         {/* Contas */}
         <motion.div {...rise} transition={{ ...spring, delay: 0.18 }}>
