@@ -1,59 +1,32 @@
-import { Analytics } from '@vercel/analytics/next'
-import type { Metadata, Viewport } from 'next'
-import { DM_Sans, DM_Mono, Syne } from 'next/font/google'
-import './globals.css'
+import { Analytics } from "@vercel/analytics/next"
+import type { Metadata, Viewport } from "next"
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google"
+import "./globals.css"
 
-const dmSans = DM_Sans({
-  subsets: ['latin'],
-  variable: '--font-dm-sans',
-  display: 'swap',
-})
-
-const dmMono = DM_Mono({
-  weight: ['400', '500'],
-  subsets: ['latin'],
-  variable: '--font-dm-mono',
-  display: 'swap',
-})
-
-const syne = Syne({
-  subsets: ['latin'],
-  variable: '--font-syne',
-  display: 'swap',
-})
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist" })
+const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" })
+const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-instrument" })
 
 export const metadata: Metadata = {
-  title: 'Fluxo | Gestão Financeira Pessoal',
-  description: 'Controle suas finanças de forma simples e inteligente. Acompanhe receitas, despesas, metas e muito mais.',
-  manifest: '/manifest.json',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'black-translucent',
-    title: 'Fluxo',
-  },
+  title: "Fluxo — seu dinheiro, vivo",
+  description: "Não é mais um app de finanças. Seu dinheiro como algo vivo: projeção, ritmo e metas em tempo real.",
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Fluxo" },
 }
 
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  userScalable: false,
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f8f7f4' },
-    { media: '(prefers-color-scheme: dark)', color: '#1a1a24' },
-  ],
+  viewportFit: "cover",
+  themeColor: "#050608",
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${dmSans.variable} ${dmMono.variable} ${syne.variable} dark bg-background`}>
-      <body className="font-sans antialiased min-h-screen">
+    <html lang="pt-BR" className={`${geist.variable} ${mono.variable} ${serif.variable}`}>
+      <body className="min-h-dvh font-sans">
         {children}
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
     </html>
   )
