@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react"
 import { ArrowRight, CalendarDays, CreditCard, Eye, Repeat, ShieldCheck, Sparkles } from "lucide-react"
 
 const ease = [0.2, 0.9, 0.2, 1] as const
-const H1 = ["Quanto", "ainda", "cabe", "no", "seu", "mês."]
 
 /* ------------------------------------------------------------------ */
 
@@ -45,159 +44,140 @@ function Nav() {
 
 function Hero() {
   const ref = useRef<HTMLElement>(null)
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] })
-  const straighten = useTransform(scrollYProgress, [0, 0.6], [1, 0])
-  const cardY = useTransform(scrollYProgress, [0, 1], [0, -160])
-  const textY = useTransform(scrollYProgress, [0, 1], [0, 120])
-  const fade = useTransform(scrollYProgress, [0, 0.7], [1, 0])
-
-  // inclinação 3D do card seguindo o mouse / o celular
-  const rx = useSpring(0, { stiffness: 120, damping: 14 })
-  const ry = useSpring(0, { stiffness: 120, damping: 14 })
+  const [vp, setVp] = useState({ w: 1440, h: 900 })
+  const { scrollY } = useScroll()
+  const p = useTransform(scrollY, (y) => Math.max(0, Math.min(1, y / (vp.h * 2.2))))
   useEffect(() => {
-    const move = (e: PointerEvent) => {
-      ry.set(((e.clientX / window.innerWidth) - 0.5) * 22)
-      rx.set(-((e.clientY / window.innerHeight) - 0.5) * 16)
-    }
-    const tilt = (e: DeviceOrientationEvent) => {
-      if (e.gamma == null || e.beta == null) return
-      ry.set(Math.max(-14, Math.min(14, e.gamma * 0.6)))
-      rx.set(Math.max(-10, Math.min(10, (e.beta - 45) * -0.4)))
-    }
-    window.addEventListener("pointermove", move)
-    window.addEventListener("deviceorientation", tilt)
-    return () => { window.removeEventListener("pointermove", move); window.removeEventListener("deviceorientation", tilt) }
-  }, [rx, ry])
+    const r = () => setVp({ w: window.innerWidth, h: window.innerHeight })
+    r(); window.addEventListener("resize", r)
+    return () => window.removeEventListener("resize", r)
+  }, [])
+
+  // geometria do iPhone final (centralizado) e do card dentro dele
+  const mobile = vp.w < 768
+  const ph = Math.min(vp.h * (mobile ? 0.7 : 0.8), 760)
+  const pw = ph * 0.47
+  const phoneTop = mobile ? vp.h - ph - 24 : (vp.h - ph) / 2 + 20
+  const phoneLeft = (vp.w - pw) / 2
+  const cw = pw * 0.9, ch = cw * 0.66
+  const cTop = phoneTop + ph * 0.17, cLeft = phoneLeft + (pw - cw) / 2
+
+  const z = useTransform(p, [0.18, 0.62], [0, 1], { clamp: true })
+  const zs = useSpring(z, { stiffness: 90, damping: 22 })
+  const top = useTransform(zs, (t) => t * cTop)
+  const left = useTransform(zs, (t) => t * cLeft)
+  const width = useTransform(zs, (t) => vp.w + (cw - vp.w) * t)
+  const height = useTransform(zs, (t) => vp.h + (ch - vp.h) * t)
+  const radius = useTransform(zs, (t) => t * (pw * 0.07))
+  const padTop = useTransform(zs, (t) => `calc(5cqw + ${(1 - t) * (mobile ? 78 : 70)}px)`)
+  const phoneOpacity = useTransform(p, [0.45, 0.66], [0, 1])
+  const phoneScale = useTransform(p, [0.45, 0.7], [1.08, 1])
+  const introOpacity = useTransform(p, [0, 0.16], [1, 0])
+  const introY = useTransform(p, [0, 0.16], [0, -60])
+  const outroOpacity = useTransform(p, [0.66, 0.8], [0, 1])
+  const outroY = useTransform(p, [0.66, 0.8], [40, 0])
+  const bgDark = useTransform(p, [0.3, 0.6], [0, 1])
+
+  const [n, setN] = useState("0")
+  useEffect(() => {
+    const c = animate(0, 3272, { delay: 0.5, duration: 2.2, ease: [0.16, 1, 0.3, 1], onUpdate: (x) => setN(Math.round(x).toLocaleString("pt-BR")) })
+    return () => c.stop()
+  }, [])
+  const days = [58, 42, 74, 36, 96, 50, 66, 100]
 
   return (
-    <section ref={ref} className="relative flex min-h-[100svh] flex-col items-center overflow-hidden px-5 pb-0 pt-[max(110px,calc(env(safe-area-inset-top)+96px))]">
-      {/* brilho laranja */}
-      <motion.div aria-hidden className="pointer-events-none absolute left-1/2 top-[38%] size-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-        style={{ background: "radial-gradient(circle, rgb(255 78 32 / 0.35), rgb(255 78 32 / 0.08) 40%, transparent 65%)" }}
-        animate={{ scale: [1, 1.08, 1], opacity: [0.9, 1, 0.9] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} />
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")" }} />
-
-      <motion.div style={{ y: textY, opacity: fade }} className="relative z-10 text-center">
-        <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.8, ease }}
-          className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3.5 py-1.5 text-[13px] text-[#ECEBE5]/80 backdrop-blur">
-          <span className="size-1.5 rounded-full bg-otan shadow-[0_0_10px_#FF4E20]" /> Finanças pessoais, do jeito certo
-        </motion.p>
-        <h1 className="ttl mx-auto max-w-[920px] text-[clamp(46px,10.5vw,124px)] leading-[0.92] tracking-[-0.045em]">
-          {H1.map((w, i) => (
-            <motion.span key={i} className="mr-[0.22em] inline-block last:mr-0"
-              initial={{ opacity: 0, y: 40, filter: "blur(14px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ delay: 0.35 + i * 0.09, duration: 0.9, ease }}>
-              {w === "cabe" ? <span className="bg-gradient-to-b from-[#FF8A5C] to-[#FF4E20] bg-clip-text text-transparent">{w}</span> : w}
-            </motion.span>
-          ))}
-        </h1>
-        <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.05, duration: 0.8, ease }}
-          className="mx-auto mt-6 max-w-[520px] text-[17px] leading-relaxed text-[#ECEBE5]/70 md:text-[19px]">
-          Sem planilha, sem culpa. O Fluxo mostra todo dia quanto você pode gastar, o que vem pela frente e para onde o dinheiro foi.
-        </motion.p>
-        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2, duration: 0.8, ease }}
-          className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <a href="/entrar" className="group flex h-14 items-center gap-2 rounded-full bg-otan px-7 text-[16px] font-semibold text-white shadow-[0_14px_40px_-10px_rgb(255_78_32/0.8),inset_0_1px_1px_rgb(255_255_255/0.4)] transition hover:shadow-[0_18px_50px_-8px_rgb(255_78_32/0.95)]">
-            Começar agora <ArrowRight size={18} className="transition group-hover:translate-x-0.5" />
-          </a>
-          <a href="#como" className="flex h-14 items-center rounded-full border border-white/15 bg-white/[0.06] px-6 text-[15px] font-medium backdrop-blur">Ver como funciona</a>
+    <section ref={ref} className="relative h-[320vh]">
+      <div className="sticky top-0 h-[100svh] overflow-hidden bg-[#0C1114]">
+        {/* fundo escuro com brilho que aparece quando a câmera se afasta */}
+        <motion.div aria-hidden style={{ opacity: bgDark }} className="pointer-events-none absolute inset-0"
+          >
+          <div className="absolute left-1/2 top-1/2 size-[1100px] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: "radial-gradient(circle, rgb(255 78 32 / 0.32), transparent 60%)" }} />
         </motion.div>
-      </motion.div>
 
-      {/* card 3D + avisos orbitando */}
-      <motion.div style={{ y: cardY }} className="relative z-10 mt-14 w-full max-w-[420px] [perspective:1200px]">
-        <motion.div initial={{ opacity: 0, y: 80, rotateX: 30, scale: 0.9 }} animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }} transition={{ delay: 1.3, duration: 1.3, ease }}>
-          <motion.div style={{ rotateX: rx, rotateY: ry, transformStyle: "preserve-3d" }}>
-            <HeroCard />
-            <Chip className="-left-3 -top-10 md:-left-64 md:top-4" delay={2.0} float={0}>
-              <Repeat size={14} className="text-otan" /> <b>Netflix</b> cobra amanhã · <span className="ttl">R$ 44,90</span>
-            </Chip>
-            <Chip className="-right-3 top-[44%] md:-right-60" delay={2.2} float={1}>
-              <span className="size-2 rounded-full bg-otan" /> <b>Delivery</b> em 96% do limite
-            </Chip>
-            <Chip className="-bottom-7 left-3 md:-bottom-2 md:-left-56" delay={2.4} float={2}>
-              <Sparkles size={14} className="text-otan" /> Saúde financeira <b className="ttl">86 · Ótima</b>
-            </Chip>
+        {/* o iPhone em volta do card */}
+        <motion.div aria-hidden style={{ opacity: phoneOpacity, scale: phoneScale, top: phoneTop, left: phoneLeft, width: pw, height: ph, borderRadius: pw * 0.16 }}
+          className="absolute overflow-hidden border-[6px] border-[#2A333A] bg-[#E4E3DC] text-[#1F282E] shadow-[0_60px_120px_-40px_rgb(0_0_0/0.9),0_0_0_2px_rgb(255_255_255/0.06)]">
+          <div className="absolute left-1/2 top-[1.6%] h-[3.4%] w-[30%] -translate-x-1/2 rounded-full bg-black" />
+          <div style={{ padding: `${ph * 0.075}px ${pw * 0.06}px 0`, fontSize: pw * 0.04 }} className="text-[#1F282E]">
+            <p className="text-[#55606A]" style={{ fontSize: "0.85em" }}>Sábado, 7 de novembro</p>
+            <p className="ttl" style={{ fontSize: "1.9em", lineHeight: 1.1 }}>Oi, Marcus</p>
+          </div>
+          <div className="absolute inset-x-[5%] flex flex-col gap-[3%]" style={{ top: ph * 0.17 + ch + ph * 0.025, bottom: ph * 0.13 }}>
+            <div className="flex flex-1 items-center gap-[6%] rounded-[14%/22%] bg-white px-[6%]">
+              <div className="aspect-square h-[62%] rounded-full border-[5px] border-[#1F282E] [border-right-color:#E4E3DC]" />
+              <div><p className="text-[#55606A]" style={{ fontSize: pw * 0.032 }}>Saúde financeira</p><p className="ttl" style={{ fontSize: pw * 0.06 }}>Ótima</p></div>
+            </div>
+            <div className="flex flex-1 gap-[4%]">
+              <div className="flex-1 rounded-[18%/26%] bg-white p-[5%]"><p className="text-[#55606A]" style={{ fontSize: pw * 0.03 }}>Entrou</p><p className="ttl" style={{ fontSize: pw * 0.05 }}>R$ 8.400</p></div>
+              <div className="flex-1 rounded-[18%/26%] bg-white p-[5%]"><p className="text-[#55606A]" style={{ fontSize: pw * 0.03 }}>Saiu</p><p className="ttl" style={{ fontSize: pw * 0.05 }}>R$ 2.508</p></div>
+            </div>
+          </div>
+          <div className="absolute inset-x-[5%] bottom-[3.5%] flex h-[7.5%] items-center justify-between rounded-full bg-white/70 px-[3%] shadow-[inset_0_1px_1px_#fff]">
+            <span className="h-[70%] w-[28%] rounded-full bg-white" /><span className="aspect-square h-[78%] rounded-full bg-otan" />
+          </div>
+        </motion.div>
+
+        {/* O CARD: começa ocupando a tela inteira e vira o card do app */}
+        <motion.div style={{ top, left, width, height, borderRadius: radius, containerType: "size" }}
+          className="absolute z-10 overflow-hidden text-white shadow-[0_40px_100px_-30px_rgb(255_78_32/0.7)]">
+          <div className="absolute inset-0" style={{ background: "radial-gradient(120% 90% at 100% 0%, rgb(255 190 150 / 0.55), transparent 55%), linear-gradient(160deg, #FF5A2C, #E2401C 55%, #B83312)" }} />
+          <motion.div className="absolute inset-0 flex flex-col" style={{ padding: "5cqw 6cqw 4cqw", paddingTop: padTop }}>
+            <div className="flex items-center justify-between" style={{ fontSize: "3.6cqw" }}>
+              <span className="font-medium text-white/85">Livre até dia 30</span>
+              <span className="ttl text-white/75">23 dias</span>
+            </div>
+            <p className="ttl font-bold tracking-[-0.045em]" style={{ fontSize: "17cqw", lineHeight: 0.95, marginTop: "2cqw", fontFeatureSettings: '"tnum" 1' }}>
+              <span className="text-white/70" style={{ fontSize: "0.42em", marginRight: "0.1em" }}>R$</span>{n}<span className="text-white/70" style={{ fontSize: "0.42em" }}>,40</span>
+            </p>
+            <p className="text-white/85" style={{ fontSize: "3.8cqw", marginTop: "1.5cqw" }}>Dá uns <b className="ttl">R$ 142</b> por dia sem apertar.</p>
+            <div className="mt-auto flex items-end" style={{ height: "30cqh", gap: "0.8cqw" }}>
+              {Array.from({ length: 30 }, (_, i) => {
+                const past = i < 7, today = i === 7
+                return (
+                  <motion.span key={i} initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.4 + i * 0.035, type: "spring", stiffness: 260, damping: 14 }}
+                    className="flex-1 origin-bottom" style={{ height: `${today ? 100 : past ? days[i] : 40}%`, borderRadius: "0.8cqw", background: today ? "#1F282E" : past ? "rgb(255 255 255 / 0.94)" : "rgb(255 255 255 / 0.28)", boxShadow: today ? "0 0 0 0.4cqw #fff" : undefined }} />
+                )
+              })}
+            </div>
+            <div className="ttl flex justify-between text-white/70" style={{ fontSize: "2.6cqw", marginTop: "1.2cqw" }}><span>dia 1</span><span className="text-white">hoje</span><span>dia 30</span></div>
           </motion.div>
-        </motion.div>
-      </motion.div>
 
-      {/* campo de palitos: balança e endireita ao rolar */}
-      <Sticks straighten={straighten} />
+        </motion.div>
+
+        {/* textos da abertura (fora do card para não encolher junto) */}
+        <motion.div style={{ opacity: introOpacity, y: introY }} className="pointer-events-none absolute inset-x-0 top-[46%] z-20 px-6 text-center md:inset-x-auto md:right-[5%] md:top-[29%] md:w-[30%] md:px-0 md:text-right">
+          <motion.p initial={{ opacity: 0, y: 30, filter: "blur(12px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ delay: 1.2, duration: 1, ease }}
+            className="ttl mx-auto max-w-[900px] text-[clamp(30px,4.6vw,64px)] leading-[0.95] tracking-[-0.04em] text-white [text-shadow:0_8px_40px_rgb(110_29_8/0.5)]">
+            é o que ainda cabe no seu mês.
+          </motion.p>
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.2, duration: 1 }}
+            className="mt-6 flex items-center justify-center gap-2 text-[14px] font-medium text-white/80 md:justify-end">
+            <motion.span animate={{ y: [0, 6, 0] }} transition={{ duration: 1.6, repeat: Infinity }}>↓</motion.span> role
+          </motion.p>
+        </motion.div>
+
+        {/* fecho: texto ao lado do iPhone */}
+        <motion.div style={{ opacity: outroOpacity, y: outroY }}
+          className="absolute z-20 text-[#ECEBE5] max-md:inset-x-0 max-md:top-[max(84px,calc(env(safe-area-inset-top)+76px))] max-md:px-6 max-md:text-center md:left-[6%] md:top-1/2 md:w-[30%] md:-translate-y-1/2">
+          <p className="ttl text-[clamp(30px,4.4vw,60px)] leading-[0.98] tracking-[-0.04em]">Seu mês inteiro, <span className="text-otan">num palito por dia.</span></p>
+          <p className="mt-4 text-[16px] text-[#ECEBE5]/65 max-md:hidden">Sem planilha. Você abre e sabe na hora quanto pode gastar, o que vem pela frente e para onde o dinheiro foi.</p>
+          <a href="/entrar" className="pointer-events-auto mt-7 inline-flex h-14 items-center gap-2 rounded-full bg-otan px-7 text-[16px] font-semibold text-white shadow-[0_14px_40px_-10px_rgb(255_78_32/0.8)] max-md:hidden">
+            Começar agora <ArrowRight size={18} />
+          </a>
+        </motion.div>
+        <motion.div style={{ opacity: outroOpacity }} className="absolute right-[6%] top-1/2 z-20 hidden w-[24%] -translate-y-1/2 space-y-3 md:block">
+          {[["Netflix cobra amanhã", "R$ 44,90"], ["Delivery em 96% do limite", "atenção"], ["Saúde financeira", "86 · Ótima"]].map(([a, b], i) => (
+            <motion.div key={a} animate={{ y: [0, -6, 0] }} transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut", delay: i * 0.5 }}
+              className="flex items-center justify-between gap-3 rounded-full border border-white/15 bg-white/[0.07] px-4 py-3 text-[14px] text-[#ECEBE5] backdrop-blur-xl [box-shadow:inset_0_1px_1px_rgb(255_255_255/0.2)]">
+              <span className="flex items-center gap-2"><span className="size-2 rounded-full bg-otan shadow-[0_0_10px_#FF4E20]" />{a}</span><span className="ttl text-[#ECEBE5]/80">{b}</span>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
     </section>
   )
 }
 
-function HeroCard() {
-  const v = useMotionValue(0)
-  const [n, setN] = useState("0")
-  useEffect(() => {
-    const c = animate(v, 3272, { delay: 1.6, duration: 2, ease: [0.16, 1, 0.3, 1], onUpdate: (x) => setN(Math.round(x).toLocaleString("pt-BR")) })
-    return () => c.stop()
-  }, [v])
-  const days = [62, 48, 80, 40, 100, 55, 70]
-  return (
-    <div className="relative overflow-hidden rounded-[28px] p-6 text-white shadow-[0_40px_90px_-30px_rgb(255_78_32/0.75)]"
-      style={{ background: "radial-gradient(120% 90% at 100% 0%, rgb(255 190 150 / 0.5), transparent 55%), linear-gradient(160deg, #FF5A2C, #E2401C 55%, #B83312)", transform: "translateZ(40px)" }}>
-      <div className="pointer-events-none absolute inset-0 rounded-[28px] [box-shadow:inset_0_1px_1px_rgb(255_255_255/0.5)]" />
-      <div className="flex items-center justify-between text-[14px]">
-        <span className="font-medium text-white/85">Livre até dia 30</span>
-        <span className="flex items-center gap-2"><span className="ttl text-white/75">23 dias</span><span className="grid size-8 place-items-center rounded-full bg-white/18"><Eye size={14} /></span></span>
-      </div>
-      <p className="ttl mt-3 text-[54px] font-bold leading-none tracking-[-0.04em]" style={{ fontFeatureSettings: '"tnum" 1' }}>
-        <span className="mr-1 text-[24px] text-white/70">R$</span>{n}<span className="text-[24px] text-white/70">,40</span>
-      </p>
-      <p className="mt-2 text-[15px] text-white/85">Dá uns <b className="ttl">R$ 142</b> por dia sem apertar.</p>
-      <div className="mt-5 flex h-12 items-end gap-[3px]">
-        {Array.from({ length: 30 }, (_, i) => {
-          const past = i < 7, today = i === 7
-          const h = past ? days[i] : 40
-          return (
-            <motion.span key={i} initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 1.8 + i * 0.025, type: "spring", stiffness: 420, damping: 15 }}
-              className="flex-1 origin-bottom rounded-[3px]"
-              style={{ height: `${today ? 100 : h}%`, background: today ? "#1F282E" : past ? "rgb(255 255 255 / 0.92)" : "rgb(255 255 255 / 0.28)", boxShadow: today ? "0 0 0 1.5px #fff" : undefined }} />
-          )
-        })}
-      </div>
-      <div className="ttl mt-1.5 flex justify-between text-[11px] text-white/70"><span>dia 1</span><span className="text-white">hoje</span><span>dia 30</span></div>
-    </div>
-  )
-}
-
-function Chip({ children, className, delay, float }: { children: React.ReactNode; className: string; delay: number; float: number }) {
-  return (
-    <motion.div className={`absolute z-20 ${className}`} style={{ transform: "translateZ(90px)" }}
-      initial={{ opacity: 0, scale: 0.7, filter: "blur(8px)" }} animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }} transition={{ delay, type: "spring", stiffness: 260, damping: 18 }}>
-      <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 4 + float, repeat: Infinity, ease: "easeInOut", delay: float * 0.6 }}
-        className="flex items-center gap-2 whitespace-nowrap rounded-full border border-white/25 bg-white/[0.14] px-4 py-2.5 text-[13px] text-white backdrop-blur-xl [box-shadow:inset_0_1px_1px_rgb(255_255_255/0.35),0_16px_40px_-12px_rgb(0_0_0/0.6)]">
-        {children}
-      </motion.div>
-    </motion.div>
-  )
-}
-
-function Sticks({ straighten }: { straighten: ReturnType<typeof useTransform<number, number>> }) {
-  const N = 64
-  return (
-    <div aria-hidden className="pointer-events-none relative mt-auto flex h-[150px] w-[130%] max-w-none items-end justify-center gap-[1.1vw] pt-16 [mask-image:linear-gradient(90deg,transparent,#000_15%,#000_85%,transparent)]">
-      {Array.from({ length: N }, (_, i) => <Stick key={i} i={i} straighten={straighten} />)}
-    </div>
-  )
-}
-
-function Stick({ i, straighten }: { i: number; straighten: ReturnType<typeof useTransform<number, number>> }) {
-  const base = ((i * 37) % 17) - 8
-  const rotate = useTransform(straighten, (s) => base * s)
-  const today = i === 32
-  const h = today ? 120 : 70 + ((i * 53) % 30)
-  return (
-    <motion.span style={{ rotate, height: h }} className="w-[max(5px,0.7vw)] shrink-0 origin-bottom"
-      initial={{ scaleY: 0, opacity: 0 }} animate={{ scaleY: 1, opacity: 1 }} transition={{ delay: 0.6 + Math.abs(i - 32) * 0.02, type: "spring", stiffness: 200, damping: 16 }}>
-      <motion.span className={`block size-full origin-bottom rounded-[3px] ${today ? "bg-otan shadow-[0_0_24px_#FF4E20]" : "bg-[#ECEBE5]/85"}`}
-        animate={today ? {} : { rotate: [0, (base >= 0 ? 3 : -3), 0] }} transition={{ duration: 3 + (i % 5) * 0.4, repeat: Infinity, ease: "easeInOut", delay: (i % 7) * 0.2 }} />
-    </motion.span>
-  )
-}
 
 /* ------------------------------- SEÇÕES ------------------------------- */
 
