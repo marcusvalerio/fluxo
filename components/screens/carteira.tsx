@@ -27,11 +27,11 @@ export function CarteiraScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
         <p className="text-[13px] text-mute">O que está planejado</p>
         <h1 className="ttl text-[30px] leading-tight">Carteira</h1>
       </motion.header>
-      <div className="lg no-scrollbar mb-6 flex gap-0.5 overflow-x-auto rounded-[22px] p-1">
+      <div className="no-scrollbar mb-6 flex gap-0.5 overflow-x-auto rounded-[22px] bg-sand p-1">
         <LayoutGroup id="carteira">
           {SEGS.map((s) => (
             <button key={s.id} onClick={() => setSeg(s.id)} className={`relative flex-1 whitespace-nowrap rounded-[18px] px-3 py-2.5 text-[13px] ${seg === s.id ? "font-semibold" : "text-smoke"}`}>
-              {seg === s.id && <motion.span layoutId="cseg" className="lg-pill absolute inset-0 rounded-[18px]" transition={spring} />}
+              {seg === s.id && <motion.span layoutId="cseg" className="absolute bg-card shadow-sm inset-0 rounded-[18px]" transition={spring} />}
               <span className="relative">{s.label}</span>
             </button>
           ))}

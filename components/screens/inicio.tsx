@@ -38,7 +38,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
           <p className="text-[13px] text-mute first-letter:uppercase">{today}</p>
           <h1 className="ttl text-[30px] leading-tight">Oi, {first}</h1>
         </div>
-        <button onClick={() => setSettings(true)} className="lg ttl grid size-[46px] place-items-center rounded-full text-[16px]" aria-label="Ajustes">
+        <button onClick={() => setSettings(true)} className="ttl grid size-[46px] place-items-center rounded-full bg-card text-[16px]" aria-label="Ajustes">
           {first[0]?.toUpperCase()}
         </button>
       </motion.header>

@@ -32,7 +32,21 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
   }, [done])
   const a = useMemo(() => analyze(snap), [snap])
 
-  useEffect(() => { window.scrollTo({ top: 0 }) }, [tab])
+  useEffect(() => { window.scrollTo({ top: 0 }); setMini(false) }, [tab])
+  // iOS 27: a barra encolhe ao rolar para baixo e volta ao subir
+  const [mini, setMini] = useState(false)
+  useEffect(() => {
+    let last = window.scrollY
+    const onScroll = () => {
+      const y = window.scrollY
+      if (y < 40) setMini(false)
+      else if (y > last + 6) setMini(true)
+      else if (y < last - 6) setMini(false)
+      last = y
+    }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
       if ((e.key === "k" && (e.metaKey || e.ctrlKey))) { e.preventDefault(); setLancar(true) }
@@ -57,29 +71,32 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
 
       <nav className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-[480px] px-4 pb-[max(20px,env(safe-area-inset-bottom))]">
         <motion.div initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2, type: "spring", stiffness: 300, damping: 26 }}
-          className="lg flex h-[66px] items-center justify-between rounded-[33px] px-1.5">
-          <LayoutGroup>
-            {TABS.map((t) => {
-              const Icon = t.icon
-              const on = tab === t.id
-              return (
-                <button key={t.id} onClick={() => setTab(t.id)} aria-current={on ? "page" : undefined} aria-label={t.label}
-                  className="relative flex h-[54px] min-w-[50px] items-center justify-center gap-2 rounded-[27px] px-3.5 text-[13px] font-semibold">
-                  {on && <motion.span layoutId="pill" className="lg-pill absolute inset-0 rounded-[27px]" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
-                  <Icon size={19} strokeWidth={2} className={`relative ${on ? "text-otan" : "text-smoke"}`} />
-                  <AnimatePresence initial={false}>
-                    {on && (
-                      <motion.span initial={{ width: 0, opacity: 0 }} animate={{ width: "auto", opacity: 1 }} exit={{ width: 0, opacity: 0 }}
-                        className="relative overflow-hidden whitespace-nowrap">{t.label}</motion.span>
-                    )}
-                  </AnimatePresence>
-                </button>
-              )
-            })}
-          </LayoutGroup>
-          <motion.button whileTap={{ scale: 0.9 }} onClick={() => setLancar(true)} aria-label="Lançar gasto"
-            className="grid size-[54px] place-items-center rounded-full bg-otan text-white shadow-[inset_0_1px_1px_rgb(255_255_255/0.5),0_6px_16px_-4px_rgb(255_78_32/0.6)]">
-            <Plus size={22} strokeWidth={2.4} />
+          className="flex items-end gap-3">
+          <motion.div layout transition={{ type: "spring", stiffness: 420, damping: 36 }}
+            className={`lg flex flex-1 items-center rounded-full p-1 ${mini ? "h-[52px]" : "h-[64px]"}`}>
+            <LayoutGroup>
+              {TABS.map((t) => {
+                const Icon = t.icon
+                const on = tab === t.id
+                return (
+                  <button key={t.id} onClick={() => setTab(t.id)} aria-current={on ? "page" : undefined} aria-label={t.label}
+                    className={`relative flex h-full flex-1 flex-col items-center justify-center gap-0.5 rounded-full text-[11px] font-semibold ${on ? "text-otan" : "text-ink"}`}>
+                    {on && <motion.span layoutId="pill" className="lg-pill absolute inset-0 rounded-full" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
+                    <Icon size={mini ? 20 : 21} strokeWidth={on ? 2.3 : 1.9} fill={on ? "currentColor" : "none"} fillOpacity={0.16} className="relative" />
+                    <AnimatePresence initial={false}>
+                      {!mini && (
+                        <motion.span initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                          className="relative overflow-hidden leading-tight">{t.label}</motion.span>
+                      )}
+                    </AnimatePresence>
+                  </button>
+                )
+              })}
+            </LayoutGroup>
+          </motion.div>
+          <motion.button layout whileTap={{ scale: 0.9 }} onClick={() => setLancar(true)} aria-label="Lançar gasto"
+            className={`lg grid shrink-0 place-items-center rounded-full text-otan ${mini ? "size-[52px]" : "size-[64px]"}`}>
+            <Plus size={24} strokeWidth={2.4} />
           </motion.button>
         </motion.div>
       </nav>

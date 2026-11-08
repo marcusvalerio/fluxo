@@ -73,11 +73,11 @@ export function FluxoScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
           <p className="text-[13px] text-mute">Seu fluxo</p>
           <h1 className="ttl text-[30px] leading-tight first-letter:uppercase">{view === "mes" ? labelMonth(snap.today) : "6 meses"}</h1>
         </div>
-        <div className="lg flex gap-0.5 rounded-[22px] p-1">
+        <div className="flex gap-0.5 rounded-[22px] bg-sand p-1">
           <LayoutGroup>
             {(["mes", "meses"] as View[]).map((v) => (
               <button key={v} onClick={() => setView(v)} className={`relative rounded-[18px] px-3.5 py-2 text-[13px] ${view === v ? "font-semibold" : "text-smoke"}`}>
-                {view === v && <motion.span layoutId="seg" className="lg-pill absolute inset-0 rounded-[18px]" transition={spring} />}
+                {view === v && <motion.span layoutId="seg" className="absolute bg-card shadow-sm inset-0 rounded-[18px]" transition={spring} />}
                 <span className="relative">{v === "mes" ? "Mês" : "6 meses"}</span>
               </button>
             ))}
@@ -123,7 +123,7 @@ export function FluxoScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
                 {a.dailyCap > 0 && (
                   <>
                     <div className="absolute inset-x-0 border-t-[1.5px] border-dashed border-sand-2" style={{ bottom: `${(a.dailyCap / peakDay) * 100}%` }} />
-                    <span className="lg absolute right-0 z-10 rounded-xl px-2 py-1 text-[11px] font-semibold text-smoke" style={{ bottom: `calc(${(a.dailyCap / peakDay) * 100}% + 4px)` }}>teto R$ {int(a.dailyCap)}</span>
+                    <span className="absolute right-0 z-10 rounded-xl bg-card px-2 py-1 text-[11px] font-semibold text-smoke" style={{ bottom: `calc(${(a.dailyCap / peakDay) * 100}% + 4px)` }}>teto R$ {int(a.dailyCap)}</span>
                   </>
                 )}
                 <div className="absolute inset-0 flex items-end gap-[3px]">

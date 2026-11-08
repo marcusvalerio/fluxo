@@ -41,7 +41,7 @@ export function MetasScreen({ snap, embedded }: { snap: Snapshot; embedded?: boo
           <p className="text-[13px] text-mute">O que você está construindo</p>
           <h1 className="ttl text-[30px] leading-tight">Metas</h1>
         </div>
-        <button onClick={() => setCreating(true)} className="lg grid size-[46px] place-items-center rounded-full" aria-label="Nova meta"><Plus size={19} /></button>
+        <button onClick={() => setCreating(true)} className="grid size-[46px] place-items-center rounded-full bg-card" aria-label="Nova meta"><Plus size={19} /></button>
       </motion.header>}
 
       <div className="flex flex-col gap-6">
