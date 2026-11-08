@@ -70,9 +70,9 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
       </AnimatePresence>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-[480px] px-4 pb-[max(20px,env(safe-area-inset-bottom))]">
-        <motion.div initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2, type: "spring", stiffness: 300, damping: 26 }}
-          className="flex items-end gap-3">
-          <motion.div layout transition={{ type: "spring", stiffness: 420, damping: 36 }}
+        {/* sem transform/opacity no pai: senão o backdrop-filter do vidro não enxerga o conteúdo */}
+        <div className="flex items-end gap-3">
+          <motion.div layout initial={{ y: 80 }} animate={{ y: 0 }} transition={{ type: "spring", stiffness: 420, damping: 36 }}
             className={`lg flex flex-1 items-center rounded-full p-1 ${mini ? "h-[52px]" : "h-[64px]"}`}>
             <LayoutGroup>
               {TABS.map((t) => {
@@ -94,11 +94,11 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
               })}
             </LayoutGroup>
           </motion.div>
-          <motion.button layout whileTap={{ scale: 0.9 }} onClick={() => setLancar(true)} aria-label="Lançar gasto"
+          <motion.button layout initial={{ y: 80 }} animate={{ y: 0 }} transition={{ type: "spring", stiffness: 420, damping: 36, delay: 0.05 }} whileTap={{ scale: 0.9 }} onClick={() => setLancar(true)} aria-label="Lançar gasto"
             className={`lg grid shrink-0 place-items-center rounded-full text-otan ${mini ? "size-[52px]" : "size-[64px]"}`}>
             <Plus size={24} strokeWidth={2.4} />
           </motion.button>
-        </motion.div>
+        </div>
       </nav>
 
       <InstallGuide open={install.open} onClose={install.close} />
