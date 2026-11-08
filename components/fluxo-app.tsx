@@ -96,7 +96,7 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
           </motion.div>
           <motion.button layout initial={{ y: 80 }} animate={{ y: 0 }} transition={{ type: "spring", stiffness: 420, damping: 36, delay: 0.05 }} whileTap={{ scale: 0.9 }} onClick={() => setLancar(true)} aria-label="Lançar gasto"
             className={`lg grid shrink-0 place-items-center rounded-full text-otan ${mini ? "size-[52px]" : "size-[64px]"}`}>
-            <Plus size={24} strokeWidth={2.4} />
+            <Plus size={28} strokeWidth={3.4} />
           </motion.button>
         </div>
       </nav>

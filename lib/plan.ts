@@ -94,3 +94,30 @@ export function health(s: Snapshot, a: Analysis): Health {
   const label = score >= 80 ? "Ótima" : score >= 60 ? "Boa" : score >= 40 ? "Atenção" : "Crítica"
   return { score, label, factors: f }
 }
+
+/**
+ * Quanto deve sobrar em cada um dos próximos meses, sem compras novas.
+ * Estimativa: orçamento do mês − contas fixas − assinaturas − parcelas já agendadas
+ * (pelo mês da fatura) − gasto do dia a dia (o do mês passado, sem parcelas).
+ * O mês atual usa o "livre" de verdade.
+ */
+export function monthRoom(s: Snapshot, a: Analysis, months = 24) {
+  const prevYm = shift(a.ym, -1)
+  const prevIncome = s.txs.filter((t) => t.kind === "income" && t.date.startsWith(prevYm)).reduce((x, t) => x + t.amount, 0)
+  const budget = s.space.limit > 0 ? s.space.limit : Math.max(a.income, prevIncome)
+  const fixed = s.bills.reduce((x, b) => x + b.amount, 0) + s.subs.reduce((x, v) => x + subMonthly(v), 0)
+  const variable = s.txs.filter((t) => t.kind === "expense" && !t.installment && t.date.startsWith(prevYm)).reduce((x, t) => x + t.amount, 0)
+  const cards = new Map(s.cards.map((c) => [c.id, c]))
+  const scheduled = new Map<string, number>()
+  for (const t of s.txs) {
+    if (t.kind !== "expense" || !t.installment) continue
+    const c = t.cardId ? cards.get(t.cardId) : undefined
+    const key = c ? invoiceKey(c, t.date) : t.date.slice(0, 7)
+    scheduled.set(key, (scheduled.get(key) ?? 0) + t.amount)
+  }
+  return Array.from({ length: months }, (_, i) => {
+    const key = shift(a.ym, i)
+    const free = i === 0 ? a.free : budget - fixed - variable - (scheduled.get(key) ?? 0)
+    return { key, free: Math.round(free * 100) / 100 }
+  })
+}
