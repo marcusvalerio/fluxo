@@ -305,6 +305,10 @@ function SettingsSheet({ open, onClose, limit, email, admin, name }: { open: boo
             <button className={row} onClick={() => { onClose(); window.dispatchEvent(new Event("fluxo:install")) }}>
               <Smartphone size={18} className="text-smoke" /><span className="flex-1">Instalar no iPhone</span><ChevronRight size={16} className="text-faint" />
             </button>
+            <button className={row} onClick={() => { onClose(); window.dispatchEvent(new Event("fluxo:fluximetro")) }}>
+              <Sparkles size={18} className="text-smoke" /><span className="flex-1">Conhecer o Fluximetro</span>
+              <span className="rounded-full bg-otan/12 px-2 py-0.5 text-[11px] font-semibold text-gravy">Em breve</span>
+            </button>
             {admin && <a href="/admin" className={row}><Shield size={18} className="text-smoke" /><span className="flex-1">Painel admin</span><ChevronRight size={16} className="text-faint" /></a>}
             <button onClick={() => start(() => logout())} className={`${row} border-t border-white/60 text-gravy`}><LogOut size={18} /><span>Sair</span></button>
           </motion.div>

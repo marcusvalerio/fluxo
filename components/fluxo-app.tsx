@@ -1,6 +1,7 @@
 "use client"
 
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion"
+import dynamic from "next/dynamic"
 import { useEffect, useMemo, useState } from "react"
 import { BarChart3, CalendarDays, Check, House, Plus, Wallet } from "lucide-react"
 import type { Snapshot } from "@/lib/types"
@@ -11,6 +12,10 @@ import { AgendaScreen } from "./screens/agenda"
 import { CarteiraScreen } from "./screens/carteira"
 import { Lancar } from "./lancar"
 import { InstallGuide, useInstallPrompt } from "./install-guide"
+
+// o mascote só carrega no navegador e fora do caminho da primeira pintura
+const FluximetroIntro = dynamic(() => import("./fluximetro-intro").then((m) => m.FluximetroIntro), { ssr: false })
+const INTRO_KEY = "fluxo-fluximetro-intro"
 
 export type Tab = "inicio" | "fluxo" | "agenda" | "carteira"
 const TABS: { id: Tab; label: string; icon: typeof House }[] = [
@@ -24,6 +29,19 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
   const [tab, setTab] = useState<Tab>("inicio")
   const [lancar, setLancar] = useState(false)
   const install = useInstallPrompt()
+  const [intro, setIntro] = useState(false)
+  // o Fluximetro se apresenta uma vez a cada vez que o app é aberto; "Conhecer o Fluximetro" nos Ajustes chama de novo
+  useEffect(() => {
+    let seen = false
+    try { seen = sessionStorage.getItem(INTRO_KEY) === "1" } catch {}
+    if (!seen) {
+      setIntro(true)
+      try { sessionStorage.setItem(INTRO_KEY, "1") } catch {}
+    }
+    const open = () => setIntro(true)
+    window.addEventListener("fluxo:fluximetro", open)
+    return () => window.removeEventListener("fluxo:fluximetro", open)
+  }, [])
   const [done, setDone] = useState<{ id: number; amount: number; kind: "income" | "expense"; label: string; parts: number } | null>(null)
   useEffect(() => {
     if (!done) return
@@ -102,6 +120,9 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
       </nav>
 
       <InstallGuide open={install.open} onClose={install.close} />
+      <AnimatePresence>
+        {intro && <FluximetroIntro key="fluximetro" name={snap.space.name} onClose={() => setIntro(false)} />}
+      </AnimatePresence>
       <Lancar open={lancar} onClose={() => setLancar(false)} snap={snap} a={a} onDone={(r) => setDone({ ...r, id: Date.now() })} />
 
       {/* confirmação: a cor enche a tela e um aviso de vidro aparece */}

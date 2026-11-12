@@ -13,6 +13,7 @@
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.16.0",
     "next": "16.2.6",
+    "open-bot-avatar": "^0.2.1",
     "react": "^19",
     "react-dom": "^19",
     "server-only": "^0.0.1"
