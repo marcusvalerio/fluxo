@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useState, useTransition } from "react"
-import { Check, ChevronRight, Crown, Gamepad2, PanelBottom, TreePine, Gauge, MessageCircle, PiggyBank, Smile, Image as ImageIcon, KeyRound, Shield, Smartphone, LayoutGrid, LogOut, TrendingUp, Plus, RotateCcw, Sparkles } from "lucide-react"
+import { Check, ChevronRight, Crown, Gamepad2, PanelBottom, TreePine, Gauge, MessageCircle, PiggyBank, Smile, Image as ImageIcon, Zap, Send, KeyRound, Shield, Smartphone, LayoutGrid, LogOut, TrendingUp, Plus, RotateCcw, Sparkles } from "lucide-react"
 import type { Bill, Snapshot } from "@/lib/types"
 import { brl, CATEGORIES, insights, int, type Analysis } from "@/lib/finance"
 import { labelMonth, relativeDay } from "@/lib/dates"
@@ -20,6 +20,8 @@ import { natalPref, setNatalPref, type NatalPref } from "@/lib/natal"
 import { ICONES, iconeAtual, setIcone, type Icone } from "@/lib/icone"
 import { fxPrefs, type Deboche } from "../fluximetro"
 import { PlanSheet } from "../plan-sheet"
+import { Atalho } from "../atalho"
+import { Convite } from "../convite"
 
 const WEEK = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" })
 
@@ -193,6 +195,7 @@ function PaidChip({ b }: { b: Bill }) {
 }
 
 function SettingsSheet({ open, onClose, limit, email, admin, name, onPlan, onPlanos }: { open: boolean; onClose: () => void; limit: number; email: string; admin: boolean; name: string; onPlan: () => void; onPlanos: () => void }) {
+  const [sub, setSub] = useState<"atalho" | "convite" | null>(null)
   const [bar, setBar] = useState(() => { try { return localStorage.getItem("fluxo-barra") === "solid" ? "solid" : "glass" } catch { return "glass" } })
   const [natal, setNatal] = useState<NatalPref>(() => natalPref())
   const toggleBar = () => { const v = bar === "solid" ? "glass" : "solid"; setBar(v); try { localStorage.setItem("fluxo-barra", v) } catch {}; if (v === "solid") document.documentElement.dataset.bar = "solid"; else delete document.documentElement.dataset.bar }
@@ -257,6 +260,12 @@ function SettingsSheet({ open, onClose, limit, email, admin, name, onPlan, onPla
               )}
             </AnimatePresence>
 
+            <button className={row} onClick={() => setSub("atalho")}>
+              <Zap size={18} className="text-smoke" /><span className="flex-1">Atalho do Apple Pay</span><span className="text-[13px] text-mute">lança sozinho</span><ChevronRight size={16} className="text-faint" />
+            </button>
+            <button className={row} onClick={() => setSub("convite")}>
+              <Send size={18} className="text-smoke" /><span className="flex-1">Chamar amigos</span><ChevronRight size={16} className="text-faint" />
+            </button>
             <button className={row} onClick={() => { onClose(); window.dispatchEvent(new Event("fluxo:install")) }}>
               <Smartphone size={18} className="text-smoke" /><span className="flex-1">Instalar no iPhone</span><ChevronRight size={16} className="text-faint" />
             </button>
@@ -302,6 +311,8 @@ function SettingsSheet({ open, onClose, limit, email, admin, name, onPlan, onPla
             {admin && <a href="/admin" className={row}><Shield size={18} className="text-smoke" /><span className="flex-1">Painel admin</span><ChevronRight size={16} className="text-faint" /></a>}
             <button onClick={() => start(() => logout())} className={`${row} border-t border-cotton text-gravy`}><LogOut size={18} /><span>Sair</span></button>
           </div>
+      <Atalho open={sub === "atalho"} onClose={() => setSub(null)} />
+      <Convite open={sub === "convite"} onClose={() => setSub(null)} nome={name} />
     </Sheet>
   )
 }
