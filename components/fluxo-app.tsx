@@ -15,7 +15,8 @@ import { InstallGuide, useInstallPrompt } from "./install-guide"
 
 // o mascote só carrega no navegador e fora do caminho da primeira pintura
 const FluximetroIntro = dynamic(() => import("./fluximetro-intro").then((m) => m.FluximetroIntro), { ssr: false })
-const INTRO_KEY = "fluxo-fluximetro-intro"
+// guardado em memória: zera a cada vez que o app é aberto de verdade (sessionStorage sobrevivia no PWA do iPhone)
+let introShown = false
 
 export type Tab = "inicio" | "fluxo" | "agenda" | "carteira"
 const TABS: { id: Tab; label: string; icon: typeof House }[] = [
@@ -32,11 +33,9 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
   const [intro, setIntro] = useState(false)
   // o Fluximetro se apresenta uma vez a cada vez que o app é aberto; "Conhecer o Fluximetro" nos Ajustes chama de novo
   useEffect(() => {
-    let seen = false
-    try { seen = sessionStorage.getItem(INTRO_KEY) === "1" } catch {}
-    if (!seen) {
+    if (!introShown) {
+      introShown = true
       setIntro(true)
-      try { sessionStorage.setItem(INTRO_KEY, "1") } catch {}
     }
     const open = () => setIntro(true)
     window.addEventListener("fluxo:fluximetro", open)
