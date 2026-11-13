@@ -326,3 +326,10 @@ async function seedDemo(id: string) {
     (${id}, 'Cartão de crédito', 1840, 25, 'Cartão'),
     (${id}, 'Condomínio', 650, 28, 'Moradia')`
 }
+
+// ---------- atalho do Apple Pay ----------
+
+export async function getShortcutToken(reset = false) {
+  const { tokenOf } = await import("@/lib/atalho")
+  return tokenOf(await requireSpaceId(), reset)
+}

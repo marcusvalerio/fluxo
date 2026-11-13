@@ -18,7 +18,7 @@ const DEBOCHE: [Deboche, string, string][] = [
   ["semfiltro", "Sem filtro", "De novo? Sua cozinha tá servindo de enfeite."],
 ]
 
-const TOTAL = 9
+const TOTAL = 10
 
 export function Onboarding({ name: initialName, needsPassword, preview = false }: { name: string; needsPassword: boolean; preview?: boolean }) {
   const [step, setStep] = useState(0)
@@ -140,8 +140,8 @@ export function Onboarding({ name: initialName, needsPassword, preview = false }
                 </div>
               </Ask>
             )}
-            {step >= 5 && step <= 7 && <Dica i={step - 5} />}
-            {step === 8 && (
+            {step >= 5 && step <= 8 && <Dica i={step - 5} />}
+            {step === 9 && (
               <Ask title={`Tudo pronto${name.trim() ? `, ${name.trim().split(" ")[0]}` : ""}.`} sub="Depois, lance seus gastos pelo botão + e cadastre cartões e assinaturas na Carteira.">
                 <div className="mt-2 space-y-3">
                   <Choice disabled={pending} onClick={() => finish(false)} title="Começar do zero" text="Para usar de verdade com o seu dinheiro." primary />
@@ -154,7 +154,7 @@ export function Onboarding({ name: initialName, needsPassword, preview = false }
         </AnimatePresence>
       </div>
 
-      {step < 8 && (
+      {step < 9 && (
         <motion.button whileTap={{ scale: 0.97 }} disabled={blocked} onClick={() => go(step === 2 && !limitN ? 4 : step + 1)}
           className="disabled:opacity-30 relative flex h-14 w-full items-center justify-center gap-2 rounded-[28px] bg-ink font-semibold text-cotton">
           {step === 0 ? "Começar" : step === 2 && !limitN ? "Pular" : "Continuar"} <ArrowRight size={18} />
@@ -216,6 +216,7 @@ const DICAS = [
   { title: "Lance do seu jeito", sub: "Toque no + e escreva como falaria. Dá pra lançar vários de uma vez.", fx: "Eu entendo. Até o \"só um lanchinho\"." },
   { title: "O número laranja manda", sub: "É quanto ainda cabe no mês sem apertar. Ele já desconta o que você vai guardar e as contas que vão vencer.", fx: "Se ele ficar vermelho, eu fico nervoso. Você foi avisado." },
   { title: "Pergunte antes de comprar", sub: "Toque em mim e pergunte \"posso comprar um tênis de 400 em 4x?\". Eu mostro se cabe e como ficam as faturas.", fx: "Eu sou sincero. Às vezes até demais." },
+  { title: "Apple Pay lança sozinho", sub: "Nos Ajustes tem o Atalho do Apple Pay. Montou uma vez, cada compra feita com o iPhone entra no Fluxo sem você digitar nada.", fx: "Você passa o celular, eu anoto. Trabalho em equipe." },
 ]
 
 function DemoLancar() {
@@ -258,11 +259,26 @@ function Dica({ i }: { i: number }) {
   const d = DICAS[i]
   return (
     <Ask title={d.title} sub={d.sub}>
-      <div className="-mt-2">{i === 0 ? <DemoLancar /> : i === 1 ? <DemoNumero /> : <DemoPergunta />}</div>
+      <div className="-mt-2">{i === 0 ? <DemoLancar /> : i === 1 ? <DemoNumero /> : i === 2 ? <DemoPergunta /> : <DemoApplePay />}</div>
       <div className="mt-6 flex items-end gap-3">
         <span className="w-20 shrink-0"><Cofrinho state={i === 1 ? "normal" : "feliz"} swing label="" /></span>
         <p className="mb-3 rounded-[18px] rounded-bl-[6px] bg-card px-4 py-3 text-[14px] leading-snug text-ink">{d.fx}</p>
       </div>
     </Ask>
+  )
+}
+
+function DemoApplePay() {
+  return (
+    <div className="flex flex-col gap-2">
+      <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, ...spring }} className="flex items-center gap-3 rounded-[22px] bg-card p-3.5 shadow-sm">
+        <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-ink text-[11px] font-bold text-cotton">Pay</span>
+        <span className="min-w-0 flex-1 text-[14px]"><b className="block">Padaria Pão Quente</b><span className="text-mute">Apple Pay · agora</span></span><b className="num text-[15px]">R$ 18,90</b>
+      </motion.div>
+      <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1, ...spring }} className="flex items-center gap-3 rounded-[22px] bg-card p-3.5 shadow-sm">
+        <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-otan text-[11px] font-bold text-white">Fx</span>
+        <span className="min-w-0 flex-1 text-[14px]"><b className="block">Atalhos</b><span className="text-smoke">Plim. R$ 18,90 em Padaria Pão Quente. Não conto pra ninguém.</span></span>
+      </motion.div>
+    </div>
   )
 }

@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion"
 import { useState, useTransition } from "react"
-import { ArrowLeft, Check, Copy, KeyRound, LogOut, Plus, Power } from "lucide-react"
+import { ArrowLeft, Check, Copy, KeyRound, LogOut, Plus, Power, Send } from "lucide-react"
+import { compartilhar, conviteAcesso } from "@/lib/convite"
 import { brl, int } from "@/lib/finance"
 import { createUser, resetPassword, setActive } from "@/app/admin/actions"
 import { logout } from "@/app/actions"
@@ -188,7 +189,7 @@ function NewUserSheet({ open, onClose, onCreated }: { open: boolean; onClose: ()
 
 function SecretSheet({ secret, onClose }: { secret: { name: string; email: string; password: string } | null; onClose: () => void }) {
   const [copied, setCopied] = useState(false)
-  const msg = secret ? `Oi, ${secret.name.split(" ")[0]}! Seu acesso ao Fluxo:\n${typeof window !== "undefined" ? window.location.origin : ""}\nE-mail: ${secret.email}\nSenha temporária: ${secret.password}\nNo primeiro acesso você cria a sua senha.` : ""
+  const msg = secret ? conviteAcesso(secret.name, secret.email, secret.password) : ""
   return (
     <Sheet open={!!secret} onClose={() => { setCopied(false); onClose() }} title="Acesso criado">
       {secret && (
@@ -198,9 +199,13 @@ function SecretSheet({ secret, onClose }: { secret: { name: string; email: strin
             <p className="text-[12px] text-mute">{secret.email}</p>
             <p className="num mt-1 select-all text-[26px] tracking-wide">{secret.password}</p>
           </div>
-          <Primary onClick={async () => { await navigator.clipboard.writeText(msg); setCopied(true) }}>
-            <span className="inline-flex items-center gap-2">{copied ? <><Check size={16} /> Copiado</> : <><Copy size={16} /> Copiar mensagem de acesso</>}</span>
+          <p className="max-h-[38vh] select-text overflow-y-auto whitespace-pre-wrap rounded-[20px] bg-card p-4 text-[13.5px] leading-relaxed text-smoke">{msg}</p>
+          <Primary onClick={async () => { const r = await compartilhar(msg); if (r === "copied") setCopied(true) }}>
+            <span className="inline-flex items-center gap-2"><Send size={16} /> Enviar mensagem do Fluximetro</span>
           </Primary>
+          <button onClick={async () => { try { await navigator.clipboard.writeText(msg); setCopied(true) } catch {} }} className="h-12 w-full rounded-[24px] bg-card text-[14px] font-semibold">
+            <span className="inline-flex items-center gap-2">{copied ? <><Check size={16} /> Copiado</> : <><Copy size={16} /> Copiar</>}</span>
+          </button>
         </div>
       )}
     </Sheet>
