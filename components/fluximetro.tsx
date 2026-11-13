@@ -11,11 +11,17 @@ import type { Analysis } from "@/lib/finance"
 import { FluxiChat } from "./fluxi-chat"
 
 // preferências do Fluximetro, guardadas no aparelho
-const KEY = { met: "fluxo-fx-met", humor: "fluxo-fx-humor", talk: "fluxo-fx-comenta" }
+const KEY = { met: "fluxo-fx-met", humor: "fluxo-fx-humor", nivel: "fluxo-fx-nivel", talk: "fluxo-fx-comenta" }
 const read = (k: string, def: boolean) => { try { const v = localStorage.getItem(k); return v === null ? def : v === "1" } catch { return def } }
 const write = (k: string, v: boolean) => { try { localStorage.setItem(k, v ? "1" : "0") } catch {} }
+/** Nível de deboche: Educado (sem piada), Sincero (padrão) ou Sem filtro (zoa sem dó). */
+export type Deboche = "educado" | "sincero" | "semfiltro"
+const nivel = (): Deboche => {
+  try { const v = localStorage.getItem(KEY.nivel); if (v === "educado" || v === "sincero" || v === "semfiltro") return v; return read(KEY.humor, true) ? "sincero" : "educado" } catch { return "sincero" }
+}
 export const fxPrefs = {
-  humor: () => read(KEY.humor, true), setHumor: (v: boolean) => write(KEY.humor, v),
+  nivel, setNivel: (v: Deboche) => { try { localStorage.setItem(KEY.nivel, v) } catch {} },
+  humor: () => nivel() !== "educado",
   talk: () => read(KEY.talk, true), setTalk: (v: boolean) => write(KEY.talk, v),
 }
 
@@ -33,8 +39,11 @@ const CONVITES = [
 /** Falas para quando você lança algo. `serio` desliga as piadas. */
 export function falaDoLancamento(kind: "income" | "expense", label: string, tight: boolean, serio: boolean): FxReaction {
   if (kind === "income") return { state: "guardou", text: serio ? `Entrada anotada: ${label}.` : pick(["Plim! Dinheiro entrando. Separo um pouco pras metas?", "Opa! Meu ponteiro até subiu.", "Entrada anotada. Hoje eu durmo tranquilo."]) }
-  if (tight) return { state: "apertado", text: "Esse passou do teto. Bora segurar até o próximo salário?" }
+  if (tight) return { state: "apertado", text: serio ? "Esse passou do teto. Bora segurar até o próximo salário?" : fxPrefs.nivel() === "semfiltro" ? "Passou do teto. Parabéns, agora o mês é que tá te gastando." : "Esse passou do teto. Bora segurar até o próximo salário?" }
   if (serio) return { state: "pensando", text: `Anotado: ${label}.`, ms: 1400 }
+  const forte = fxPrefs.nivel() === "semfiltro"
+  if (forte && /ifood|delivery|rappi|lanche|pizza|hamb/i.test(label)) return { state: "pensando", text: pick(["De novo? Sua cozinha tá servindo de enfeite.", "Mais um. O motoboy já te chama de patrão.", "Anotado. Já pensou em casar com o iFood? Sai mais barato."]) }
+  if (forte) return { state: "pensando", text: pick(["Lançado. Seu dinheiro pediu demissão.", "Anotado. Eu vi. Todo mundo viu.", "Mais um. Meu ponteiro tá com crise de ansiedade."]) }
   if (/ifood|delivery|rappi|lanche|pizza|hamb/i.test(label)) return { state: "pensando", text: pick(["Anotado. O motoboy já sabe seu nome.", "Delivery de novo? Eu anoto e não julgo. Muito."]) }
   return { state: "pensando", text: pick(["Lançado. Seu dinheiro saiu pra passear.", "Anotado. Não conto pra ninguém.", "Pronto. O ponteiro sentiu, mas aguenta."]) }
 }

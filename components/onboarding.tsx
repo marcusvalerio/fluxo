@@ -8,6 +8,14 @@ import { int } from "@/lib/finance"
 import { spring } from "./ui"
 import { DEFAULT_PLAN, SaveEditor } from "./plan-editor"
 import type { Plan } from "@/lib/types"
+import { fxPrefs, type Deboche } from "./fluximetro"
+import { ICONES, setIcone, type Icone } from "@/lib/icone"
+
+const DEBOCHE: [Deboche, string, string][] = [
+  ["educado", "Educado", "Anotado: iFood, R$ 52."],
+  ["sincero", "Sincero", "Delivery de novo? Eu anoto e não julgo. Muito."],
+  ["semfiltro", "Sem filtro", "De novo? Sua cozinha tá servindo de enfeite."],
+]
 
 const TOTAL = 5
 
@@ -21,6 +29,8 @@ export function Onboarding({ name: initialName, needsPassword, preview = false }
   const [pending, start] = useTransition()
   const limitN = Number(limit.replace(/\D/g, "")) || 0
   const [plan, setPlan] = useState<Plan>(DEFAULT_PLAN)
+  const [nivel, setNivel] = useState<Deboche>("sincero")
+  const [icone, setIc] = useState<Icone>("claro")
 
   const go = (n: number) => { setDir(n > step ? 1 : -1); setStep(n) }
   const finish = (demo: boolean) => start(async () => {
@@ -109,6 +119,27 @@ export function Onboarding({ name: initialName, needsPassword, preview = false }
               </Ask>
             )}
             {step === 4 && (
+              <Ask title="Do seu jeito" sub="Quanto o Fluximetro pode zoar seus gastos e qual ícone vai pra sua tela inicial. Dá pra mudar depois nos Ajustes.">
+                <div className="-mt-2 flex flex-col gap-2">
+                  {DEBOCHE.map(([k, t, ex]) => (
+                    <button key={k} onClick={() => { fxPrefs.setNivel(k); setNivel(k) }} aria-pressed={nivel === k}
+                      className={`rounded-[20px] p-4 text-left ${nivel === k ? "bg-ink text-cotton" : "bg-card text-ink"}`}>
+                      <b className="block text-[16px]">{t}</b><span className={`text-[13.5px] ${nivel === k ? "text-cotton/75" : "text-smoke"}`}>&ldquo;{ex}&rdquo;</span>
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-6 grid grid-cols-3 gap-2">
+                  {ICONES.map((k) => (
+                    <button key={k} onClick={() => { setIcone(k); setIc(k) }} aria-pressed={icone === k}
+                      className={`flex flex-col items-center gap-1.5 rounded-[18px] p-2.5 text-[13px] font-semibold capitalize ${icone === k ? "bg-card text-ink ring-2 ring-otan" : "text-mute"}`}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={`/icons/${k}-180.png`} alt="" className="size-14 rounded-[14px]" />{k}
+                    </button>
+                  ))}
+                </div>
+              </Ask>
+            )}
+            {step === 5 && (
               <Ask title={`Tudo pronto${name.trim() ? `, ${name.trim().split(" ")[0]}` : ""}.`} sub="Depois, lance seus gastos pelo botão + e cadastre cartões e assinaturas na Carteira.">
                 <div className="mt-2 space-y-3">
                   <Choice disabled={pending} onClick={() => finish(false)} title="Começar do zero" text="Para usar de verdade com o seu dinheiro." primary />
@@ -121,7 +152,7 @@ export function Onboarding({ name: initialName, needsPassword, preview = false }
         </AnimatePresence>
       </div>
 
-      {step < 4 && (
+      {step < 5 && (
         <motion.button whileTap={{ scale: 0.97 }} disabled={blocked} onClick={() => go(step === 2 && !limitN ? 4 : step + 1)}
           className="disabled:opacity-30 relative flex h-14 w-full items-center justify-center gap-2 rounded-[28px] bg-ink font-semibold text-cotton">
           {step === 0 ? "Começar" : step === 2 && !limitN ? "Pular" : "Continuar"} <ArrowRight size={18} />

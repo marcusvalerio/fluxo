@@ -1,15 +1,21 @@
 import { Analytics } from "@vercel/analytics/next"
 import type { Metadata, Viewport } from "next"
 import { DM_Sans, Inter } from "next/font/google"
+import { cookies } from "next/headers"
+import { asIcone } from "@/lib/icone"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 const dm = DM_Sans({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-dm" })
 
-export const metadata: Metadata = {
-  title: "Fluxo",
-  description: "Quanto ainda cabe no seu mês, todo dia.",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "Fluxo" },
+export async function generateMetadata(): Promise<Metadata> {
+  const ic = asIcone((await cookies()).get("fluxo-icone")?.value)
+  return {
+    title: "Fluxo",
+    description: "Quanto ainda cabe no seu mês, todo dia.",
+    appleWebApp: { capable: true, statusBarStyle: "default", title: "Fluxo" },
+    icons: { apple: `/icons/${ic}-180.png` },
+  }
 }
 
 export const viewport: Viewport = {
