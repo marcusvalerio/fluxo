@@ -3,10 +3,10 @@
 import { revalidatePath } from "next/cache"
 import { randomUUID } from "node:crypto"
 import { sql } from "@/lib/db"
-import { requireSpaceId, monthKey } from "@/lib/space"
+import { ensurePlanColumn, requireSpaceId, monthKey } from "@/lib/space"
 import { endSession, hashPassword, requireUser, startSession, verifyPassword } from "@/lib/auth"
 import { addDays, todayISO } from "@/lib/dates"
-import type { Kind } from "@/lib/types"
+import type { Kind, Plan } from "@/lib/types"
 
 const done = () => revalidatePath("/")
 const money = (n: unknown) => {
@@ -25,6 +25,18 @@ const isoDate = (s: unknown) => {
 }
 
 // ---------- conta ----------
+
+/** Confere o plano vindo do app: porcentagens inteiras que somam 100. */
+function cleanPlan(p: Plan): Plan {
+  const pct = (n: unknown) => Math.max(0, Math.min(100, Math.round(Number(n) || 0)))
+  const income = Math.max(0, Math.round(Number(p.income) || 0))
+  const fixed = pct(p.fixed), variable = pct(p.variable), save = pct(p.save)
+  if (fixed + variable + save !== 100 || income > 1e9) throw new Error("Plano inválido")
+  const goals: Record<string, number> = {}
+  for (const [k, v] of Object.entries(p.goals ?? {}).slice(0, 50)) if (/^\d+$/.test(k)) goals[k] = pct(v)
+  return { income, fixed, variable, save, goals }
+}
+const tetoDoPlano = (p: Plan) => Math.round((p.income * (p.fixed + p.variable)) / 100)
 
 export async function login(email: string, password: string): Promise<{ error?: string }> {
   const e = String(email ?? "").trim().toLowerCase()
@@ -54,16 +66,18 @@ export async function changePassword(current: string, next: string): Promise<{ e
 }
 
 /** Fim do onboarding: nome, teto, senha nova (se for a temporária) e dados de exemplo opcionais. */
-export async function completeOnboarding(input: { name: string; limit: number; demo: boolean; password?: string }): Promise<{ error?: string }> {
+export async function completeOnboarding(input: { name: string; limit: number; demo: boolean; password?: string; plan?: Plan | null }): Promise<{ error?: string }> {
   const user = await requireUser()
   if (user.mustChangePassword) {
     if (!input.password || input.password.length < 8) return { error: "Crie uma senha com pelo menos 8 caracteres." }
     await sql`update users set password_hash = ${await hashPassword(input.password)}, must_change_password = false where id = ${user.id}`
   }
   const name = text(input.name, 40)
-  const limit = Math.max(0, Number(input.limit) || 0)
+  const plan = input.plan && input.plan.income > 0 ? cleanPlan(input.plan) : null
+  const limit = plan ? tetoDoPlano(plan) : Math.max(0, Number(input.limit) || 0)
   await sql`update users set name = ${name} where id = ${user.id}`
-  await sql`update spaces set name = ${name}, monthly_limit = ${limit}, onboarded = true where id = ${user.spaceId}`
+  await ensurePlanColumn()
+  await sql`update spaces set name = ${name}, monthly_limit = ${limit}, onboarded = true, plan = ${plan ? JSON.stringify(plan) : null}::jsonb where id = ${user.spaceId}`
   if (input.demo) {
     const [{ n }] = await sql`select count(*)::int as n from transactions where space_id = ${user.spaceId}`
     if (n === 0) await seedDemo(user.spaceId)
@@ -179,6 +193,16 @@ export async function setCategoryLimit(category: string, amount: number) {
 export async function deleteTransaction(txId: number) {
   const id = await requireSpaceId()
   await sql`delete from transactions where id = ${txId} and space_id = ${id}`
+  done()
+}
+
+/** Salva o plano (quanto guardar e a divisão entre metas). O teto do mês passa a ser o que sobra depois de guardar. */
+export async function savePlan(input: Plan) {
+  const id = await requireSpaceId()
+  const plan = cleanPlan(input)
+  await ensurePlanColumn()
+  if (plan.income > 0) await sql`update spaces set plan = ${JSON.stringify(plan)}::jsonb, monthly_limit = ${tetoDoPlano(plan)} where id = ${id}`
+  else await sql`update spaces set plan = ${JSON.stringify(plan)}::jsonb where id = ${id}`
   done()
 }
 
