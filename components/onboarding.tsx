@@ -11,7 +11,7 @@ import type { Plan } from "@/lib/types"
 
 const TOTAL = 5
 
-export function Onboarding({ name: initialName, needsPassword }: { name: string; needsPassword: boolean }) {
+export function Onboarding({ name: initialName, needsPassword, preview = false }: { name: string; needsPassword: boolean; preview?: boolean }) {
   const [step, setStep] = useState(0)
   const [dir, setDir] = useState(1)
   const [name, setName] = useState(initialName)
@@ -25,6 +25,8 @@ export function Onboarding({ name: initialName, needsPassword }: { name: string;
   const go = (n: number) => { setDir(n > step ? 1 : -1); setStep(n) }
   const finish = (demo: boolean) => start(async () => {
     setError("")
+    // modo de visualização: só mostra as telas, não salva nada
+    if (preview) { window.location.href = "/"; return }
     const r = await completeOnboarding({ name: name.trim() || "Você", limit: 0, demo, password: needsPassword ? password : undefined, plan: limitN > 0 ? { ...plan, income: limitN } : null })
     if (r.error) { setError(r.error); setStep(1) }
   })
