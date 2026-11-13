@@ -1,7 +1,7 @@
 "use client"
 
 import { AnimatePresence, motion } from "framer-motion"
-import { useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import { completeOnboarding } from "@/app/actions"
 import { int } from "@/lib/finance"
@@ -9,6 +9,7 @@ import { spring } from "./ui"
 import { DEFAULT_PLAN, SaveEditor } from "./plan-editor"
 import type { Plan } from "@/lib/types"
 import { fxPrefs, type Deboche } from "./fluximetro"
+import { Cofrinho } from "./cofrinho"
 import { ICONES, setIcone, type Icone } from "@/lib/icone"
 
 const DEBOCHE: [Deboche, string, string][] = [
@@ -17,7 +18,7 @@ const DEBOCHE: [Deboche, string, string][] = [
   ["semfiltro", "Sem filtro", "De novo? Sua cozinha tá servindo de enfeite."],
 ]
 
-const TOTAL = 5
+const TOTAL = 9
 
 export function Onboarding({ name: initialName, needsPassword, preview = false }: { name: string; needsPassword: boolean; preview?: boolean }) {
   const [step, setStep] = useState(0)
@@ -139,7 +140,8 @@ export function Onboarding({ name: initialName, needsPassword, preview = false }
                 </div>
               </Ask>
             )}
-            {step === 5 && (
+            {step >= 5 && step <= 7 && <Dica i={step - 5} />}
+            {step === 8 && (
               <Ask title={`Tudo pronto${name.trim() ? `, ${name.trim().split(" ")[0]}` : ""}.`} sub="Depois, lance seus gastos pelo botão + e cadastre cartões e assinaturas na Carteira.">
                 <div className="mt-2 space-y-3">
                   <Choice disabled={pending} onClick={() => finish(false)} title="Começar do zero" text="Para usar de verdade com o seu dinheiro." primary />
@@ -152,7 +154,7 @@ export function Onboarding({ name: initialName, needsPassword, preview = false }
         </AnimatePresence>
       </div>
 
-      {step < 5 && (
+      {step < 8 && (
         <motion.button whileTap={{ scale: 0.97 }} disabled={blocked} onClick={() => go(step === 2 && !limitN ? 4 : step + 1)}
           className="disabled:opacity-30 relative flex h-14 w-full items-center justify-center gap-2 rounded-[28px] bg-ink font-semibold text-cotton">
           {step === 0 ? "Começar" : step === 2 && !limitN ? "Pular" : "Continuar"} <ArrowRight size={18} />
@@ -207,5 +209,60 @@ function Choice({ title, text, onClick, disabled, primary }: { title: string; te
       </span>
       <span className={`grid size-10 place-items-center rounded-full ${primary ? "bg-otan text-white" : "bg-cotton"}`}><ArrowRight size={16} /></span>
     </motion.button>
+  )
+}
+
+const DICAS = [
+  { title: "Lance do seu jeito", sub: "Toque no + e escreva como falaria. Dá pra lançar vários de uma vez.", fx: "Eu entendo. Até o \"só um lanchinho\"." },
+  { title: "O número laranja manda", sub: "É quanto ainda cabe no mês sem apertar. Ele já desconta o que você vai guardar e as contas que vão vencer.", fx: "Se ele ficar vermelho, eu fico nervoso. Você foi avisado." },
+  { title: "Pergunte antes de comprar", sub: "Toque em mim e pergunte \"posso comprar um tênis de 400 em 4x?\". Eu mostro se cabe e como ficam as faturas.", fx: "Eu sou sincero. Às vezes até demais." },
+]
+
+function DemoLancar() {
+  const full = "ifood 52 e uber 23"
+  const [n, setN] = useState(0)
+  useEffect(() => { const t = setInterval(() => setN((v) => (v >= full.length + 14 ? 0 : v + 1)), 90); return () => clearInterval(t) }, [])
+  const shown = full.slice(0, n), done = n >= full.length
+  return (
+    <div className="rounded-[24px] bg-card p-4">
+      <div className="flex h-12 items-center rounded-[16px] bg-cotton px-4 text-[17px]">{shown}<span className="ml-0.5 h-5 w-[2px] animate-pulse bg-otan" /></div>
+      <div className={`mt-3 flex flex-col gap-2 transition-opacity duration-300 ${done ? "opacity-100" : "opacity-0"}`}>
+        {[["iFood", "52,00"], ["Uber", "23,00"]].map(([k, v]) => (
+          <div key={k} className="flex justify-between rounded-[14px] bg-cotton/60 px-4 py-2.5 text-[15px]"><span>{k}<small className="block text-[12px] text-mute">Saída · hoje</small></span><b className="num self-center">−R$ {v}</b></div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function DemoNumero() {
+  return (
+    <div className="rounded-[26px] bg-gradient-to-br from-[#FF5A2C] to-[#E2401C] p-5 text-center text-white">
+      <p className="text-[13px] opacity-85">Livre até dia 30</p>
+      <motion.p className="num mt-2 text-[48px] leading-none" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={spring}>R$ 2.158</motion.p>
+      <p className="mt-2 text-[13px] opacity-90">Dá uns <b>R$ 113</b> por dia sem apertar.</p>
+    </div>
+  )
+}
+
+function DemoPergunta() {
+  return (
+    <div className="flex flex-col gap-2 rounded-[24px] bg-card p-4 text-[15px]">
+      <motion.p initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2, ...spring }} className="self-end rounded-[18px] rounded-br-[6px] bg-ink px-4 py-2.5 text-cotton">Posso comprar um tênis de 400 em 4x?</motion.p>
+      <motion.p initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1, ...spring }} className="self-start rounded-[18px] rounded-bl-[6px] bg-otan px-4 py-2.5 text-white">Cabe. São R$ 100 por mês até março. Só não inventa outra.</motion.p>
+    </div>
+  )
+}
+
+function Dica({ i }: { i: number }) {
+  const d = DICAS[i]
+  return (
+    <Ask title={d.title} sub={d.sub}>
+      <div className="-mt-2">{i === 0 ? <DemoLancar /> : i === 1 ? <DemoNumero /> : <DemoPergunta />}</div>
+      <div className="mt-6 flex items-end gap-3">
+        <span className="w-20 shrink-0"><Cofrinho state={i === 1 ? "normal" : "feliz"} swing label="" /></span>
+        <p className="mb-3 rounded-[18px] rounded-bl-[6px] bg-card px-4 py-3 text-[14px] leading-snug text-ink">{d.fx}</p>
+      </div>
+    </Ask>
   )
 }
