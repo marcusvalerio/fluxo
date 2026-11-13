@@ -6,6 +6,9 @@ import { BellRing, CalendarClock, MessageCircleHeart, TrendingUp } from "lucide-
 import type { CofrinhoState } from "@/lib/cofrinho"
 import { Cofrinho } from "./cofrinho"
 import { Sheet } from "./ui"
+import type { Snapshot } from "@/lib/types"
+import type { Analysis } from "@/lib/finance"
+import { FluxiChat } from "./fluxi-chat"
 
 // preferências do Fluximetro, guardadas no aparelho
 const KEY = { met: "fluxo-fx-met", humor: "fluxo-fx-humor", talk: "fluxo-fx-comenta" }
@@ -40,12 +43,13 @@ export function falaDoLancamento(kind: "income" | "expense", label: string, tigh
  * O Fluximetro morando em cima do botão +: cai do céu quando o app abre, balança as perninhas,
  * chama pra conhecer e reage ao que acontece no app.
  */
-export function FluximetroBuddy({ ready, hello }: { ready: boolean; hello?: FxReaction | null }) {
+export function FluximetroBuddy({ ready, hello, snap, a }: { ready: boolean; hello?: FxReaction | null; snap: Snapshot; a: Analysis }) {
   const reduced = !!useReducedMotion()
   const [landed, setLanded] = useState(false)
   const [state, setState] = useState<CofrinhoState>("normal")
   const [bubble, setBubble] = useState<{ text: string; invite?: boolean } | null>(null)
   const [meet, setMeet] = useState(false)
+  const [chat, setChat] = useState(false)
   const back = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const hide = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
@@ -69,12 +73,16 @@ export function FluximetroBuddy({ ready, hello }: { ready: boolean; hello?: FxRe
   useEffect(() => {
     const on = (e: Event) => { if (fxPrefs.talk()) say((e as CustomEvent<FxReaction>).detail) }
     const open = () => setMeet(true)
+    const talk = () => { setBubble(null); setChat(true) }
     window.addEventListener("fluxo:reage", on)
     window.addEventListener("fluxo:fluximetro", open)
-    return () => { window.removeEventListener("fluxo:reage", on); window.removeEventListener("fluxo:fluximetro", open) }
+    window.addEventListener("fluxo:conversa", talk)
+    return () => { window.removeEventListener("fluxo:reage", on); window.removeEventListener("fluxo:fluximetro", open); window.removeEventListener("fluxo:conversa", talk) }
   }, [say])
 
   const openMeet = () => { setBubble(null); setMeet(true) }
+  // depois de se conhecerem, tocar nele abre a conversa
+  const tap = () => { setBubble(null); if (read(KEY.met, false)) setChat(true); else setMeet(true) }
   const closeMeet = () => {
     setMeet(false)
     if (!read(KEY.met, false)) {
@@ -86,7 +94,7 @@ export function FluximetroBuddy({ ready, hello }: { ready: boolean; hello?: FxRe
   if (!ready) return null
   return (
     <>
-      <motion.button type="button" onClick={openMeet} aria-label="Conhecer o Fluximetro"
+      <motion.button type="button" onClick={tap} aria-label="Falar com o Fluximetro"
         className="absolute bottom-[calc(100%-6px)] left-1/2 z-10 w-[58px] -translate-x-1/2"
         initial={reduced ? { opacity: 0 } : { y: "-110vh", rotate: -25 }}
         animate={reduced ? { opacity: 1 } : { y: [null, 0, -26, 0], rotate: [null, 8, -4, 0], scaleX: [1, 1.14, 0.95, 1], scaleY: [1, 0.82, 1.06, 1] }}
@@ -109,6 +117,7 @@ export function FluximetroBuddy({ ready, hello }: { ready: boolean; hello?: FxRe
       </AnimatePresence>
 
       <MeetSheet open={meet} onClose={closeMeet} />
+      <FluxiChat open={chat} onClose={() => setChat(false)} snap={snap} a={a} />
     </>
   )
 }
@@ -145,10 +154,10 @@ export function MeetSheet({ open, onClose }: { open: boolean; onClose: () => voi
             </div>
           ))}
         </div>
-        <p className="flex items-center justify-center gap-2 text-[13px] text-mute"><span className="size-2 animate-pulse rounded-full bg-otan" />Em breve: lançar gastos conversando comigo</p>
+        <p className="text-center text-[13px] leading-snug text-mute">Já dá pra lançar gastos e entradas conversando comigo: é só tocar em mim.<br /><span className="inline-flex items-center gap-1.5"><span className="size-2 animate-pulse rounded-full bg-otan" />Em breve: perguntas livres, quando eu ganhar IA.</span></p>
         <div className="grid grid-cols-2 gap-3">
           <button onClick={() => { onClose(); setTimeout(() => window.dispatchEvent(new Event("fluxo:jogo")), 350) }} className="h-14 rounded-[28px] bg-card font-semibold text-ink">Brincar com ele</button>
-          <button onClick={onClose} className="h-14 rounded-[28px] bg-ink font-semibold text-cotton">Combinado</button>
+          <button onClick={() => { onClose(); setTimeout(() => window.dispatchEvent(new Event("fluxo:conversa")), 400) }} className="h-14 rounded-[28px] bg-ink font-semibold text-cotton">Conversar</button>
         </div>
       </div>
     </Sheet>
