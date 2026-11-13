@@ -109,7 +109,7 @@ export function FluximetroBuddy({ ready, hello, snap, a, natal = false }: { read
         animate={reduced ? { opacity: 1 } : { y: [null, 0, -26, 0], rotate: [null, 8, -4, 0], scaleX: [1, 1.14, 0.95, 1], scaleY: [1, 0.82, 1.06, 1] }}
         transition={reduced ? { duration: 0.3 } : { duration: 1.1, times: [0, 0.62, 0.8, 1], ease: ["easeIn", "easeOut", "easeIn"] }}
         onAnimationComplete={() => setLanded(true)} style={{ transformOrigin: "50% 100%" }}>
-        <Cofrinho state={state} swing follow label="" lights={natal} />
+        <Cofrinho state={state} swing follow legs label="" lights={natal} />
       </motion.button>
 
       <AnimatePresence>
@@ -153,7 +153,7 @@ export function MeetSheet({ open, onClose }: { open: boolean; onClose: () => voi
         <div className="mx-auto mt-2 w-[120px]"><Cofrinho state={DEMO[i]} swing label="Fluximetro" /></div>
         <div className="text-center">
           <h2 className="ttl text-[28px] leading-tight">Prazer, Fluximetro</h2>
-          <p className="mx-auto mt-2 max-w-[34ch] text-[15px] leading-relaxed text-smoke">Sou um cofrinho que resolveu cuidar do seu dinheiro. Tenho duas perninhas, zero salário e muita opinião.</p>
+          <p className="mx-auto mt-2 max-w-[34ch] text-[15px] leading-relaxed text-smoke">Sou um cofrinho que resolveu cuidar do seu dinheiro. Zero salário e muita opinião. Quando sento no +, até aparecem umas perninhas.</p>
         </div>
         <div className="rounded-[23px] bg-card px-4">
           {FACTS.map((f) => (
