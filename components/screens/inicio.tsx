@@ -57,7 +57,7 @@ export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Ana
         {/* recado do Fluximetro: a leitura mais importante do mês */}
         {tips[0] && (
           <motion.div {...rise} transition={{ ...spring, delay: 0.07 }}>
-            <button onClick={() => window.dispatchEvent(new Event("fluxo:fluximetro"))} className="flex w-full items-center gap-4 rounded-[26px] bg-card py-4 pl-3 pr-5 text-left">
+            <button onClick={() => window.dispatchEvent(new Event("fluxo:conversa"))} className="flex w-full items-center gap-4 rounded-[26px] bg-card py-4 pl-3 pr-5 text-left">
               <span className="w-[58px] shrink-0"><Cofrinho state={tips[0].tone === "warn" ? "apertado" : tips[0].tone === "good" ? "feliz" : "normal"} label="" /></span>
               <span className="min-w-0 text-[14px] leading-snug text-smoke">
                 <span className="mb-1 block text-[11.5px] font-semibold uppercase tracking-[0.06em] text-faint">Fluximetro</span>
