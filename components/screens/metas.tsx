@@ -133,9 +133,9 @@ function NewGoalSheet({ open, onClose }: { open: boolean; onClose: () => void })
         start(async () => { await addGoal({ name, target: Number(target.replace(/\./g, "").replace(",", ".")), emoji: "", deadline: deadline || null }); setName(""); setTarget(""); setDeadline(""); onClose() })
       }}>
         <label className="block"><Label>Nome</Label><input required value={name} onChange={(e) => setName(e.target.value)} placeholder="Viagem para o Japão" className={field} /></label>
-        <div className="grid grid-cols-2 gap-3">
-          <label className="block"><Label>Quanto</Label><input required inputMode="decimal" value={target} onChange={(e) => setTarget(e.target.value)} placeholder="20.000" className={`${field} num`} /></label>
-          <label className="block"><Label>Até quando</Label><input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className={field} /></label>
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3">
+          <label className="block min-w-0"><Label>Quanto</Label><input required inputMode="decimal" value={target} onChange={(e) => setTarget(e.target.value)} placeholder="20.000" className={`${field} num`} /></label>
+          <label className="block min-w-0"><Label>Até quando</Label><input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className={field} /></label>
         </div>
         <div className="pt-2"><Primary type="submit" disabled={pending}>{pending ? "Criando…" : "Criar meta"}</Primary></div>
       </form>

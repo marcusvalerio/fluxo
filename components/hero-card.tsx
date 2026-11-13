@@ -104,21 +104,21 @@ export function HeroCard({ snap, a, score }: { snap: Snapshot; a: Analysis; scor
           <motion.div key={hidden ? "h" : sd ? `d${sd.day}` : "v"}
             initial={{ opacity: 0, y: 6, filter: "blur(10px)", scale: 0.98 }} animate={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
             exit={{ opacity: 0, filter: "blur(10px)" }} transition={{ duration: 0.35, ease: [0.2, 0.9, 0.2, 1] }} className="absolute inset-x-0 bottom-0 text-center">
-            <p className="ttl mt-2 text-[44px] font-bold leading-none tracking-[-0.035em]" style={{ fontFeatureSettings: '"tnum" 1' }}>
+            <p className="ttl text-[44px] font-bold leading-none tracking-[-0.035em]" style={{ fontFeatureSettings: '"tnum" 1' }}>
               <span className="mr-1 text-[20px] text-white/70">{!sd && a.free < 0 ? "−R$" : "R$"}</span>
               {hidden ? dots : sd ? int(sd.total) : <Ticker value={Math.abs(Math.floor(a.free))} format={(n) => Math.round(n).toLocaleString("pt-BR")} />}
               {!hidden && !sd && <span className="text-[20px] text-white/70">,{String(Math.round((Math.abs(a.free) % 1) * 100)).padStart(2, "0")}</span>}
-            </p>
-            <p className="mt-1.5 text-[13.5px] text-white/85">
-              {sd ? (sd.future ? <>Dia {sd.day} · ainda não chegou</> : <>Gasto no dia {sd.day}{a.dailyCap > 0 && <> · teto <span className="ttl">R$ {hidden ? "•••" : int(a.dailyCap)}</span></>}</>) :
-                a.budget <= 0 ? "Defina um teto no menu da sua inicial." :
-                tight ? <>Você está <span className="ttl">{hidden ? "R$ •••" : brl(-a.free, false)}</span> acima do teto.</> :
-                <>Dá uns <span className="ttl">R$ {hidden ? "•••" : int(a.perDay)}</span> por dia sem apertar.</>}
             </p>
           </motion.div>
         </AnimatePresence>
   
         </div>
+      <p className="relative mx-auto mt-3 max-w-[30ch] text-balance text-center text-[13.5px] leading-snug text-white/85">
+        {sd ? (sd.future ? <>Dia {sd.day} · ainda não chegou</> : <>Gasto no dia {sd.day}{a.dailyCap > 0 && <> · teto <span className="ttl">R$ {hidden ? "•••" : int(a.dailyCap)}</span></>}</>) :
+          a.budget <= 0 ? "Toque na sua inicial e monte seu plano pra ver quanto cabe." :
+          tight ? <>Você está <span className="ttl">{hidden ? "R$ •••" : brl(-a.free, false)}</span> acima do teto.</> :
+          <>Dá uns <span className="ttl">R$ {hidden ? "•••" : int(a.perDay)}</span> por dia sem apertar.</>}
+      </p>
       <div className="ttl relative mt-2.5 flex justify-between text-[11px] text-white/65">
         <span>R$ 0</span><span>{a.budget > 0 ? `teto ${brl(a.budget, false)}` : "sem teto"}</span>
       </div>

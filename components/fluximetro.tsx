@@ -102,7 +102,7 @@ export function FluximetroBuddy({ ready, hello }: { ready: boolean; hello?: FxRe
             transition={{ type: "spring", stiffness: 420, damping: 32 }}
             onClick={bubble.invite ? openMeet : () => setBubble(null)}
             style={{ transformOrigin: "100% 100%" }}
-            className="absolute bottom-[calc(100%+18px)] right-[calc(100%-8px)] z-10 w-[min(240px,calc(100vw-120px))] cursor-pointer rounded-[20px] rounded-br-[6px] bg-card px-4 py-3 text-[13.5px] leading-snug text-ink shadow-[0_14px_36px_-14px_rgb(31_40_46/0.35)]">
+            className="absolute bottom-[calc(100%+18px)] right-[calc(100%-8px)] z-10 w-[min(240px,calc(100vw-120px))] cursor-pointer rounded-[20px] rounded-br-[6px] bg-paper px-4 py-3 text-[13.5px] leading-snug text-ink shadow-[0_18px_40px_-10px_rgb(0_0_0/0.45)] ring-1 ring-ink/10">
             {bubble.text}
           </motion.div>
         )}
