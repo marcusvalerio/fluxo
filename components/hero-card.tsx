@@ -37,8 +37,8 @@ export function HeroCard({ snap, a, score }: { snap: Snapshot; a: Analysis; scor
   const tight = a.free < 0
   // sempre laranja; escurece quando o mês passa do teto
   const bg = tight
-    ? "radial-gradient(120% 90% at 100% 0%, rgb(255 120 80 / 0.35), transparent 55%), linear-gradient(160deg, #B83312, #6E1D08)"
-    : "radial-gradient(120% 90% at 100% 0%, rgb(255 190 150 / 0.45), transparent 55%), linear-gradient(160deg, #FF5A2C, #E2401C 55%, #B83312)"
+    ? "linear-gradient(160deg, #B83312, #6E1D08)"
+    : "linear-gradient(160deg, #FF5A2C, #E2401C 60%, #C73A18)"
   void score
 
   const peak = Math.max(a.dailyCap * 1.6, ...a.days.map((d) => d.total), 1)
@@ -87,7 +87,7 @@ export function HeroCard({ snap, a, score }: { snap: Snapshot; a: Analysis; scor
 
       {/* medidor em segmentos: os brancos são o que ainda cabe no teto */}
       <div className="relative mx-auto mt-3 w-full max-w-[300px]">
-        <svg viewBox="0 0 300 172" className="block h-auto w-full overflow-visible" role="img"
+        <svg viewBox="-10 -10 320 190" className="block h-auto w-full overflow-visible" role="img"
           aria-label={a.budget > 0 ? `${Math.round(fill * 100)}% do teto ainda livre` : "Sem teto definido"}>
           {Array.from({ length: SEG }, (_, i) => {
             const ang = Math.PI - ((i + 0.5) / SEG) * Math.PI, on = (i + 0.5) / SEG < fill

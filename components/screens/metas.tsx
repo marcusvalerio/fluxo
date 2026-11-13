@@ -7,6 +7,7 @@ import type { Goal, Snapshot } from "@/lib/types"
 import { brl, int } from "@/lib/finance"
 import { diffDays, labelDay } from "@/lib/dates"
 import { field, Label, Primary, rise, Sheet, spring } from "../ui"
+import { Piggy } from "../piggy"
 import { addGoal, contributeGoal, deleteGoal } from "@/app/actions"
 
 const COLORS = ["var(--c-ink)", "#FF4E20", "var(--c-smoke)", "var(--c-faint)"]
@@ -60,8 +61,9 @@ export function MetasScreen({ snap, embedded }: { snap: Snapshot; embedded?: boo
           return (
             <motion.button key={g.id} {...rise} transition={{ ...spring, delay: 0.1 + i * 0.06 }} whileTap={{ scale: 0.98 }}
               onClick={() => setActive(g)} className="block w-full rounded-[23px] bg-card p-[18px] text-left">
-              <span className="flex items-baseline justify-between">
-                <span className="text-[15px] font-semibold">{g.name}</span>
+              <span className="flex items-center gap-3">
+                <Piggy pct={pct} size={52} />
+                <span className="flex-1 text-[15px] font-semibold">{g.name}</span>
                 <span className="text-[12px] text-mute">{g.deadline ? labelDay(g.deadline) : "Sem prazo"}</span>
               </span>
               <span className="mt-2 flex items-baseline gap-1.5">

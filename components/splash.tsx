@@ -2,20 +2,22 @@
 
 import { motion, useReducedMotion } from "framer-motion"
 import { useEffect } from "react"
+import { NatalDrop } from "./natal"
 
 const BARS = [0.4, 0.75, 0.55, 1, 0.65]
 
 /** Abertura: os palitos do Fluxo sobem um a um, o nome aparece e o app abre. */
-export function Splash({ onDone }: { onDone: () => void }) {
+export function Splash({ onDone, natal = false }: { onDone: () => void; natal?: boolean }) {
   const reduced = !!useReducedMotion()
   useEffect(() => {
-    const t = setTimeout(onDone, reduced ? 700 : 1500)
+    const t = setTimeout(onDone, reduced ? 900 : natal ? 4800 : 1500)
     return () => clearTimeout(t)
-  }, [onDone, reduced])
+  }, [onDone, reduced, natal])
   return (
     <motion.div className="fixed inset-0 z-[80] grid place-items-center bg-cotton" aria-hidden
       initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.38 }}>
-      <div className="flex items-center gap-3">
+      {natal && <NatalDrop />}
+      <div className={`flex items-center gap-3 ${natal ? "translate-y-[30vh]" : ""}`}>
         <div className="flex h-[46px] items-end gap-[5px]">
           {BARS.map((h, i) => (
             <motion.span key={i} className="w-[9px] origin-bottom rounded-full bg-otan" style={{ height: `${h * 100}%` }}

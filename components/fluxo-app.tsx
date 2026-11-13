@@ -14,6 +14,8 @@ import { Lancar } from "./lancar"
 import { InstallGuide, useInstallPrompt } from "./install-guide"
 
 import { Splash } from "./splash"
+import { isNatal } from "@/lib/natal"
+const Neve = dynamic(() => import("./natal").then((m) => m.Neve), { ssr: false })
 import { falaDoLancamento, fxPrefs, reagir, type FxReaction } from "./fluximetro"
 
 // o mascote só carrega no navegador e fora do caminho da primeira pintura
@@ -39,12 +41,23 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
   const [splash, setSplash] = useState<boolean | null>(null)
   useEffect(() => { setSplash(!splashShown); splashShown = true }, [])
   const endSplash = useCallback(() => setSplash(false), [])
+  useEffect(() => { try { if (localStorage.getItem("fluxo-barra") === "solid") document.documentElement.dataset.bar = "solid" } catch {} }, [])
+  // modo Natal (dezembro até dia 6 de janeiro, ou o que estiver nos Ajustes)
+  const [natal, setNatal] = useState(false)
+  useEffect(() => {
+    const upd = () => setNatal(isNatal(snap.today))
+    upd(); window.addEventListener("fluxo:natal", upd)
+    return () => window.removeEventListener("fluxo:natal", upd)
+  }, [snap.today])
   const [agendaView, setAgendaView] = useState<AgendaView>("ritmo")
   const [jogo, setJogo] = useState(false)
+  const [seed, setSeed] = useState<string | undefined>(undefined)
   useEffect(() => {
     const open = () => setJogo(true)
+    const comprar = () => { setSeed("quero comprar "); setLancar(true) }
     window.addEventListener("fluxo:jogo", open)
-    return () => window.removeEventListener("fluxo:jogo", open)
+    window.addEventListener("fluxo:comprar", comprar)
+    return () => { window.removeEventListener("fluxo:jogo", open); window.removeEventListener("fluxo:comprar", comprar) }
   }, [])
   const goAgenda = (v: AgendaView) => { setAgendaView(v); setTab("agenda") }
   const [done, setDone] = useState<{ id: number; amount: number; kind: "income" | "expense"; label: string; parts: number } | null>(null)
@@ -124,9 +137,9 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
             </LayoutGroup>
           </motion.div>
           <div className="relative shrink-0">
-          <FluximetroBuddy ready={splash === false} hello={hello} snap={snap} a={a} />
+          <FluximetroBuddy ready={splash === false} hello={hello} snap={snap} a={a} natal={natal} />
           <motion.button layout initial={{ y: 80 }} animate={{ y: 0 }} transition={{ type: "spring", stiffness: 420, damping: 36, delay: 0.05 }} whileTap={{ scale: 0.9 }} onClick={() => setLancar(true)} aria-label="Lançar gasto"
-            className={`lg grid shrink-0 place-items-center rounded-full text-otan ${mini ? "size-[52px]" : "size-[64px]"}`}>
+            className={`lg-plus grid shrink-0 place-items-center rounded-full ${mini ? "size-[52px]" : "size-[64px]"}`}>
             <Plus size={28} strokeWidth={3.4} />
           </motion.button>
           </div>
@@ -134,9 +147,10 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
       </nav>
 
       <InstallGuide open={install.open} onClose={install.close} />
-      <AnimatePresence>{splash && <Splash key="splash" onDone={endSplash} />}</AnimatePresence>
+      <AnimatePresence>{splash && <Splash key="splash" onDone={endSplash} natal={natal} />}</AnimatePresence>
+      {natal && a.budget > 0 && a.free < 0 && <Neve />}
       <Jogo open={jogo} onClose={() => setJogo(false)} />
-      <Lancar open={lancar} onClose={() => setLancar(false)} snap={snap} a={a} onDone={(r) => {
+      <Lancar open={lancar} seed={seed} onClose={() => { setLancar(false); setSeed(undefined) }} snap={snap} a={a} onDone={(r) => {
         setDone({ ...r, id: Date.now() })
         const tight = r.kind === "expense" && a.budget > 0 && a.free - r.amount < 0
         setTimeout(() => reagir(falaDoLancamento(r.kind, r.label, tight, !fxPrefs.humor())), 900)

@@ -43,7 +43,7 @@ export function falaDoLancamento(kind: "income" | "expense", label: string, tigh
  * O Fluximetro morando em cima do botão +: cai do céu quando o app abre, balança as perninhas,
  * chama pra conhecer e reage ao que acontece no app.
  */
-export function FluximetroBuddy({ ready, hello, snap, a }: { ready: boolean; hello?: FxReaction | null; snap: Snapshot; a: Analysis }) {
+export function FluximetroBuddy({ ready, hello, snap, a, natal = false }: { ready: boolean; hello?: FxReaction | null; snap: Snapshot; a: Analysis; natal?: boolean }) {
   const reduced = !!useReducedMotion()
   const [landed, setLanded] = useState(false)
   const [state, setState] = useState<CofrinhoState>("normal")
@@ -95,12 +95,12 @@ export function FluximetroBuddy({ ready, hello, snap, a }: { ready: boolean; hel
   return (
     <>
       <motion.button type="button" onClick={tap} aria-label="Falar com o Fluximetro"
-        className="absolute bottom-[calc(100%-6px)] left-1/2 z-10 w-[58px] -translate-x-1/2"
+        className="absolute bottom-[calc(100%-20px)] left-1/2 z-10 w-[58px] -translate-x-1/2"
         initial={reduced ? { opacity: 0 } : { y: "-110vh", rotate: -25 }}
         animate={reduced ? { opacity: 1 } : { y: [null, 0, -26, 0], rotate: [null, 8, -4, 0], scaleX: [1, 1.14, 0.95, 1], scaleY: [1, 0.82, 1.06, 1] }}
         transition={reduced ? { duration: 0.3 } : { duration: 1.1, times: [0, 0.62, 0.8, 1], ease: ["easeIn", "easeOut", "easeIn"] }}
         onAnimationComplete={() => setLanded(true)} style={{ transformOrigin: "50% 100%" }}>
-        <Cofrinho state={state} swing follow label="" />
+        <Cofrinho state={state} swing follow label="" lights={natal} />
       </motion.button>
 
       <AnimatePresence>

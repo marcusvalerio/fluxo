@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useState, useTransition } from "react"
-import { Check, ChevronRight, Gamepad2, Gauge, MessageCircle, PiggyBank, Smile, KeyRound, Shield, Smartphone, LayoutGrid, LogOut, TrendingUp, Plus, RotateCcw, Sparkles } from "lucide-react"
+import { Check, ChevronRight, Crown, Gamepad2, PanelBottom, TreePine, Gauge, MessageCircle, PiggyBank, Smile, KeyRound, Shield, Smartphone, LayoutGrid, LogOut, TrendingUp, Plus, RotateCcw, Sparkles } from "lucide-react"
 import type { Bill, Snapshot } from "@/lib/types"
 import { brl, CATEGORIES, insights, int, type Analysis } from "@/lib/finance"
 import { labelMonth, relativeDay } from "@/lib/dates"
@@ -14,21 +14,20 @@ import { addBill, changePassword, deleteBill, logout, setLimit, toggleBill } fro
 import type { AgendaView, Tab } from "../fluxo-app"
 import { useRitmo } from "../ritmo"
 import { Cofrinho } from "../cofrinho"
+import { RetroCard } from "../retro"
+import { Planos } from "../planos"
+import { natalPref, setNatalPref, type NatalPref } from "@/lib/natal"
 import { fxPrefs } from "../fluximetro"
 import { PlanSheet } from "../plan-sheet"
-import { goalSplitOf } from "../plan-editor"
 
 const WEEK = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" })
 
 export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Analysis; go: (t: Tab) => void; goAgenda: (v: AgendaView) => void }) {
   const r = useRitmo(snap, a)
-  const open = snap.goals.filter((g) => g.saved < g.target)
-  const split = goalSplitOf(snap.space.plan, open)
-  const plan = snap.space.plan
-  const perGoal = (id: number) => { const i = open.findIndex((g) => g.id === id); return plan && plan.income > 0 && i >= 0 ? (plan.income * plan.save / 100) * split[i] / 100 : 0 }
   const [settings, setSettings] = useState(false)
   const [billSheet, setBillSheet] = useState(false)
   const [planOpen, setPlanOpen] = useState(false)
+  const [planosOpen, setPlanosOpen] = useState(false)
   const first = snap.space.name.split(" ")[0]
   const today = WEEK.format(new Date(snap.today + "T12:00:00Z"))
   const upcoming = snap.bills.filter((b) => !b.paid).sort((x, y) => x.dueDay - y.dueDay)
@@ -36,7 +35,6 @@ export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Ana
   const hs = health(snap, a)
   const paid = snap.bills.filter((b) => b.paid)
   const tips = insights(snap, a)
-  const goals = snap.goals.filter((g) => g.saved < g.target).slice(0, 2)
 
   return (
     <div className="px-4 pt-[max(52px,env(safe-area-inset-top))]">
@@ -54,18 +52,17 @@ export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Ana
         {/* Livre até o fim do mês */}
         <motion.div {...rise} transition={{ ...spring, delay: 0.05 }}><HeroCard snap={snap} a={a} score={hs.score} /></motion.div>
 
-        {/* recado do Fluximetro: a leitura mais importante do mês */}
-        {tips[0] && (
-          <motion.div {...rise} transition={{ ...spring, delay: 0.07 }}>
-            <button onClick={() => window.dispatchEvent(new Event("fluxo:conversa"))} className="flex w-full items-center gap-4 rounded-[26px] bg-card py-4 pl-3 pr-5 text-left">
-              <span className="w-[58px] shrink-0"><Cofrinho state={tips[0].tone === "warn" ? "apertado" : tips[0].tone === "good" ? "feliz" : "normal"} label="" /></span>
-              <span className="min-w-0 text-[14px] leading-snug text-smoke">
-                <span className="mb-1 block text-[11.5px] font-semibold uppercase tracking-[0.06em] text-faint">Fluximetro</span>
-                <b className="font-semibold text-ink">{tips[0].title}</b> {tips[0].text}
-              </span>
-            </button>
-          </motion.div>
-        )}
+        <RetroCard snap={snap} />
+
+        {/* recado do Fluximetro: a leitura mais importante do mês, e o atalho pra simular uma compra */}
+        <motion.div {...rise} transition={{ ...spring, delay: 0.07 }} className="flex items-center gap-4 rounded-[26px] bg-card py-4 pl-3 pr-5">
+          <button onClick={() => window.dispatchEvent(new Event("fluxo:conversa"))} aria-label="Conversar com o Fluximetro" className="w-[58px] shrink-0"><Cofrinho state={tips[0]?.tone === "warn" ? "apertado" : tips[0]?.tone === "good" ? "feliz" : "normal"} label="" /></button>
+          <span className="min-w-0 text-[14px] leading-snug text-smoke">
+            <span className="mb-1 block text-[11.5px] font-semibold text-faint">Fluximetro</span>
+            {tips[0] ? <><b className="font-semibold text-ink">{tips[0].title}</b> {tips[0].text}</> : "Tudo tranquilo por aqui. Eu aviso se algo mudar."}
+            <button onClick={() => window.dispatchEvent(new Event("fluxo:comprar"))} className="mt-2.5 block rounded-full bg-ink px-3.5 py-1.5 text-[12.5px] font-semibold text-cotton">Posso comprar algo?</button>
+          </span>
+        </motion.div>
 
         {/* atalhos pros gráficos da Agenda */}
         <motion.div {...rise} transition={{ ...spring, delay: 0.08 }} className="-mt-2 grid grid-cols-2 gap-3">
@@ -138,37 +135,6 @@ export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Ana
           </section>
         </motion.div>
 
-        {/* Metas */}
-        {goals.length > 0 && (
-          <motion.div {...rise} transition={{ ...spring, delay: 0.21 }}>
-            <div className="mb-3 flex items-center justify-between px-1">
-              <p className="ttl text-[17px]">Metas</p>
-              <button onClick={() => go("carteira")} className="text-[13px] font-semibold text-mute">Ver todas</button>
-            </div>
-            <section className="rounded-[23px] bg-card p-5">
-            <div className="space-y-4">
-              {goals.map((g, i) => {
-                const pct = Math.min(1, g.saved / g.target)
-                return (
-                  <div key={g.id}>
-                    <div className="flex items-baseline justify-between text-[14px]">
-                      <span>{g.name}</span>
-                      <span className="num text-[14px]">{Math.round(pct * 100)}%</span>
-                    </div>
-                    <div className="mt-1.5 flex h-2.5 gap-[2px]">
-                      {Array.from({ length: 30 }, (_, k) => (
-                        <span key={k} className="flex-1 rounded-[2px]" style={{ background: k < Math.round(pct * 30) ? (i === 0 ? "var(--c-ink)" : "#FF4E20") : "var(--c-cotton)" }} />
-                      ))}
-                    </div>
-                    <p className="mt-1 text-[12px] text-mute">{brl(g.saved, false)} de {brl(g.target, false)}{perGoal(g.id) > 0 && <> · recebe {brl(perGoal(g.id), false)} por mês</>}</p>
-                  </div>
-                )
-              })}
-            </div>
-            </section>
-          </motion.div>
-        )}
-
         {/* Recentes */}
         {snap.txs.length > 0 && (
           <motion.div {...rise} transition={{ ...spring, delay: 0.24 }}>
@@ -183,7 +149,8 @@ export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Ana
         )}
       </div>
 
-      <SettingsSheet key={settings ? "o" : "c"} open={settings} onClose={() => setSettings(false)} limit={snap.space.limit} email={snap.user.email} admin={snap.user.role === "admin"} name={snap.user.name} onPlan={() => { setSettings(false); setPlanOpen(true) }} />
+      <SettingsSheet key={settings ? "o" : "c"} open={settings} onClose={() => setSettings(false)} limit={snap.space.limit} email={snap.user.email} admin={snap.user.role === "admin"} name={snap.user.name} onPlan={() => { setSettings(false); setPlanOpen(true) }} onPlanos={() => { setSettings(false); setPlanosOpen(true) }} />
+      <Planos open={planosOpen} onClose={() => setPlanosOpen(false)} />
       <PlanSheet key={planOpen ? "po" : "pc"} open={planOpen} onClose={() => setPlanOpen(false)} snap={snap} />
       <BillSheet open={billSheet} onClose={() => setBillSheet(false)} />
     </div>
@@ -224,7 +191,11 @@ function PaidChip({ b }: { b: Bill }) {
   )
 }
 
-function SettingsSheet({ open, onClose, limit, email, admin, name, onPlan }: { open: boolean; onClose: () => void; limit: number; email: string; admin: boolean; name: string; onPlan: () => void }) {
+function SettingsSheet({ open, onClose, limit, email, admin, name, onPlan, onPlanos }: { open: boolean; onClose: () => void; limit: number; email: string; admin: boolean; name: string; onPlan: () => void; onPlanos: () => void }) {
+  const [bar, setBar] = useState(() => { try { return localStorage.getItem("fluxo-barra") === "solid" ? "solid" : "glass" } catch { return "glass" } })
+  const [natal, setNatal] = useState<NatalPref>(() => natalPref())
+  const toggleBar = () => { const v = bar === "solid" ? "glass" : "solid"; setBar(v); try { localStorage.setItem("fluxo-barra", v) } catch {}; if (v === "solid") document.documentElement.dataset.bar = "solid"; else delete document.documentElement.dataset.bar }
+  const nextNatal = () => { const v: NatalPref = natal === "auto" ? "on" : natal === "on" ? "off" : "auto"; setNatal(v); setNatalPref(v) }
   const [humor, setHumor] = useState(() => fxPrefs.humor())
   const [talk, setTalk] = useState(() => fxPrefs.talk())
   const [v, setV] = useState(limit ? String(limit) : "")
@@ -296,6 +267,15 @@ function SettingsSheet({ open, onClose, limit, email, admin, name, onPlan }: { o
             </button>
             <button className={row} onClick={() => { onClose(); window.dispatchEvent(new Event("fluxo:fluximetro")) }}>
               <Sparkles size={18} className="text-smoke" /><span className="flex-1">Conhecer o Fluximetro</span><ChevronRight size={16} className="text-faint" />
+            </button>
+            <button className={row} onClick={onPlanos}>
+              <Crown size={18} className="text-smoke" /><span className="flex-1">Assinatura</span><span className="text-[13px] text-mute">fase de testes</span><ChevronRight size={16} className="text-faint" />
+            </button>
+            <button className={row} role="switch" aria-checked={bar === "glass"} onClick={toggleBar}>
+              <PanelBottom size={18} className="text-smoke" /><span className="flex-1">Barra translúcida</span><Toggle on={bar === "glass"} />
+            </button>
+            <button className={row} onClick={nextNatal}>
+              <TreePine size={18} className="text-smoke" /><span className="flex-1">Modo Natal</span><span className="text-[13px] font-semibold text-mute">{natal === "auto" ? "Automático" : natal === "on" ? "Ligado" : "Desligado"}</span>
             </button>
             <button className={row} onClick={() => { onClose(); window.dispatchEvent(new Event("fluxo:jogo")) }}>
               <Gamepad2 size={18} className="text-smoke" /><span className="flex-1">Jogar com o Fluximetro</span><ChevronRight size={16} className="text-faint" />
