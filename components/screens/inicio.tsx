@@ -212,18 +212,11 @@ function SettingsSheet({ open, onClose, limit, email, admin, name, onPlan, onPla
     window.addEventListener("keydown", k)
     return () => window.removeEventListener("keydown", k)
   }, [open, onClose])
-  const row = "flex h-[52px] w-full items-center gap-3 px-4 text-left text-[15px]"
+  const row = "flex min-h-[52px] py-2.5 w-full items-center gap-3 px-4 text-left text-[15px]"
   return (
-    <AnimatePresence>
-      {open && (
-        <>
-          <motion.div className="fixed inset-0 z-40 bg-ink/10 backdrop-blur-[2px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
-          <motion.div role="dialog" aria-modal aria-label="Conta"
-            initial={{ opacity: 0, scale: 0.6, y: -10, filter: "blur(8px)" }} animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }} exit={{ opacity: 0, scale: 0.7, y: -8, filter: "blur(6px)" }}
-            transition={{ type: "spring", stiffness: 420, damping: 30 }}
-            style={{ transformOrigin: "calc(100% - 23px) -23px" }}
-            className="fixed right-4 border border-white/70 bg-paper/92 shadow-[inset_0_1px_1px_#fff,0_24px_60px_-12px_rgb(31_40_46/0.35)] backdrop-blur-2xl backdrop-saturate-150 top-[max(108px,calc(env(safe-area-inset-top)+108px))] z-50 w-[min(320px,calc(100vw-32px))] overflow-hidden rounded-[23px] bg-paper/80 sm:right-[max(16px,calc(50vw-224px))]">
-            <div className="flex items-center gap-3 border-b border-white/60 px-4 py-4">
+    <Sheet open={open} onClose={onClose} title="Ajustes">
+          <div className="overflow-hidden rounded-[23px] bg-card">
+            <div className="flex items-center gap-3 border-b border-cotton px-4 py-4">
               <span className="ttl grid size-11 place-items-center rounded-full bg-ink text-[16px] text-cotton">{name[0]?.toUpperCase()}</span>
               <div className="min-w-0"><p className="ttl truncate text-[16px]">{name}</p><p className="truncate text-[12px] text-mute">{email}</p></div>
             </div>
@@ -307,11 +300,9 @@ function SettingsSheet({ open, onClose, limit, email, admin, name, onPlan, onPla
               <MessageCircle size={18} className="text-smoke" /><span className="flex-1">Comentar lançamentos</span><Toggle on={talk} />
             </button>
             {admin && <a href="/admin" className={row}><Shield size={18} className="text-smoke" /><span className="flex-1">Painel admin</span><ChevronRight size={16} className="text-faint" /></a>}
-            <button onClick={() => start(() => logout())} className={`${row} border-t border-white/60 text-gravy`}><LogOut size={18} /><span>Sair</span></button>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+            <button onClick={() => start(() => logout())} className={`${row} border-t border-cotton text-gravy`}><LogOut size={18} /><span>Sair</span></button>
+          </div>
+    </Sheet>
   )
 }
 

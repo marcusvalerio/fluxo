@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef } from "react"
 import { useReducedMotion } from "framer-motion"
 import { lightsBack, lightsFront } from "@/lib/natal"
-import { MOEDA, COFRINHO_COLOR, COFRINHO_DARK, COFRINHO_LEGS, SHAPES, type CofrinhoState, type ShapeSpec } from "@/lib/cofrinho"
+import { COFRE, COFRINHO_COLOR, COFRINHO_DARK, COFRINHO_LEGS, SHAPES, type CofrinhoState, type ShapeSpec } from "@/lib/cofrinho"
 
 type Interp = (t: number) => string
 type Flubber = {
@@ -40,10 +40,12 @@ export interface CofrinhoProps {
   label?: string
   /** Enrolado no pisca-pisca (modo Natal). */
   lights?: boolean
+  /** Perninhas: só quando ele está sentado em cima do +. */
+  legs?: boolean
 }
 
 /** O Fluximetro. Troca de forma de um jeito contínuo, sem saltos, quando `state` muda. */
-export function Cofrinho({ state = "normal", swing = false, follow = false, className, label = "Fluximetro", lights = false }: CofrinhoProps) {
+export function Cofrinho({ state = "normal", swing = false, follow = false, className, label = "Fluximetro", lights = false, legs: withLegs = false }: CofrinhoProps) {
   const reduced = !!useReducedMotion()
   const svg = useRef<SVGSVGElement>(null)
   const body = useRef<SVGGElement>(null)
@@ -126,7 +128,7 @@ export function Cofrinho({ state = "normal", swing = false, follow = false, clas
     open.current!.style.opacity = s.eyes === "open" || s.eyes === "tight" ? "1" : "0"
     happy.current!.style.opacity = s.eyes === "happy" ? "1" : "0"
     open.current!.querySelectorAll("ellipse").forEach((el) => el.setAttribute("ry", s.eyes === "tight" ? "3.5" : "6.5"))
-    legs.current!.style.opacity = s.legs ? "1" : "0"
+    legs.current!.style.opacity = s.legs && withLegs ? "1" : "0"
 
     // moeda caindo na fenda
     const cn = coin.current!
@@ -171,15 +173,15 @@ export function Cofrinho({ state = "normal", swing = false, follow = false, clas
     })
     cur.current = target
     return () => clearTimeout(decoTimer)
-  }, [state, reduced])
+  }, [state, reduced, withLegs])
 
   return (
     <svg ref={svg} viewBox="-10 -10 120 120" role="img" aria-label={label} className={className} style={{ overflow: "visible", display: "block" }}>
-      <g ref={legs} className={swing && !reduced ? "cf-swing" : undefined} style={{ transition: "opacity .35s ease" }}>
+      <g ref={legs} className={swing && !reduced ? "cf-swing" : undefined} style={{ opacity: withLegs ? 1 : 0, transition: "opacity .35s ease" }}>
         <path className="cf-l" d="M33 72H41V80A3 3 0 0 1 38 83H36A3 3 0 0 1 33 80Z" fill={COFRINHO_LEGS} />
         <path className="cf-r" d="M59 72H67V80A3 3 0 0 1 64 83H62A3 3 0 0 1 59 80Z" fill={COFRINHO_LEGS} />
       </g>
-      {lights && <g dangerouslySetInnerHTML={{ __html: lightsBack(50, 46, 32) }} />}
+      {lights && <g dangerouslySetInnerHTML={{ __html: lightsBack(50, 47, 34) }} />}
       {/* filtro líquido: as partes se fundem como gosma durante a transformação, sem linhas de corte */}
       <defs>
         <filter id={gooId} x="-20%" y="-20%" width="140%" height="140%" colorInterpolationFilters="sRGB">
@@ -187,8 +189,8 @@ export function Cofrinho({ state = "normal", swing = false, follow = false, clas
           <feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9" />
         </filter>
       </defs>
-      <g filter={`url(#${gooId})`}><g ref={body}><path d={MOEDA} fill={COFRINHO_COLOR} /></g></g>
-      <g ref={deco} className="text-ink" dangerouslySetInnerHTML={{ __html: decoMarkup("ring") }} />
+      <g filter={`url(#${gooId})`}><g ref={body}><path d={COFRE} fill={COFRINHO_COLOR} /></g></g>
+      <g ref={deco} className="text-ink" dangerouslySetInnerHTML={{ __html: decoMarkup("slot") }} />
       <g ref={eyes} style={{ transition: "transform .68s cubic-bezier(.65,0,.35,1), opacity .3s ease" }}>
         <g ref={open} style={{ transition: "opacity .3s ease" }}>
           <ellipse cx="40" cy="46" rx="6" ry="6.5" fill="#fff" />
@@ -200,7 +202,7 @@ export function Cofrinho({ state = "normal", swing = false, follow = false, clas
           <path d="M34 48q6-8 12 0M54 48q6-8 12 0" stroke="#fff" strokeWidth="3.6" fill="none" strokeLinecap="round" />
         </g>
       </g>
-      {lights && <g dangerouslySetInnerHTML={{ __html: lightsFront(50, 46, 32) }} />}
+      {lights && <g dangerouslySetInnerHTML={{ __html: lightsFront(50, 47, 34) }} />}
       <g ref={coin} style={{ opacity: 0 }}>
         <circle cx="50" cy="0" r="7" fill="#FFC23D" stroke="#E2A21A" strokeWidth="2" />
       </g>

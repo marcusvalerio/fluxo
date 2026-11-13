@@ -4,14 +4,14 @@ import { useEffect, useRef } from "react"
 import { useReducedMotion } from "framer-motion"
 import { BULBS, bulb, lightsBack, lightsFront } from "@/lib/natal"
 
-// moeda do Fluximetro desenhada em SVG puro (pra animar quadro a quadro na abertura)
+// cofrinho do Fluximetro desenhado em SVG puro (pra animar quadro a quadro na abertura)
 function coinSvg(happy: boolean, t: number) {
   const eyes = happy
     ? `<path d="M33 46q6-8 12 0M55 46q6-8 12 0" stroke="#fff" stroke-width="3.6" fill="none" stroke-linecap="round"/>`
     : `<ellipse cx="40" cy="46" rx="6" ry="6.5" fill="#fff"/><ellipse cx="60" cy="46" rx="6" ry="6.5" fill="#fff"/><circle cx="40" cy="48" r="2.8" fill="#1F282E"/><circle cx="60" cy="48" r="2.8" fill="#1F282E"/>`
-  const sw = Math.sin(t * 6) * 25
-  return `<rect x="35" y="72" width="8" height="13" rx="4" fill="#E2401C" transform="rotate(${sw} 39 72)"/><rect x="57" y="72" width="8" height="13" rx="4" fill="#E2401C" transform="rotate(${-sw} 61 72)"/>
-  ${lightsBack(50, 46, 32)}<circle cx="50" cy="48" r="32" fill="#C7361A"/><circle cx="50" cy="46" r="32" fill="#FF4E20"/><circle cx="50" cy="46" r="26" fill="none" stroke="#B83312" stroke-opacity=".5" stroke-width="2.4"/>${eyes}${lightsFront(50, 46, 32, 1)}`
+  void t
+  const body = "M50 18C72 18 86 31 86 48C86 63 74 74 54 75H46C26 74 14 63 14 48C14 31 28 18 50 18Z"
+  return `${lightsBack(50, 47, 34)}<path d="${body}" fill="#C7361A" transform="translate(0 2)"/><path d="${body}" fill="#FF4E20"/><rect x="40" y="23" width="20" height="4" rx="2" fill="#B83312"/>${eyes}${lightsFront(50, 47, 34, 1)}`
 }
 
 /**
