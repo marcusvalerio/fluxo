@@ -14,12 +14,17 @@ export const monthKey = () => todayISO().slice(0, 7)
 const num = (v: unknown) => Number(v)
 const day = (v: unknown) => (v instanceof Date ? v.toISOString().slice(0, 10) : String(v).slice(0, 10))
 
+// a coluna do plano é criada na primeira vez que o app precisa dela
+let planColumn: Promise<unknown> | null = null
+export const ensurePlanColumn = () => (planColumn ??= sql`alter table spaces add column if not exists plan jsonb`.catch((e) => { planColumn = null; throw e }))
+
 export async function loadSnapshot(): Promise<Snapshot | null> {
   const user = await currentUser()
   if (!user) return null
   const id = user.spaceId
+  await ensurePlanColumn()
   const [spaces, txs, goals, bills, cards, subs, limits] = await Promise.all([
-    sql`select id, name, monthly_limit, onboarded from spaces where id = ${id}`,
+    sql`select id, name, monthly_limit, onboarded, plan from spaces where id = ${id}`,
     sql`select id, kind, amount, description, category, occurred_on, card_id, installment_no, installment_total from transactions
         where space_id = ${id} and occurred_on > now() - interval '400 days'
         order by occurred_on desc, id desc`,
@@ -33,7 +38,7 @@ export async function loadSnapshot(): Promise<Snapshot | null> {
   if (!s) return null
   const mk = monthKey()
   return {
-    space: { id: s.id, name: s.name, limit: num(s.monthly_limit), onboarded: s.onboarded },
+    space: { id: s.id, name: s.name, limit: num(s.monthly_limit), onboarded: s.onboarded, plan: s.plan ?? null },
     user: { name: user.name, email: user.email, role: user.role, mustChangePassword: user.mustChangePassword },
     txs: txs.map((t) => ({
       id: num(t.id), kind: t.kind, amount: num(t.amount), description: t.description,

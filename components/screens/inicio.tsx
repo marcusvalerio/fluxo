@@ -2,23 +2,33 @@
 
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useState, useTransition } from "react"
-import { ArrowDownLeft, ArrowUpRight, Check, ChevronRight, Gauge, KeyRound, Shield, Smartphone, Lightbulb, LogOut, Plus, RotateCcw, TriangleAlert, Sparkles } from "lucide-react"
+import { Check, ChevronRight, Gamepad2, Gauge, MessageCircle, PiggyBank, Smile, KeyRound, Shield, Smartphone, LayoutGrid, LogOut, TrendingUp, Plus, RotateCcw, Sparkles } from "lucide-react"
 import type { Bill, Snapshot } from "@/lib/types"
-import { brl, CATEGORIES, insights, int, lastWeek, type Analysis } from "@/lib/finance"
+import { brl, CATEGORIES, insights, int, type Analysis } from "@/lib/finance"
 import { labelMonth, relativeDay } from "@/lib/dates"
 import { BigMoney, field, Label, Primary, rise, Sheet, spring } from "../ui"
 import { TxList } from "../tx-list"
-import { HealthCard } from "../health-card"
 import { HeroCard } from "../hero-card"
 import { health } from "@/lib/plan"
 import { addBill, changePassword, deleteBill, logout, setLimit, toggleBill } from "@/app/actions"
-import type { Tab } from "../fluxo-app"
+import type { AgendaView, Tab } from "../fluxo-app"
+import { useRitmo } from "../ritmo"
+import { Cofrinho } from "../cofrinho"
+import { fxPrefs } from "../fluximetro"
+import { PlanSheet } from "../plan-sheet"
+import { goalSplitOf } from "../plan-editor"
 
 const WEEK = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" })
 
-export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go: (t: Tab) => void }) {
+export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Analysis; go: (t: Tab) => void; goAgenda: (v: AgendaView) => void }) {
+  const r = useRitmo(snap, a)
+  const open = snap.goals.filter((g) => g.saved < g.target)
+  const split = goalSplitOf(snap.space.plan, open)
+  const plan = snap.space.plan
+  const perGoal = (id: number) => { const i = open.findIndex((g) => g.id === id); return plan && plan.income > 0 && i >= 0 ? (plan.income * plan.save / 100) * split[i] / 100 : 0 }
   const [settings, setSettings] = useState(false)
   const [billSheet, setBillSheet] = useState(false)
+  const [planOpen, setPlanOpen] = useState(false)
   const first = snap.space.name.split(" ")[0]
   const today = WEEK.format(new Date(snap.today + "T12:00:00Z"))
   const upcoming = snap.bills.filter((b) => !b.paid).sort((x, y) => x.dueDay - y.dueDay)
@@ -26,9 +36,6 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
   const hs = health(snap, a)
   const paid = snap.bills.filter((b) => b.paid)
   const tips = insights(snap, a)
-  const week = lastWeek(snap)
-  const weekTotal = week.reduce((x, d) => x + d.total, 0)
-  const weekPeak = Math.max(1, ...week.map((d) => d.total))
   const goals = snap.goals.filter((g) => g.saved < g.target).slice(0, 2)
 
   return (
@@ -43,97 +50,73 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
         </button>
       </motion.header>
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-7">
         {/* Livre até o fim do mês */}
         <motion.div {...rise} transition={{ ...spring, delay: 0.05 }}><HeroCard snap={snap} a={a} score={hs.score} /></motion.div>
 
-        {/* Saúde financeira */}
-        <motion.div {...rise} transition={{ ...spring, delay: 0.07 }}><HealthCard h={hs} /></motion.div>
-
-        {/* Entrou / saiu / semana */}
-        <motion.div {...rise} transition={{ ...spring, delay: 0.08 }} className="grid grid-cols-2 gap-3">
-          <div className="rounded-[23px] bg-card p-4">
-            <span className="flex items-center gap-1.5 text-[13px] text-mute"><span className="grid size-6 place-items-center rounded-full bg-otan/12 text-gravy"><ArrowDownLeft size={13} /></span>Entrou</span>
-            <p className="num mt-2 text-[22px] leading-none">{brl(a.income, false)}</p>
-            <p className="mt-1 text-[11px] text-mute">neste mês</p>
-          </div>
-          <div className="rounded-[23px] bg-card p-4">
-            <span className="flex items-center gap-1.5 text-[13px] text-mute"><span className="grid size-6 place-items-center rounded-full bg-cotton text-smoke"><ArrowUpRight size={13} /></span>Saiu</span>
-            <p className="num mt-2 text-[22px] leading-none">{brl(a.expense, false)}</p>
-            <p className="mt-1 text-[11px] text-mute">{a.income > 0 ? `${Math.round((a.expense / a.income) * 100)}% do que entrou` : "neste mês"}</p>
-          </div>
-          <div className="col-span-2 flex items-end gap-4 rounded-[23px] bg-card p-4">
-            <div className="shrink-0">
-              <p className="text-[13px] text-mute">Últimos 7 dias</p>
-              <p className="num mt-1 text-[22px] leading-none">{brl(weekTotal, false)}</p>
-              <p className="mt-1 text-[11px] text-mute">média R$ {int(weekTotal / 7)}/dia</p>
-            </div>
-            <div className="flex h-[58px] flex-1 items-end gap-1.5">
-              {week.map((d, i) => (
-                <div key={d.iso} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
-                  <motion.span initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.35 + i * 0.04, type: "spring", stiffness: 200, damping: 16 }}
-                    className="w-[9px] origin-bottom rounded-full" style={{ height: `${Math.max(10, (d.total / weekPeak) * 100)}%`, background: i === 6 ? "#FF4E20" : d.total > a.dailyCap && a.dailyCap > 0 ? "var(--c-gravy)" : d.total ? "var(--c-ink)" : "var(--c-cotton)" }} />
-                  <span className="text-[9px] uppercase text-faint">{["D","S","T","Q","Q","S","S"][new Date(d.iso + "T12:00:00Z").getUTCDay()]}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Leituras */}
-        {tips.length > 0 && (
-          <motion.div {...rise} transition={{ ...spring, delay: 0.1 }} className="no-scrollbar -mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4">
-            {tips.map((t, i) => {
-              const Icon = t.tone === "warn" ? TriangleAlert : t.tone === "good" ? Sparkles : Lightbulb
-              return (
-                <motion.div key={i} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ ...spring, delay: 0.15 + i * 0.05 }}
-                  className={`w-[calc(50%-6px)] shrink-0 snap-start rounded-[23px] p-4 ${t.tone === "warn" ? "bg-ink text-cotton" : "bg-card"}`}>
-                  <span className={`grid size-8 place-items-center rounded-full ${t.tone === "warn" ? "bg-otan text-white" : t.tone === "good" ? "bg-otan/12 text-gravy" : "bg-cotton text-smoke"}`}><Icon size={15} /></span>
-                  <p className="ttl mt-3 text-[17px] leading-tight">{t.title}</p>
-                  <p className={`mt-1 text-[13px] leading-snug ${t.tone === "warn" ? "text-[var(--c-on-ink-2)]" : "text-smoke"}`}>{t.text}</p>
-                </motion.div>
-              )
-            })}
+        {/* recado do Fluximetro: a leitura mais importante do mês */}
+        {tips[0] && (
+          <motion.div {...rise} transition={{ ...spring, delay: 0.07 }}>
+            <button onClick={() => window.dispatchEvent(new Event("fluxo:fluximetro"))} className="flex w-full items-center gap-4 rounded-[26px] bg-card py-4 pl-3 pr-5 text-left">
+              <span className="w-[58px] shrink-0"><Cofrinho state={tips[0].tone === "warn" ? "apertado" : tips[0].tone === "good" ? "feliz" : "normal"} label="" /></span>
+              <span className="min-w-0 text-[14px] leading-snug text-smoke">
+                <span className="mb-1 block text-[11.5px] font-semibold uppercase tracking-[0.06em] text-faint">Fluximetro</span>
+                <b className="font-semibold text-ink">{tips[0].title}</b> {tips[0].text}
+              </span>
+            </button>
           </motion.div>
         )}
 
-        {/* Para onde foi */}
-        <motion.div {...rise} transition={{ ...spring, delay: 0.12 }}>
-          <div className="mb-3 flex items-center justify-between px-1">
-            <p className="ttl text-[17px]">Para onde foi</p>
-            <button onClick={() => go("fluxo")} className="text-[13px] font-semibold text-mute">Ver fluxo</button>
+        {/* atalhos pros gráficos da Agenda */}
+        <motion.div {...rise} transition={{ ...spring, delay: 0.08 }} className="-mt-2 grid grid-cols-2 gap-3">
+          {([["ritmo", "Ritmo do mês", r.hitDay !== null && a.budget > 0 ? `teto no dia ${r.hitDay}` : "dentro do teto", TrendingUp], ["dia", "Gastos por dia", `${brl(r.last7, false)} na semana`, LayoutGrid]] as const).map(([k, t, sub, Icon]) => (
+            <motion.button key={k} whileTap={{ scale: 0.97 }} onClick={() => goAgenda(k)} className="flex items-center gap-2.5 rounded-full bg-card py-2 pl-2 pr-4 text-left">
+              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-otan/12 text-otan"><Icon size={17} /></span>
+              <span className="min-w-0"><b className="block truncate text-[13px] font-semibold">{t}</b><span className="block truncate text-[11.5px] text-mute">{sub}</span></span>
+            </motion.button>
+          ))}
+        </motion.div>
+
+        {/* Entrou / saiu */}
+        <motion.div {...rise} transition={{ ...spring, delay: 0.09 }} className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-3.5 rounded-[26px] bg-card p-5">
+            <span className="flex items-start justify-between gap-2 text-[13.5px] text-mute">Entrou
+<span className="text-[11.5px]">neste mês</span></span>
+            <p className="num text-[24px] leading-none">{brl(a.income, false)}</p>
           </div>
-          <section className="rounded-[23px] bg-card p-5">
-          <p className="num text-[30px] leading-none">{brl(a.expense, false)}</p>
-          {a.categories.length === 0 ? (
-            <p className="mt-4 text-[14px] text-mute">Nenhum gasto este mês ainda.</p>
-          ) : (
-            <>
-              <div className="mt-4 flex h-2.5 gap-[3px] overflow-hidden rounded-full">
-                {a.categories.map((c, i) => (
-                  <motion.span key={c.name} initial={{ flexGrow: 0 }} animate={{ flexGrow: c.share }} transition={{ delay: 0.3 + i * 0.06, type: "spring", stiffness: 70, damping: 16 }}
-                    className="basis-0" style={{ background: c.color }} />
-                ))}
-              </div>
-              <div className="mt-[18px] flex flex-col gap-3.5">
-                {a.categories.map((c, i) => (
-                  <div key={c.name}>
-                    <div className="mb-1.5 flex items-baseline justify-between text-[14px]">
-                      <span className="flex items-center gap-2"><span className="size-2 rounded-[2px]" style={{ background: c.color }} />{c.name}</span>
-                      <span><span className="num text-[15px]">{brl(c.value, false)}</span><span className="text-[12px] text-mute">{snap.limits[c.name] ? ` de ${brl(snap.limits[c.name], false)}` : ` · ${Math.round(c.share * 100)}%`}</span></span>
+          <div className="flex flex-col gap-3.5 rounded-[26px] bg-card p-5">
+            <span className="flex items-start justify-between gap-2 text-[13.5px] text-mute">Saiu
+              {a.income > 0 && <span className="rounded-full bg-ink px-2.5 py-1 text-[11.5px] font-semibold text-cotton">{Math.round((a.expense / a.income) * 100)}%</span>}</span>
+            <p className="num text-[24px] leading-none">{brl(a.expense, false)}</p>
+          </div>
+        </motion.div>
+
+        {/* Para onde foi: colunas por categoria */}
+        <motion.div {...rise} transition={{ ...spring, delay: 0.12 }}>
+          <section className="rounded-[26px] bg-card p-5">
+            <div className="flex items-baseline justify-between text-[14px] text-mute"><span>Para onde foi</span><button onClick={() => go("fluxo")} className="font-semibold">Ver fluxo</button></div>
+            <p className="num mt-2.5 text-[34px] leading-none">{brl(a.expense, false)}</p>
+            {a.categories.length === 0 ? <p className="mt-4 text-[14px] text-mute">Nenhum gasto este mês ainda.</p> : (
+              <div className="mt-4 grid gap-2" style={{ gridTemplateColumns: `repeat(${a.categories.length}, minmax(0,1fr))` }}>
+                {a.categories.map((c, i) => {
+                  const h = Math.max(22, (c.value / a.categories[0].value) * 92)
+                  const top = i === 0
+                  const hot = c.prev > 0 && a.dayOfMonth >= 8 && c.value > c.prev * (a.dayOfMonth / a.dim) * 1.3
+                  return (
+                    <div key={c.name} className="flex flex-col items-center gap-2">
+                      <span className={`text-[11.5px] ${hot ? "font-semibold text-gravy" : "text-mute"}`}>{Math.round(c.share * 100)}%</span>
+                      <div className="relative h-[120px] w-full overflow-hidden rounded-[14px] bg-paper">
+                        <motion.div className="absolute inset-x-0 bottom-0 origin-bottom rounded-[12px]" initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.3 + i * 0.06, type: "spring", stiffness: 160, damping: 20 }}
+                          style={{ height: `${h}%`, background: top ? "linear-gradient(180deg,#FF8A63,#FF4E20)" : "repeating-linear-gradient(-45deg,#FFB89E 0 2px,transparent 2px 6px),#FFE1D6" }} />
+                        <span className={`num absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] shadow-[0_1px_3px_rgb(0_0_0/0.08)] ${top ? "bg-ink text-cotton" : "bg-card text-ink"}`}
+                          style={{ bottom: `calc(${h}% - 26px)` }}>{int(c.value)}</span>
+                      </div>
+                      <span className={`max-w-full truncate text-[12px] ${top ? "font-semibold text-ink" : "text-mute"}`}>{c.name}</span>
                     </div>
-                    <div className="hatch h-2 overflow-hidden rounded">
-                      <motion.div className="h-full origin-left rounded" style={{ background: c.color, width: `${(c.value / a.categories[0].value) * 100}%` }}
-                        initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.35 + i * 0.06, duration: 1, ease: [0.2, 0.9, 0.2, 1] }} />
-                    </div>
-                    {c.prev > 0 && a.dayOfMonth >= 8 && c.value > c.prev * (a.dayOfMonth / a.dim) * 1.3 && (
-                      <p className="mt-1.5 text-[12px] text-gravy">Acima do ritmo do mês passado.</p>
-                    )}
-                  </div>
-                ))}
+                  )
+                })}
               </div>
-            </>
-          )}
+            )}
           </section>
         </motion.div>
 
@@ -177,7 +160,7 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
                         <span key={k} className="flex-1 rounded-[2px]" style={{ background: k < Math.round(pct * 30) ? (i === 0 ? "var(--c-ink)" : "#FF4E20") : "var(--c-cotton)" }} />
                       ))}
                     </div>
-                    <p className="mt-1 text-[12px] text-mute">{brl(g.saved, false)} de {brl(g.target, false)}</p>
+                    <p className="mt-1 text-[12px] text-mute">{brl(g.saved, false)} de {brl(g.target, false)}{perGoal(g.id) > 0 && <> · recebe {brl(perGoal(g.id), false)} por mês</>}</p>
                   </div>
                 )
               })}
@@ -200,7 +183,8 @@ export function InicioScreen({ snap, a, go }: { snap: Snapshot; a: Analysis; go:
         )}
       </div>
 
-      <SettingsSheet key={settings ? "o" : "c"} open={settings} onClose={() => setSettings(false)} limit={snap.space.limit} email={snap.user.email} admin={snap.user.role === "admin"} name={snap.user.name} />
+      <SettingsSheet key={settings ? "o" : "c"} open={settings} onClose={() => setSettings(false)} limit={snap.space.limit} email={snap.user.email} admin={snap.user.role === "admin"} name={snap.user.name} onPlan={() => { setSettings(false); setPlanOpen(true) }} />
+      <PlanSheet key={planOpen ? "po" : "pc"} open={planOpen} onClose={() => setPlanOpen(false)} snap={snap} />
       <BillSheet open={billSheet} onClose={() => setBillSheet(false)} />
     </div>
   )
@@ -240,7 +224,9 @@ function PaidChip({ b }: { b: Bill }) {
   )
 }
 
-function SettingsSheet({ open, onClose, limit, email, admin, name }: { open: boolean; onClose: () => void; limit: number; email: string; admin: boolean; name: string }) {
+function SettingsSheet({ open, onClose, limit, email, admin, name, onPlan }: { open: boolean; onClose: () => void; limit: number; email: string; admin: boolean; name: string; onPlan: () => void }) {
+  const [humor, setHumor] = useState(() => fxPrefs.humor())
+  const [talk, setTalk] = useState(() => fxPrefs.talk())
   const [v, setV] = useState(limit ? String(limit) : "")
   const [cur, setCur] = useState("")
   const [nxt, setNxt] = useState("")
@@ -269,6 +255,9 @@ function SettingsSheet({ open, onClose, limit, email, admin, name }: { open: boo
               <div className="min-w-0"><p className="ttl truncate text-[16px]">{name}</p><p className="truncate text-[12px] text-mute">{email}</p></div>
             </div>
 
+            <button className={row} onClick={onPlan}>
+              <PiggyBank size={18} className="text-smoke" /><span className="flex-1">Seu plano</span><span className="text-[13px] text-mute">guardar e metas</span><ChevronRight size={16} className="text-faint" />
+            </button>
             <button className={row} onClick={() => setPanel(panel === "teto" ? null : "teto")} aria-expanded={panel === "teto"}>
               <Gauge size={18} className="text-smoke" /><span className="flex-1">Teto do mês</span>
               <span className="num text-[14px] text-mute">{limit ? brl(limit, false) : "—"}</span>
@@ -306,8 +295,16 @@ function SettingsSheet({ open, onClose, limit, email, admin, name }: { open: boo
               <Smartphone size={18} className="text-smoke" /><span className="flex-1">Instalar no iPhone</span><ChevronRight size={16} className="text-faint" />
             </button>
             <button className={row} onClick={() => { onClose(); window.dispatchEvent(new Event("fluxo:fluximetro")) }}>
-              <Sparkles size={18} className="text-smoke" /><span className="flex-1">Conhecer o Fluximetro</span>
-              <span className="rounded-full bg-otan/12 px-2 py-0.5 text-[11px] font-semibold text-gravy">Em breve</span>
+              <Sparkles size={18} className="text-smoke" /><span className="flex-1">Conhecer o Fluximetro</span><ChevronRight size={16} className="text-faint" />
+            </button>
+            <button className={row} onClick={() => { onClose(); window.dispatchEvent(new Event("fluxo:jogo")) }}>
+              <Gamepad2 size={18} className="text-smoke" /><span className="flex-1">Jogar com o Fluximetro</span><ChevronRight size={16} className="text-faint" />
+            </button>
+            <button className={row} role="switch" aria-checked={humor} onClick={() => { fxPrefs.setHumor(!humor); setHumor(!humor) }}>
+              <Smile size={18} className="text-smoke" /><span className="flex-1">Fluximetro bem-humorado</span><Toggle on={humor} />
+            </button>
+            <button className={row} role="switch" aria-checked={talk} onClick={() => { fxPrefs.setTalk(!talk); setTalk(!talk) }}>
+              <MessageCircle size={18} className="text-smoke" /><span className="flex-1">Comentar lançamentos</span><Toggle on={talk} />
             </button>
             {admin && <a href="/admin" className={row}><Shield size={18} className="text-smoke" /><span className="flex-1">Painel admin</span><ChevronRight size={16} className="text-faint" /></a>}
             <button onClick={() => start(() => logout())} className={`${row} border-t border-white/60 text-gravy`}><LogOut size={18} /><span>Sair</span></button>
@@ -343,5 +340,13 @@ function BillSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
         <div className="pt-2"><Primary type="submit" disabled={pending}>{pending ? "Salvando…" : "Adicionar"}</Primary></div>
       </form>
     </Sheet>
+  )
+}
+
+function Toggle({ on }: { on: boolean }) {
+  return (
+    <span className={`relative h-[26px] w-[44px] shrink-0 rounded-full transition-colors ${on ? "bg-otan" : "bg-sand-2"}`}>
+      <span className={`absolute top-[3px] size-5 rounded-full bg-white shadow transition-transform ${on ? "translate-x-[21px]" : "translate-x-[3px]"}`} />
+    </span>
   )
 }

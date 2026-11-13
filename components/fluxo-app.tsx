@@ -2,7 +2,7 @@
 
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion"
 import dynamic from "next/dynamic"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { BarChart3, CalendarDays, Check, House, Plus, Wallet } from "lucide-react"
 import type { Snapshot } from "@/lib/types"
 import { analyze } from "@/lib/finance"
@@ -13,11 +13,17 @@ import { CarteiraScreen } from "./screens/carteira"
 import { Lancar } from "./lancar"
 import { InstallGuide, useInstallPrompt } from "./install-guide"
 
+import { Splash } from "./splash"
+import { falaDoLancamento, fxPrefs, reagir, type FxReaction } from "./fluximetro"
+
 // o mascote só carrega no navegador e fora do caminho da primeira pintura
-const FluximetroIntro = dynamic(() => import("./fluximetro-intro").then((m) => m.FluximetroIntro), { ssr: false })
-const INTRO_KEY = "fluxo-fluximetro-intro"
+const FluximetroBuddy = dynamic(() => import("./fluximetro").then((m) => m.FluximetroBuddy), { ssr: false })
+// guardado em memória: zera a cada vez que o app é aberto de verdade (sessionStorage sobrevivia no PWA do iPhone)
+let splashShown = false
+const Jogo = dynamic(() => import("./jogo").then((m) => m.Jogo), { ssr: false })
 
 export type Tab = "inicio" | "fluxo" | "agenda" | "carteira"
+export type AgendaView = "ritmo" | "dia"
 const TABS: { id: Tab; label: string; icon: typeof House }[] = [
   { id: "inicio", label: "Início", icon: House },
   { id: "fluxo", label: "Fluxo", icon: BarChart3 },
@@ -29,19 +35,18 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
   const [tab, setTab] = useState<Tab>("inicio")
   const [lancar, setLancar] = useState(false)
   const install = useInstallPrompt()
-  const [intro, setIntro] = useState(false)
-  // o Fluximetro se apresenta uma vez a cada vez que o app é aberto; "Conhecer o Fluximetro" nos Ajustes chama de novo
+  // abertura com o logo uma vez a cada vez que o app é aberto; depois o Fluximetro cai em cima do +
+  const [splash, setSplash] = useState<boolean | null>(null)
+  useEffect(() => { setSplash(!splashShown); splashShown = true }, [])
+  const endSplash = useCallback(() => setSplash(false), [])
+  const [agendaView, setAgendaView] = useState<AgendaView>("ritmo")
+  const [jogo, setJogo] = useState(false)
   useEffect(() => {
-    let seen = false
-    try { seen = sessionStorage.getItem(INTRO_KEY) === "1" } catch {}
-    if (!seen) {
-      setIntro(true)
-      try { sessionStorage.setItem(INTRO_KEY, "1") } catch {}
-    }
-    const open = () => setIntro(true)
-    window.addEventListener("fluxo:fluximetro", open)
-    return () => window.removeEventListener("fluxo:fluximetro", open)
+    const open = () => setJogo(true)
+    window.addEventListener("fluxo:jogo", open)
+    return () => window.removeEventListener("fluxo:jogo", open)
   }, [])
+  const goAgenda = (v: AgendaView) => { setAgendaView(v); setTab("agenda") }
   const [done, setDone] = useState<{ id: number; amount: number; kind: "income" | "expense"; label: string; parts: number } | null>(null)
   useEffect(() => {
     if (!done) return
@@ -49,6 +54,13 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
     return () => clearTimeout(t)
   }, [done])
   const a = useMemo(() => analyze(snap), [snap])
+  // recado do Fluximetro ao abrir: conta vencendo ou mês apertado
+  const hello = useMemo<FxReaction | null>(() => {
+    if (a.budget > 0 && a.free < 0) return { state: "apertado", text: "O mês sentou em mim. Segura os gastos até o próximo salário?", ms: 3200 }
+    const soon = snap.bills.filter((b) => !b.paid && b.dueDay >= a.dayOfMonth && b.dueDay - a.dayOfMonth <= 3).sort((x, y) => x.dueDay - y.dueDay)[0]
+    if (soon) return { state: "conta", text: soon.dueDay === a.dayOfMonth ? `${soon.name} vence hoje. Já tá anotado aqui na testa.` : `${soon.name} vence dia ${soon.dueDay}. Já tá anotado aqui na testa.`, ms: 3200 }
+    return null
+  }, [a, snap.bills])
 
   useEffect(() => { window.scrollTo({ top: 0 }); setMini(false) }, [tab])
   // iOS 27: a barra encolhe ao rolar para baixo e volta ao subir
@@ -75,14 +87,13 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
 
   return (
     <div className="relative mx-auto min-h-dvh max-w-[480px] overflow-x-clip pb-32">
-      <div className="blob pointer-events-none absolute -right-20 -top-16 size-64 rounded-full bg-[radial-gradient(circle,rgb(255_78_32/0.26),transparent_70%)]" />
       <AnimatePresence mode="wait">
         <motion.main key={tab} className="relative"
           initial={{ opacity: 0, y: 10, filter: "blur(6px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           exit={{ opacity: 0, y: -6, filter: "blur(6px)" }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}>
-          {tab === "inicio" && <InicioScreen snap={snap} a={a} go={setTab} />}
+          {tab === "inicio" && <InicioScreen snap={snap} a={a} go={setTab} goAgenda={goAgenda} />}
           {tab === "fluxo" && <FluxoScreen snap={snap} a={a} />}
-          {tab === "agenda" && <AgendaScreen snap={snap} a={a} />}
+          {tab === "agenda" && <AgendaScreen snap={snap} a={a} view={agendaView} setView={setAgendaView} />}
           {tab === "carteira" && <CarteiraScreen snap={snap} a={a} />}
         </motion.main>
       </AnimatePresence>
@@ -112,18 +123,24 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
               })}
             </LayoutGroup>
           </motion.div>
+          <div className="relative shrink-0">
+          <FluximetroBuddy ready={splash === false} hello={hello} />
           <motion.button layout initial={{ y: 80 }} animate={{ y: 0 }} transition={{ type: "spring", stiffness: 420, damping: 36, delay: 0.05 }} whileTap={{ scale: 0.9 }} onClick={() => setLancar(true)} aria-label="Lançar gasto"
             className={`lg grid shrink-0 place-items-center rounded-full text-otan ${mini ? "size-[52px]" : "size-[64px]"}`}>
             <Plus size={28} strokeWidth={3.4} />
           </motion.button>
+          </div>
         </div>
       </nav>
 
       <InstallGuide open={install.open} onClose={install.close} />
-      <AnimatePresence>
-        {intro && <FluximetroIntro key="fluximetro" name={snap.space.name} onClose={() => setIntro(false)} />}
-      </AnimatePresence>
-      <Lancar open={lancar} onClose={() => setLancar(false)} snap={snap} a={a} onDone={(r) => setDone({ ...r, id: Date.now() })} />
+      <AnimatePresence>{splash && <Splash key="splash" onDone={endSplash} />}</AnimatePresence>
+      <Jogo open={jogo} onClose={() => setJogo(false)} />
+      <Lancar open={lancar} onClose={() => setLancar(false)} snap={snap} a={a} onDone={(r) => {
+        setDone({ ...r, id: Date.now() })
+        const tight = r.kind === "expense" && a.budget > 0 && a.free - r.amount < 0
+        setTimeout(() => reagir(falaDoLancamento(r.kind, r.label, tight, !fxPrefs.humor())), 900)
+      }} />
 
       {/* confirmação: a cor enche a tela e um aviso de vidro aparece */}
       <AnimatePresence>

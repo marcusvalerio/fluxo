@@ -8,6 +8,8 @@ import { brl, int, type Analysis } from "@/lib/finance"
 import { Ticker } from "./ui"
 
 const KEY = "fluxo-privacy"
+// arredonda pra o servidor e o navegador escreverem o mesmo número
+const r2 = (n: number) => Math.round(n * 100) / 100
 
 /** Modo privacidade: esconde todos os valores do app e lembra a escolha no aparelho. */
 export function usePrivacy() {
@@ -49,6 +51,8 @@ export function HeroCard({ snap, a, score }: { snap: Snapshot; a: Analysis; scor
     setScrub(d)
   }
   const sd = scrub ? a.days[scrub - 1] : null
+  const SEG = 17
+  const fill = a.budget > 0 ? Math.max(0, Math.min(1, a.free / a.budget)) : 0
   const hidden = privacy.on
   const dots = <span className="text-[34px] tracking-[0.04em]">•••••</span>
 
@@ -81,45 +85,42 @@ export function HeroCard({ snap, a, score }: { snap: Snapshot; a: Analysis; scor
         </div>
       </div>
 
+      {/* medidor em segmentos: os brancos são o que ainda cabe no teto */}
+      <div className="relative mx-auto mt-3 w-full max-w-[300px]">
+        <svg viewBox="0 0 300 172" className="block h-auto w-full overflow-visible" role="img"
+          aria-label={a.budget > 0 ? `${Math.round(fill * 100)}% do teto ainda livre` : "Sem teto definido"}>
+          {Array.from({ length: SEG }, (_, i) => {
+            const ang = Math.PI - ((i + 0.5) / SEG) * Math.PI, on = (i + 0.5) / SEG < fill
+            const c = Math.cos(ang), sn = Math.sin(ang)
+            return (
+              <motion.line key={i} x1={r2(150 + 120 * c)} y1={r2(162 - 120 * sn)} x2={r2(150 + 146 * c)} y2={r2(162 - 146 * sn)}
+                strokeWidth="17" strokeLinecap="round" initial={{ stroke: "rgba(255,255,255,0.22)", pathLength: 0 }}
+                animate={{ stroke: on ? "#ffffff" : "rgba(255,255,255,0.22)", pathLength: 1 }}
+                transition={{ delay: 0.15 + i * 0.03, duration: 0.4 }} />
+            )
+          })}
+        </svg>
       <AnimatePresence mode="wait" initial={false}>
-        <motion.div key={hidden ? "h" : sd ? `d${sd.day}` : "v"}
-          initial={{ opacity: 0, y: 6, filter: "blur(10px)", scale: 0.98 }} animate={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
-          exit={{ opacity: 0, filter: "blur(10px)" }} transition={{ duration: 0.35, ease: [0.2, 0.9, 0.2, 1] }} className="relative">
-          <p className="ttl mt-2 text-[44px] font-bold leading-none tracking-[-0.035em]" style={{ fontFeatureSettings: '"tnum" 1' }}>
-            <span className="mr-1 text-[20px] text-white/70">{!sd && a.free < 0 ? "−R$" : "R$"}</span>
-            {hidden ? dots : sd ? int(sd.total) : <Ticker value={Math.abs(Math.floor(a.free))} format={(n) => Math.round(n).toLocaleString("pt-BR")} />}
-            {!hidden && !sd && <span className="text-[20px] text-white/70">,{String(Math.round((Math.abs(a.free) % 1) * 100)).padStart(2, "0")}</span>}
-          </p>
-          <p className="mt-1.5 text-[14px] text-white/85">
-            {sd ? (sd.future ? <>Dia {sd.day} · ainda não chegou</> : <>Gasto no dia {sd.day}{a.dailyCap > 0 && <> · teto <span className="ttl">R$ {hidden ? "•••" : int(a.dailyCap)}</span></>}</>) :
-              a.budget <= 0 ? "Defina um teto no menu da sua inicial." :
-              tight ? <>Você está <span className="ttl">{hidden ? "R$ •••" : brl(-a.free, false)}</span> acima do teto.</> :
-              <>Dá uns <span className="ttl">R$ {hidden ? "•••" : int(a.perDay)}</span> por dia sem apertar.</>}
-          </p>
-        </motion.div>
-      </AnimatePresence>
-
-      {/* régua de palitos: arraste para ver cada dia */}
-      <div ref={box} className="relative mt-4 flex h-11 touch-none select-none items-end gap-[3px]"
-        onPointerDown={(e) => { (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId); pick(e.clientX) }}
-        onPointerMove={(e) => (e.buttons || e.pointerType === "mouse") && pick(e.clientX)}
-        onPointerUp={() => setScrub(null)} onPointerLeave={() => setScrub(null)} onPointerCancel={() => setScrub(null)}
-        role="img" aria-label="Gasto de cada dia do mês. Arraste para ver.">
-        {a.days.map((d, i) => {
-          const h = d.future ? 40 : Math.max(40, (d.total / peak) * 100)
-          const on = scrub === d.day
-          return (
-            <div key={d.iso} className="relative flex h-full flex-1 flex-col items-center justify-end">
-              {d.over && !d.future && <span className="mb-[3px] size-[5px] rounded-full bg-[#1F282E]" />}
-              <motion.span initial={{ scaleY: 0 }} animate={{ scaleY: on ? 1.08 : 1 }} transition={{ delay: scrub ? 0 : 0.25 + i * 0.018, type: "spring", stiffness: 420, damping: 16 }}
-                className="w-full origin-bottom rounded-[3px]"
-                style={{ height: `${h}%`, background: d.today ? "#1F282E" : d.future ? "rgb(255 255 255 / 0.28)" : on ? "#fff" : "rgb(255 255 255 / 0.92)", boxShadow: d.today ? "0 0 0 1.5px rgb(255 255 255 / 0.9)" : undefined }} />
-            </div>
-          )
-        })}
-      </div>
-      <div className="ttl relative mt-1.5 flex justify-between text-[11px] text-white/70">
-        <span>dia 1</span><span className="text-white">hoje</span><span>dia {a.dim}</span>
+          <motion.div key={hidden ? "h" : sd ? `d${sd.day}` : "v"}
+            initial={{ opacity: 0, y: 6, filter: "blur(10px)", scale: 0.98 }} animate={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
+            exit={{ opacity: 0, filter: "blur(10px)" }} transition={{ duration: 0.35, ease: [0.2, 0.9, 0.2, 1] }} className="absolute inset-x-0 bottom-0 text-center">
+            <p className="ttl mt-2 text-[44px] font-bold leading-none tracking-[-0.035em]" style={{ fontFeatureSettings: '"tnum" 1' }}>
+              <span className="mr-1 text-[20px] text-white/70">{!sd && a.free < 0 ? "−R$" : "R$"}</span>
+              {hidden ? dots : sd ? int(sd.total) : <Ticker value={Math.abs(Math.floor(a.free))} format={(n) => Math.round(n).toLocaleString("pt-BR")} />}
+              {!hidden && !sd && <span className="text-[20px] text-white/70">,{String(Math.round((Math.abs(a.free) % 1) * 100)).padStart(2, "0")}</span>}
+            </p>
+            <p className="mt-1.5 text-[13.5px] text-white/85">
+              {sd ? (sd.future ? <>Dia {sd.day} · ainda não chegou</> : <>Gasto no dia {sd.day}{a.dailyCap > 0 && <> · teto <span className="ttl">R$ {hidden ? "•••" : int(a.dailyCap)}</span></>}</>) :
+                a.budget <= 0 ? "Defina um teto no menu da sua inicial." :
+                tight ? <>Você está <span className="ttl">{hidden ? "R$ •••" : brl(-a.free, false)}</span> acima do teto.</> :
+                <>Dá uns <span className="ttl">R$ {hidden ? "•••" : int(a.perDay)}</span> por dia sem apertar.</>}
+            </p>
+          </motion.div>
+        </AnimatePresence>
+  
+        </div>
+      <div className="ttl relative mt-2.5 flex justify-between text-[11px] text-white/65">
+        <span>R$ 0</span><span>{a.budget > 0 ? `teto ${brl(a.budget, false)}` : "sem teto"}</span>
       </div>
     </section>
   )

@@ -50,11 +50,21 @@ export interface Subscription {
   paid: boolean
 }
 
+/** Plano do mês, em porcentagens da renda. `goals` divide o que é guardado entre as metas (id da meta → %). */
+export interface Plan {
+  income: number
+  fixed: number
+  variable: number
+  save: number
+  goals: Record<string, number>
+}
+
 export interface Space {
   id: string
   name: string
   limit: number
   onboarded: boolean
+  plan: Plan | null
 }
 
 export interface Snapshot {

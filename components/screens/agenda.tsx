@@ -8,12 +8,14 @@ import { brl, int, type Analysis } from "@/lib/finance"
 import { labelMonth } from "@/lib/dates"
 import { monthEvents, type DayEvent } from "@/lib/plan"
 import { rise, spring } from "../ui"
+import { GastosDiaCard, RitmoCard } from "../ritmo"
+import type { AgendaView } from "../fluxo-app"
 
 const WD = ["D", "S", "T", "Q", "Q", "S", "S"]
 const ICON = { income: ArrowDownLeft, bill: Receipt, sub: RotateCcw, invoice: CreditCard }
 const NAME = { income: "Entrada", bill: "Conta", sub: "Assinatura", invoice: "Fatura" }
 
-export function AgendaScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
+export function AgendaScreen({ snap, a, view, setView }: { snap: Snapshot; a: Analysis; view: AgendaView; setView: (v: AgendaView) => void }) {
   const events = useMemo(() => monthEvents(snap, a), [snap, a])
   const [sel, setSel] = useState(a.dayOfMonth)
   const first = new Date(a.ym + "-01T12:00:00Z").getUTCDay()
@@ -38,6 +40,18 @@ export function AgendaScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
       </motion.header>
 
       <div className="flex flex-col gap-6">
+        <motion.div {...rise} transition={{ ...spring, delay: 0.03 }} className="flex flex-col gap-3">
+          <div role="tablist" aria-label="Gráficos do mês" className="flex gap-1 rounded-full bg-sand p-1">
+            {([["ritmo", "Ritmo do mês"], ["dia", "Gastos por dia"]] as const).map(([k, l]) => (
+              <button key={k} role="tab" aria-selected={view === k} onClick={() => setView(k)}
+                className={`relative h-10 flex-1 rounded-full text-[13.5px] font-semibold ${view === k ? "text-ink" : "text-mute"}`}>
+                {view === k && <motion.span layoutId="agenda-seg" className="absolute inset-0 rounded-full bg-card shadow-[0_1px_3px_rgb(0_0_0/0.08)]" transition={spring} />}
+                <span className="relative">{l}</span>
+              </button>
+            ))}
+          </div>
+          {view === "ritmo" ? <RitmoCard snap={snap} a={a} /> : <GastosDiaCard snap={snap} a={a} />}
+        </motion.div>
         <motion.section {...rise} transition={{ ...spring, delay: 0.05 }} className="rounded-[23px] bg-card p-4">
           <div className="grid grid-cols-7 gap-1 pb-2">
             {WD.map((w, i) => <span key={i} className="text-center text-[11px] font-semibold text-faint">{w}</span>)}

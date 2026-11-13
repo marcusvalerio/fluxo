@@ -1,7 +1,8 @@
 "use client"
 
 import { animate, AnimatePresence, motion, useMotionValue, useTransform } from "framer-motion"
-import { useEffect, type ReactNode } from "react"
+import { useEffect, useState, type ReactNode } from "react"
+import { createPortal } from "react-dom"
 
 export const spring = { type: "spring", stiffness: 380, damping: 32 } as const
 export const rise = {
@@ -34,13 +35,17 @@ export function BigMoney({ value, size = 48 }: { value: number; size?: number })
 }
 
 export function Sheet({ open, onClose, title, children }: { open: boolean; onClose: () => void; title?: string; children: ReactNode }) {
+  // vai direto pro body: dentro da tela animada o z-index ficava preso e a barra de abas passava por cima
+  const [host, setHost] = useState<HTMLElement | null>(null)
+  useEffect(() => setHost(document.body), [])
   useEffect(() => {
     if (!open) return
     const k = (e: KeyboardEvent) => e.key === "Escape" && onClose()
     window.addEventListener("keydown", k)
     return () => window.removeEventListener("keydown", k)
   }, [open, onClose])
-  return (
+  if (!host) return null
+  return createPortal(
     <AnimatePresence>
       {open && (
         <>
@@ -58,7 +63,8 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    host,
   )
 }
 

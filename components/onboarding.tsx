@@ -6,8 +6,10 @@ import { ArrowLeft, ArrowRight } from "lucide-react"
 import { completeOnboarding } from "@/app/actions"
 import { int } from "@/lib/finance"
 import { spring } from "./ui"
+import { DEFAULT_PLAN, SaveEditor } from "./plan-editor"
+import type { Plan } from "@/lib/types"
 
-const TOTAL = 4
+const TOTAL = 5
 
 export function Onboarding({ name: initialName, needsPassword }: { name: string; needsPassword: boolean }) {
   const [step, setStep] = useState(0)
@@ -18,18 +20,18 @@ export function Onboarding({ name: initialName, needsPassword }: { name: string;
   const [limit, setLimit] = useState("")
   const [pending, start] = useTransition()
   const limitN = Number(limit.replace(/\D/g, "")) || 0
+  const [plan, setPlan] = useState<Plan>(DEFAULT_PLAN)
 
   const go = (n: number) => { setDir(n > step ? 1 : -1); setStep(n) }
   const finish = (demo: boolean) => start(async () => {
     setError("")
-    const r = await completeOnboarding({ name: name.trim() || "Você", limit: limitN, demo, password: needsPassword ? password : undefined })
+    const r = await completeOnboarding({ name: name.trim() || "Você", limit: 0, demo, password: needsPassword ? password : undefined, plan: limitN > 0 ? { ...plan, income: limitN } : null })
     if (r.error) { setError(r.error); setStep(1) }
   })
   const blocked = step === 1 && needsPassword && password.length < 8
 
   return (
     <main className="relative mx-auto flex min-h-dvh max-w-[480px] flex-col overflow-hidden px-5 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(20px,env(safe-area-inset-top))]">
-      <div className="blob pointer-events-none absolute -right-24 -top-20 size-72 rounded-full bg-[radial-gradient(circle,rgb(255_78_32/0.25),transparent_70%)]" />
 
       <header className="relative flex h-12 items-center justify-between">
         <AnimatePresence>
@@ -75,12 +77,12 @@ export function Onboarding({ name: initialName, needsPassword }: { name: string;
               </Ask>
             )}
             {step === 2 && (
-              <Ask title="Quanto você quer gastar por mês?" sub="É o seu teto: o app mostra quanto ainda cabe até o fim do mês. Muda quando quiser.">
+              <Ask title="Quanto entra por mês?" sub="Seu salário ou o que costuma cair na conta. Com isso a gente monta seu plano.">
                 <div className="flex items-baseline gap-2 border-b-2 border-sand pb-3 focus-within:border-otan">
                   <span className="num text-[24px] text-faint">R$</span>
-                  <input autoFocus inputMode="numeric" value={limit} aria-label="Limite mensal"
+                  <input autoFocus inputMode="numeric" value={limit} aria-label="Renda mensal"
                     onChange={(e) => { const n = Number(e.target.value.replace(/\D/g, "")); setLimit(n ? n.toLocaleString("pt-BR") : "") }}
-                    onKeyDown={(e) => e.key === "Enter" && go(3)}
+                    onKeyDown={(e) => e.key === "Enter" && go(limitN ? 3 : 4)}
                     placeholder="0" className="num w-full bg-transparent text-[48px] outline-none focus-visible:outline-none" />
                 </div>
                 <div className="mt-5 flex flex-wrap gap-2">
@@ -92,13 +94,19 @@ export function Onboarding({ name: initialName, needsPassword }: { name: string;
                 <AnimatePresence>
                   {limitN > 0 && (
                     <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mt-4 text-[15px] text-smoke">
-                      Isso dá uns <span className="num text-ink">R$ {int(limitN / 30)}</span> por dia.
+                      No próximo passo você decide quanto disso guardar.
                     </motion.p>
                   )}
                 </AnimatePresence>
               </Ask>
             )}
             {step === 3 && (
+              <Ask title="Quanto você quer guardar?" sub="Esse valor sai primeiro, logo que o salário cai. O resto do mês se ajusta a partir dele.">
+                <p className="num -mt-4 mb-6 text-center text-[46px] leading-none"><span className="mr-1 text-[22px] text-faint">R$</span>{int((limitN * plan.save) / 100)}</p>
+                <SaveEditor plan={{ ...plan, income: limitN }} onChange={(p) => setPlan({ ...p, income: 0 })} />
+              </Ask>
+            )}
+            {step === 4 && (
               <Ask title={`Tudo pronto${name.trim() ? `, ${name.trim().split(" ")[0]}` : ""}.`} sub="Depois, lance seus gastos pelo botão + e cadastre cartões e assinaturas na Carteira.">
                 <div className="mt-2 space-y-3">
                   <Choice disabled={pending} onClick={() => finish(false)} title="Começar do zero" text="Para usar de verdade com o seu dinheiro." primary />
@@ -111,8 +119,8 @@ export function Onboarding({ name: initialName, needsPassword }: { name: string;
         </AnimatePresence>
       </div>
 
-      {step < 3 && (
-        <motion.button whileTap={{ scale: 0.97 }} disabled={blocked} onClick={() => go(step + 1)}
+      {step < 4 && (
+        <motion.button whileTap={{ scale: 0.97 }} disabled={blocked} onClick={() => go(step === 2 && !limitN ? 4 : step + 1)}
           className="disabled:opacity-30 relative flex h-14 w-full items-center justify-center gap-2 rounded-[28px] bg-ink font-semibold text-cotton">
           {step === 0 ? "Começar" : step === 2 && !limitN ? "Pular" : "Continuar"} <ArrowRight size={18} />
         </motion.button>
