@@ -100,3 +100,7 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: non
 @keyframes cf-r { 0%,100% { transform: rotate(16deg) } 50% { transform: rotate(-14deg) } }
 .cf-sp, .cf-swing path { transform-box: fill-box; transform-origin: center }
 .cf-swing .cf-l, .cf-swing .cf-r { transform-origin: 50% 0 }
+
+/* campo de data no iPhone: o Safari dá uma largura mínima própria e ele vaza do card */
+input[type="date"] { -webkit-appearance: none; appearance: none; display: block; width: 100%; min-width: 0; max-width: 100%; min-height: 3.25rem; text-align: left }
+input[type="date"]::-webkit-date-and-time-value { text-align: left; min-height: 1.5em }
