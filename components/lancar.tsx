@@ -14,7 +14,7 @@ import { Sheet, spring } from "./ui"
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0", "del"]
 
-export function Lancar({ open, onClose, snap, a, onDone }: { open: boolean; onClose: () => void; snap: Snapshot; a: Analysis; onDone?: (r: { amount: number; kind: Kind; label: string; parts: number }) => void }) {
+export function Lancar({ open, onClose, snap, a, onDone, seed }: { open: boolean; onClose: () => void; snap: Snapshot; a: Analysis; onDone?: (r: { amount: number; kind: Kind; label: string; parts: number }) => void; seed?: string }) {
   const [kind, setKind] = useState<Kind>("expense")
   const [cents, setCents] = useState("") // dígitos digitados
   const [desc, setDesc] = useState("")
@@ -29,8 +29,8 @@ export function Lancar({ open, onClose, snap, a, onDone }: { open: boolean; onCl
   const [plan, setPlan] = useState<Purchase | null>(null)
 
   useEffect(() => {
-    if (open) { setKind("expense"); setCents(""); setDesc(""); setCat(null); setWhen(0); setCardId(null); setParts(1); setText(""); setRemoved([]); setPlan(null) }
-  }, [open])
+    if (open) { setKind("expense"); setCents(""); setDesc(""); setCat(null); setWhen(0); setCardId(null); setParts(1); setText(seed ?? ""); setRemoved([]); setPlan(null) }
+  }, [open, seed])
 
   const cardNames = snap.cards.map((c) => c.name)
   const typed = text.trim()
@@ -93,13 +93,14 @@ export function Lancar({ open, onClose, snap, a, onDone }: { open: boolean; onCl
   const decPart = String(Math.round((amount % 1) * 100)).padStart(2, "0")
 
   return (
-    <Sheet open={open} onClose={onClose}>
+    <Sheet open={open} onClose={onClose} title={seed ? "Posso comprar?" : "Lançar"}>
       <div className="flex flex-col">
+        {seed && !plan && <p className="mb-3 px-1 text-[14px] leading-snug text-smoke">Escreve o que você tá de olho, tipo <b className="text-ink">"quero comprar um tênis de 400 em 4x no nubank"</b>. Eu mostro se cabe, como ficam as faturas e em quantas vezes vale parcelar.</p>}
         {plan ? <Simular snap={snap} a={a} plan={plan} onBack={() => setPlan(null)} onDone={onDone} onClose={onClose} /> : <>
         <label className={`flex items-center gap-2.5 rounded-[22px] border-[1.5px] bg-card py-1.5 pl-3 pr-1.5 transition ${typed ? "border-otan" : "border-transparent focus-within:border-otan"}`}>
           <TalkIcon className="size-7 shrink-0 text-otan" />
           <span className="sr-only">Escreva o que aconteceu</span>
-          <input value={text} onChange={(e) => { setText(e.target.value); setRemoved([]) }} placeholder="Escreva o que aconteceu…" maxLength={200} enterKeyHint="done"
+          <input value={text} onChange={(e) => { setText(e.target.value); setRemoved([]) }} placeholder="Escreva o que aconteceu…" maxLength={200} enterKeyHint="done" autoFocus={!!seed}
             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); submitText() } }}
             className="h-10 min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-faint focus-visible:outline-none" />
           {typed && <button onClick={() => { setText(""); setRemoved([]) }} aria-label="Limpar texto" className="grid size-9 shrink-0 place-items-center rounded-full bg-otan text-white"><X size={16} strokeWidth={2.6} /></button>}

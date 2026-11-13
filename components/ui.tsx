@@ -34,38 +34,41 @@ export function BigMoney({ value, size = 48 }: { value: number; size?: number })
   )
 }
 
+/**
+ * Página que entra deslizando da direita, com botão de voltar (no lugar das abas que subiam).
+ * O nome continua Sheet pra não mexer em quem já usa.
+ */
 export function Sheet({ open, onClose, title, children }: { open: boolean; onClose: () => void; title?: string; children: ReactNode }) {
   // vai direto pro body: dentro da tela animada o z-index ficava preso e a barra de abas passava por cima
   const [host, setHost] = useState<HTMLElement | null>(null)
-  // arrastar pra fechar só pela barrinha do topo; no resto da folha o dedo rola o conteúdo
-  const drag = useDragControls()
   useEffect(() => setHost(document.body), [])
   useEffect(() => {
     if (!open) return
     const k = (e: KeyboardEvent) => e.key === "Escape" && onClose()
     window.addEventListener("keydown", k)
-    return () => window.removeEventListener("keydown", k)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => { window.removeEventListener("keydown", k); document.body.style.overflow = prev }
   }, [open, onClose])
   if (!host) return null
   return createPortal(
     <AnimatePresence>
       {open && (
-        <>
-          <motion.div className="fixed inset-0 z-40 bg-ink/25 backdrop-blur-[2px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
-          <motion.div
-            role="dialog" aria-modal aria-label={title}
-            className="fixed inset-x-0 bottom-0 z-50 mx-auto max-h-[94dvh] max-w-[480px] overflow-y-auto overscroll-contain rounded-t-[36px] bg-cotton px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-3 shadow-[0_-20px_60px_-20px_rgb(31_40_46/0.4)]"
-            initial={{ y: "105%" }} animate={{ y: 0 }} exit={{ y: "105%" }} transition={spring}
-            drag="y" dragControls={drag} dragListener={false} dragConstraints={{ top: 0, bottom: 0 }} dragElastic={{ top: 0, bottom: 0.6 }}
-            onDragEnd={(_, i) => (i.offset.y > 110 || i.velocity.y > 600) && onClose()}
-          >
-            <div onPointerDown={(e) => drag.start(e)} className="-mx-4 -mt-3 mb-1 flex cursor-grab touch-none justify-center pb-2 pt-3" aria-hidden>
-              <span className="h-1.5 w-10 rounded-full bg-sand-2" />
-            </div>
-            {title && <h2 className="ttl mb-4 px-2 text-[24px]">{title}</h2>}
-            {children}
-          </motion.div>
-        </>
+        <motion.div
+          role="dialog" aria-modal aria-label={title}
+          className="fixed inset-0 z-50 mx-auto max-w-[480px] overflow-y-auto overscroll-contain bg-cotton px-4 pb-[max(28px,env(safe-area-inset-bottom))] shadow-[-20px_0_60px_-20px_rgb(31_40_46/0.35)]"
+          initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", stiffness: 380, damping: 38 }}
+          drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={{ left: 0, right: 0.5 }} dragDirectionLock
+          onDragEnd={(_, i) => (i.offset.x > 120 || i.velocity.x > 700) && onClose()}
+        >
+          <div className="sticky top-0 z-10 -mx-4 mb-4 flex items-center gap-3 bg-gradient-to-b from-cotton from-60% to-transparent px-4 pb-4 pt-[max(14px,env(safe-area-inset-top))]">
+            <button onClick={onClose} aria-label="Voltar" className="lg grid size-11 shrink-0 place-items-center rounded-full text-ink">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+            </button>
+            {title && <h2 className="ttl flex-1 truncate pr-11 text-center text-[17px]">{title}</h2>}
+          </div>
+          {children}
+        </motion.div>
       )}
     </AnimatePresence>,
     host,
