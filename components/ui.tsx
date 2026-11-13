@@ -1,6 +1,6 @@
 "use client"
 
-import { animate, AnimatePresence, motion, useMotionValue, useTransform } from "framer-motion"
+import { animate, AnimatePresence, motion, useDragControls, useMotionValue, useTransform } from "framer-motion"
 import { useEffect, useState, type ReactNode } from "react"
 import { createPortal } from "react-dom"
 
@@ -37,6 +37,8 @@ export function BigMoney({ value, size = 48 }: { value: number; size?: number })
 export function Sheet({ open, onClose, title, children }: { open: boolean; onClose: () => void; title?: string; children: ReactNode }) {
   // vai direto pro body: dentro da tela animada o z-index ficava preso e a barra de abas passava por cima
   const [host, setHost] = useState<HTMLElement | null>(null)
+  // arrastar pra fechar só pela barrinha do topo; no resto da folha o dedo rola o conteúdo
+  const drag = useDragControls()
   useEffect(() => setHost(document.body), [])
   useEffect(() => {
     if (!open) return
@@ -52,12 +54,14 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
           <motion.div className="fixed inset-0 z-40 bg-ink/25 backdrop-blur-[2px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
           <motion.div
             role="dialog" aria-modal aria-label={title}
-            className="fixed inset-x-0 bottom-0 z-50 mx-auto max-h-[94dvh] max-w-[480px] overflow-y-auto rounded-t-[36px] bg-cotton px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-3 shadow-[0_-20px_60px_-20px_rgb(31_40_46/0.4)]"
+            className="fixed inset-x-0 bottom-0 z-50 mx-auto max-h-[94dvh] max-w-[480px] overflow-y-auto overscroll-contain rounded-t-[36px] bg-cotton px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-3 shadow-[0_-20px_60px_-20px_rgb(31_40_46/0.4)]"
             initial={{ y: "105%" }} animate={{ y: 0 }} exit={{ y: "105%" }} transition={spring}
-            drag="y" dragConstraints={{ top: 0, bottom: 0 }} dragElastic={{ top: 0, bottom: 0.6 }}
+            drag="y" dragControls={drag} dragListener={false} dragConstraints={{ top: 0, bottom: 0 }} dragElastic={{ top: 0, bottom: 0.6 }}
             onDragEnd={(_, i) => (i.offset.y > 110 || i.velocity.y > 600) && onClose()}
           >
-            <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-sand-2" />
+            <div onPointerDown={(e) => drag.start(e)} className="-mx-4 -mt-3 mb-1 flex cursor-grab touch-none justify-center pb-2 pt-3" aria-hidden>
+              <span className="h-1.5 w-10 rounded-full bg-sand-2" />
+            </div>
             {title && <h2 className="ttl mb-4 px-2 text-[24px]">{title}</h2>}
             {children}
           </motion.div>
