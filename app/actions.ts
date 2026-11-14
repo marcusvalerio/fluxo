@@ -333,3 +333,22 @@ export async function getShortcutToken(reset = false) {
   const { tokenOf } = await import("@/lib/atalho")
   return tokenOf(await requireSpaceId(), reset)
 }
+
+// ---------- notificações do Fluximetro ----------
+
+export async function pushPublicKey() {
+  return process.env.VAPID_PUBLIC_KEY ?? ""
+}
+export async function subscribePush(sub: { endpoint: string; keys: { p256dh: string; auth: string } }) {
+  const { saveSub, sendTo } = await import("@/lib/push")
+  const id = await requireSpaceId()
+  if (!sub?.endpoint || !sub.keys?.p256dh || !sub.keys?.auth) return { error: "Assinatura inválida" }
+  await saveSub(id, sub)
+  await sendTo(id, { title: "Fluximetro", body: "Pronto, agora eu falo com você por aqui. Prometo não ser chato. Muito." })
+  return {}
+}
+export async function unsubscribePush(endpoint: string) {
+  const { removeSub } = await import("@/lib/push")
+  await requireSpaceId()
+  await removeSub(endpoint)
+}

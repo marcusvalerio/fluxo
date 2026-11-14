@@ -5,7 +5,8 @@ import { useEffect, useRef, useState, useTransition } from "react"
 import { ArrowUp, Check, Sparkles } from "lucide-react"
 import type { Snapshot } from "@/lib/types"
 import { brl, int, type Analysis } from "@/lib/finance"
-import { parseEntries, parseMoney, type Draft } from "@/lib/assistente"
+import { compareOptions, parseEntries, parseMoney, parsePurchase, simulate, type Draft } from "@/lib/assistente"
+import { monthRoom } from "@/lib/plan"
 import { addTransaction } from "@/app/actions"
 import { Cofrinho } from "./cofrinho"
 import { Sheet } from "./ui"
@@ -13,10 +14,14 @@ import { falaDoLancamento, fxPrefs, reagir } from "./fluximetro"
 
 type Msg =
   | { id: number; from: "eu" | "fx"; text: string; soon?: boolean }
-  | { id: number; from: "draft"; drafts: Draft[]; state: "open" | "done" | "cancel" }
+  | { id: number; from: "draft"; drafts: Draft[]; state: "open" | "done" | "cancel"; title?: string }
+  | { id: number; from: "sim"; rows: { mes: string; parcela: number; antes: number; depois: number }[] }
+
+const MES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
+const mes = (k: string) => `${MES[Number(k.slice(5, 7)) - 1]}/${k.slice(2, 4)}`
 
 let seq = 0
-const SUGESTOES = ["ifood 52", "uber 23 ontem", "recebi 800 do freela", "quanto ainda cabe?"]
+const SUGESTOES = ["ifood 52", "uber 23 ontem", "posso comprar um notebook de 4 mil em 6x?", "quanto ainda cabe?"]
 const dia = (iso: string, today: string) => (iso === today ? "hoje" : new Date(iso + "T12:00:00Z").toLocaleDateString("pt-BR", { day: "numeric", month: "short", timeZone: "UTC" }))
 
 /**
@@ -39,6 +44,36 @@ export function FluxiChat({ open, onClose, snap, a }: { open: boolean; onClose: 
   useEffect(() => { end.current?.scrollIntoView({ behavior: "smooth", block: "end" }) }, [msgs])
 
   const fx = (t: string, soon = false) => setMsgs((m) => [...m, { id: ++seq, from: "fx", text: t, soon }])
+
+  /** "Notebook de 4 mil em 6x": avalia antes de lançar. Mostra parcela, meses e o que sobra em cada um. */
+  const avaliar = (q: string): boolean => {
+    const p = parsePurchase(q, snap.cards.map((c) => c.name))
+    if (!p || !p.total) return false
+    const n = p.installments ?? 1
+    const card = (p.card && snap.cards.find((c) => c.name === p.card)) || snap.cards[0]
+    // sem cartão: considera que a primeira parcela cai no mês que vem
+    const day = Number(snap.today.slice(8, 10))
+    const rule = card ? { name: card.name, closingDay: card.closingDay, dueDay: card.dueDay } : { name: "", closingDay: Math.max(1, day - 1), dueDay: Math.min(28, day + 5) }
+    const room = monthRoom(snap, a)
+    const sim = simulate(p.total, n, rule, snap.today, room)
+    const nome = p.description === "Compra" ? "Essa compra" : p.description
+    const ini = mes(sim.months[0].key), fim = mes(sim.months[sim.months.length - 1].key)
+    const pior = sim.months.reduce((x, m) => (m.freeAfter < x.freeAfter ? m : x), sim.months[0])
+    const parcelas = n > 1 ? `${n}x de ${brl(sim.perInstallment)}, de ${ini} a ${fim}` : `à vista, entrando em ${ini}`
+    let veredito: string
+    if (sim.verdict === "tranquilo") veredito = `Cabe tranquilo. No mês mais apertado ainda sobram ${brl(pior.freeAfter, false)}.`
+    else if (sim.verdict === "aperta") veredito = `Cabe, mas aperta: em ${sim.tightMonths} ${sim.tightMonths === 1 ? "mês" : "meses"} sobra pouco. O pior é ${mes(pior.key)}, com ${brl(pior.freeAfter, false)} livres.`
+    else veredito = `Não cabe: em ${mes(pior.key)} você ficaria ${brl(-pior.freeAfter, false)} no vermelho.`
+    const melhor = compareOptions(p.total, rule, snap.today, room, [3, 6, 10, 12].filter((k) => k !== n)).find((o) => o.sim.verdict === "tranquilo")
+    const dica = sim.verdict !== "tranquilo" && melhor ? ` Em ${melhor.n}x de ${brl(melhor.sim.perInstallment)} ficaria tranquilo.` : ""
+    const piada = fxPrefs.humor() ? (sim.verdict === "tranquilo" ? " Pode comprar sem culpa. Quase." : sim.verdict === "nao-cabe" ? " Seu eu do futuro mandou dizer que não." : "") : ""
+    fx(`${nome} de ${brl(p.total, false)}: ${parcelas}${card ? ` no ${card.name}` : ""}. Sem ela, sobrariam uns ${brl(pior.freeBefore, false)} em ${mes(pior.key)}. ${veredito}${dica}${piada}`)
+    setMsgs((m) => [...m, { id: ++seq, from: "sim", rows: sim.months.slice(0, 6).map((x) => ({ mes: mes(x.key), parcela: x.parcel, antes: x.freeBefore, depois: x.freeAfter })) }])
+    const drafts = parseEntries(`${p.description} ${p.total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}${n > 1 ? ` em ${n}x` : ""}${card ? ` no ${card.name}` : ""}`, snap.today, snap.cards.map((c) => c.name))
+    if (drafts.length) setMsgs((m) => [...m, { id: ++seq, from: "draft", drafts, state: "open", title: "Se decidir comprar, eu lanço assim:" }])
+    if (!card && n > 1) fx("Sem cartão cadastrado eu considerei uma parcela por mês a partir do mês que vem. Cadastra o cartão na Carteira que eu acerto pelas faturas.")
+    return true
+  }
 
   /** Perguntas que dá pra responder com as contas do app. */
   const responder = (q: string): boolean => {
@@ -74,6 +109,7 @@ export function FluxiChat({ open, onClose, snap, a }: { open: boolean; onClose: 
     setText("")
     setMsgs((m) => [...m, { id: ++seq, from: "eu", text: q }])
     setTimeout(() => {
+      if (avaliar(q)) return
       if (responder(q)) return
       const drafts = parseEntries(q, snap.today, snap.cards.map((c) => c.name))
       if (drafts.length) setMsgs((m) => [...m, { id: ++seq, from: "draft", drafts, state: "open" }])
@@ -119,9 +155,22 @@ export function FluxiChat({ open, onClose, snap, a }: { open: boolean; onClose: 
                     {m.text}
                   </div>
                 )}
+                {m.from === "sim" && (
+                  <div className="w-[min(320px,80vw)] rounded-[20px] rounded-bl-[6px] bg-card p-3">
+                    <div className="grid grid-cols-[1fr_auto_auto] gap-x-3 gap-y-1.5 px-1 text-[13px]">
+                      <span className="text-mute">Mês</span><span className="text-right text-mute">Parcela</span><span className="text-right text-mute">Sobra</span>
+                      {m.rows.map((r) => (
+                        <div key={r.mes} className="contents">
+                          <span>{r.mes}</span><span className="num text-right">{brl(r.parcela)}</span>
+                          <span className={`num text-right ${r.depois < 0 ? "text-gravy" : r.depois < r.antes * 0.2 ? "text-[#A87300]" : "text-[#2E8B57]"}`}>{brl(r.depois, false)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {m.from === "draft" && (
                   <div className="w-[min(320px,80vw)] rounded-[20px] rounded-bl-[6px] bg-card p-3">
-                    <p className="px-1 pb-2 text-[13px] text-mute">{m.state === "done" ? "Lançado:" : "Entendi assim. Confere?"}</p>
+                    <p className="px-1 pb-2 text-[13px] text-mute">{m.state === "done" ? "Lançado:" : m.title ?? "Entendi assim. Confere?"}</p>
                     {m.drafts.map((d, i) => (
                       <div key={i} className="flex items-center gap-3 border-t border-cotton px-1 py-2.5 first:border-0">
                         <span className="min-w-0 flex-1"><span className="block truncate text-[15px]">{d.description}</span>

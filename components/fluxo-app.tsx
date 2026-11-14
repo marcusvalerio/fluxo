@@ -39,8 +39,9 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
   const [lancar, setLancar] = useState(false)
   const install = useInstallPrompt()
   // abertura com o logo uma vez a cada vez que o app é aberto; depois o Fluximetro cai em cima do +
-  const [splash, setSplash] = useState<boolean | null>(null)
-  useEffect(() => { setSplash(!splashShown); splashShown = true }, [])
+  // a abertura já vem no primeiro quadro (sem esperar o app carregar); só toca uma vez por visita
+  const [splash, setSplash] = useState<boolean>(!splashShown)
+  useEffect(() => { splashShown = true }, [])
   const endSplash = useCallback(() => setSplash(false), [])
   useEffect(() => { try { if (localStorage.getItem("fluxo-barra") === "solid") document.documentElement.dataset.bar = "solid" } catch {} }, [])
   // modo Natal (dezembro até dia 6 de janeiro, ou o que estiver nos Ajustes)
