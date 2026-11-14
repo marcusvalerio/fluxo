@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useState, useTransition } from "react"
-import { Check, ChevronRight, Crown, Gamepad2, PanelBottom, TreePine, Gauge, MessageCircle, PiggyBank, Smile, Image as ImageIcon, Zap, Send, KeyRound, Shield, Smartphone, LayoutGrid, LogOut, TrendingUp, Plus, RotateCcw, Sparkles } from "lucide-react"
+import { Check, ChevronRight, Crown, Gamepad2, PanelBottom, TreePine, Gauge, MessageCircle, PiggyBank, Smile, Zap, Send, KeyRound, Shield, Smartphone, LayoutGrid, LogOut, TrendingUp, Plus, RotateCcw, Sparkles } from "lucide-react"
 import type { Bill, Snapshot } from "@/lib/types"
 import { brl, CATEGORIES, insights, int, type Analysis } from "@/lib/finance"
 import { labelMonth, relativeDay } from "@/lib/dates"
@@ -17,7 +17,6 @@ import { Cofrinho } from "../cofrinho"
 import { RetroCard } from "../retro"
 import { Planos } from "../planos"
 import { natalPref, setNatalPref, type NatalPref } from "@/lib/natal"
-import { ICONES, iconeAtual, setIcone, type Icone } from "@/lib/icone"
 import { fxPrefs, type Deboche } from "../fluximetro"
 import { PlanSheet } from "../plan-sheet"
 import { Atalho } from "../atalho"
@@ -201,7 +200,6 @@ function SettingsSheet({ open, onClose, limit, email, admin, name, onPlan, onPla
   const toggleBar = () => { const v = bar === "solid" ? "glass" : "solid"; setBar(v); try { localStorage.setItem("fluxo-barra", v) } catch {}; if (v === "solid") document.documentElement.dataset.bar = "solid"; else delete document.documentElement.dataset.bar }
   const nextNatal = () => { const v: NatalPref = natal === "auto" ? "on" : natal === "on" ? "off" : "auto"; setNatal(v); setNatalPref(v) }
   const [nivel, setNivel] = useState<Deboche>(() => fxPrefs.nivel())
-  const [icone, setIc] = useState<Icone>(() => iconeAtual())
   const [talk, setTalk] = useState(() => fxPrefs.talk())
   const [v, setV] = useState(limit ? String(limit) : "")
   const [cur, setCur] = useState("")
@@ -290,18 +288,6 @@ function SettingsSheet({ open, onClose, limit, email, admin, name, onPlan, onPla
                 {([["educado", "Educado"], ["sincero", "Sincero"], ["semfiltro", "Sem filtro"]] as const).map(([k, t]) => (
                   <button key={k} onClick={() => { fxPrefs.setNivel(k); setNivel(k) }} aria-pressed={nivel === k}
                     className={`h-9 rounded-[11px] text-[13px] font-semibold ${nivel === k ? "bg-card text-ink shadow-sm" : "text-mute"}`}>{t}</button>
-                ))}
-              </div>
-            </div>
-            <div className={`${row} flex-col !items-stretch gap-2.5`}>
-              <span className="flex items-center gap-3"><ImageIcon size={18} className="text-smoke" /><span className="flex-1">Ícone do app<small className="block text-[12px] font-normal text-mute">Vale quando você adicionar o app de novo à tela inicial</small></span></span>
-              <div className="grid grid-cols-3 gap-2">
-                {ICONES.map((k) => (
-                  <button key={k} onClick={() => { setIcone(k); setIc(k) }} aria-pressed={icone === k}
-                    className={`flex flex-col items-center gap-1.5 rounded-[14px] p-2 text-[12px] font-semibold capitalize ${icone === k ? "bg-card text-ink ring-2 ring-otan" : "text-mute"}`}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={`/icons/${k}-180.png`} alt="" className="size-12 rounded-[12px]" />{k}
-                  </button>
                 ))}
               </div>
             </div>

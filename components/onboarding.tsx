@@ -10,7 +10,6 @@ import { DEFAULT_PLAN, SaveEditor } from "./plan-editor"
 import type { Plan } from "@/lib/types"
 import { fxPrefs, type Deboche } from "./fluximetro"
 import { Cofrinho } from "./cofrinho"
-import { ICONES, setIcone, type Icone } from "@/lib/icone"
 
 const DEBOCHE: [Deboche, string, string][] = [
   ["educado", "Educado", "Anotado: iFood, R$ 52."],
@@ -31,7 +30,6 @@ export function Onboarding({ name: initialName, needsPassword, preview = false }
   const limitN = Number(limit.replace(/\D/g, "")) || 0
   const [plan, setPlan] = useState<Plan>(DEFAULT_PLAN)
   const [nivel, setNivel] = useState<Deboche>("sincero")
-  const [icone, setIc] = useState<Icone>("claro")
 
   const go = (n: number) => { setDir(n > step ? 1 : -1); setStep(n) }
   const finish = (demo: boolean) => start(async () => {
@@ -120,21 +118,12 @@ export function Onboarding({ name: initialName, needsPassword, preview = false }
               </Ask>
             )}
             {step === 4 && (
-              <Ask title="Do seu jeito" sub="Quanto o Fluximetro pode zoar seus gastos e qual ícone vai pra sua tela inicial. Dá pra mudar depois nos Ajustes.">
+              <Ask title="Do seu jeito" sub="Quanto o Fluximetro pode zoar seus gastos. Dá pra mudar depois nos Ajustes.">
                 <div className="-mt-2 flex flex-col gap-2">
                   {DEBOCHE.map(([k, t, ex]) => (
                     <button key={k} onClick={() => { fxPrefs.setNivel(k); setNivel(k) }} aria-pressed={nivel === k}
                       className={`rounded-[20px] p-4 text-left ${nivel === k ? "bg-ink text-cotton" : "bg-card text-ink"}`}>
                       <b className="block text-[16px]">{t}</b><span className={`text-[13.5px] ${nivel === k ? "text-cotton/75" : "text-smoke"}`}>&ldquo;{ex}&rdquo;</span>
-                    </button>
-                  ))}
-                </div>
-                <div className="mt-6 grid grid-cols-3 gap-2">
-                  {ICONES.map((k) => (
-                    <button key={k} onClick={() => { setIcone(k); setIc(k) }} aria-pressed={icone === k}
-                      className={`flex flex-col items-center gap-1.5 rounded-[18px] p-2.5 text-[13px] font-semibold capitalize ${icone === k ? "bg-card text-ink ring-2 ring-otan" : "text-mute"}`}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={`/icons/${k}-180.png`} alt="" className="size-14 rounded-[14px]" />{k}
                     </button>
                   ))}
                 </div>
