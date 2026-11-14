@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: "Fluxo",
   description: "Quanto ainda cabe no seu mês, todo dia.",
   appleWebApp: { capable: true, statusBarStyle: "default", title: "Fluxo" },
-  icons: { apple: "/icons/claro-180.png" },
+  icons: { apple: "/icons/fluxo-v3-180.png" },
 }
 
 export const viewport: Viewport = {
