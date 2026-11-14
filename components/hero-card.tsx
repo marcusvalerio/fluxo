@@ -35,10 +35,9 @@ export function HeroCard({ snap, a, score }: { snap: Snapshot; a: Analysis; scor
   const privacy = usePrivacy()
   const [wave, setWave] = useState(0)
   const tight = a.free < 0
-  // sempre laranja; escurece quando o mês passa do teto
-  const bg = tight
-    ? "linear-gradient(160deg, #B83312, #6E1D08)"
-    : "linear-gradient(160deg, #FF5A2C, #E2401C 60%, #C73A18)"
+  // a cor acompanha o mês: laranja com folga, esquenta conforme aperta, telha quando passa do teto
+  const left = a.budget > 0 ? a.free / a.budget : 1
+  const bg = tight ? "#B83312" : left < 0.15 ? "#D23C16" : left < 0.35 ? "#EC4519" : "#FF4E20"
   void score
 
   const peak = Math.max(a.dailyCap * 1.6, ...a.days.map((d) => d.total), 1)
@@ -104,7 +103,7 @@ export function HeroCard({ snap, a, score }: { snap: Snapshot; a: Analysis; scor
           <motion.div key={hidden ? "h" : sd ? `d${sd.day}` : "v"}
             initial={{ opacity: 0, y: 6, filter: "blur(10px)", scale: 0.98 }} animate={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
             exit={{ opacity: 0, filter: "blur(10px)" }} transition={{ duration: 0.35, ease: [0.2, 0.9, 0.2, 1] }} className="absolute inset-x-0 bottom-0 text-center">
-            <p className="ttl text-[44px] font-bold leading-none tracking-[-0.035em]" style={{ fontFeatureSettings: '"tnum" 1' }}>
+            <p className="num text-[46px] leading-none" style={{ fontFeatureSettings: '"tnum" 1' }}>
               <span className="mr-1 text-[20px] text-white/70">{!sd && a.free < 0 ? "−R$" : "R$"}</span>
               {hidden ? dots : sd ? int(sd.total) : <Ticker value={Math.abs(Math.floor(a.free))} format={(n) => Math.round(n).toLocaleString("pt-BR")} />}
               {!hidden && !sd && <span className="text-[20px] text-white/70">,{String(Math.round((Math.abs(a.free) % 1) * 100)).padStart(2, "0")}</span>}

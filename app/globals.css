@@ -15,18 +15,19 @@
   --color-faint: var(--c-faint);
   --color-otan: #FF4E20;
   --color-gravy: var(--c-gravy);
+  --color-peach: var(--c-peach);
 }
 
 :root {
   color-scheme: light;
-  --c-cotton: #E4E3DC; --c-sand: #DAD8CF; --c-sand-2: #CFCDC3; --c-sand-3: #B9B7AE; --c-paper: #F4F3EE; --c-card: #FFFFFF;
-  --c-ink: #1F282E; --c-smoke: #414E58; --c-mute: #55606A; --c-faint: #8A939A; --c-gravy: #B83312; --c-on-ink-2: #A9B1B7;
-  --glass-a: rgb(250 250 247 / 0.66); --glass-b: rgb(250 250 247 / 0.72); --glass-edge: rgb(31 40 46 / 0.08); --glass-hi: rgb(255 255 255 / 0.95); --glass-pill: rgb(255 255 255 / 0.8);
+  --c-cotton: #FFF6EF; --c-sand: #F6E6DB; --c-sand-2: #EBD5C8; --c-sand-3: #D2BBAE; --c-paper: #FFFBF7; --c-card: #FFFFFF; --c-peach: #FFD8C4;
+  --c-ink: #1F282E; --c-smoke: #4A3F3A; --c-mute: #6B5A52; --c-faint: #9A8A82; --c-gravy: #B83312; --c-on-ink-2: #A9B1B7;
+  --glass-a: rgb(255 251 247 / 0.7); --glass-b: rgb(255 251 247 / 0.76); --glass-edge: rgb(31 40 46 / 0.08); --glass-hi: rgb(255 255 255 / 0.95); --glass-pill: rgb(255 255 255 / 0.8);
 }
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --c-cotton: #101519; --c-sand: #2A333A; --c-sand-2: #36414A; --c-sand-3: #4A565F; --c-paper: #1A2126; --c-card: #1B2227;
+    --c-cotton: #0F1418; --c-sand: #252E35; --c-sand-2: #323C44; --c-sand-3: #4A565F; --c-paper: #1A2228; --c-card: #1A2228; --c-peach: #5A2A1C;
     --c-ink: #ECEBE5; --c-smoke: #BAC2C8; --c-mute: #8F99A1; --c-faint: #66717A; --c-gravy: #FF8A63; --c-on-ink-2: #55606A;
     --glass-a: rgb(44 53 60 / 0.66); --glass-b: rgb(44 53 60 / 0.62); --glass-edge: rgb(255 255 255 / 0.12); --glass-hi: rgb(255 255 255 / 0.22); --glass-pill: rgb(255 255 255 / 0.14);
   }
@@ -40,18 +41,36 @@ html, body {
   overscroll-behavior-y: none;
 }
 
-/* números: DM Sans pesado, tabular */
+/* números e títulos: Anybody, com respiro (sem apertar demais as letras) */
 .num {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 800;
+  font-stretch: 88%;
   font-feature-settings: "tnum" 1;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.01em;
 }
 .ttl {
   font-family: var(--font-display);
   font-weight: 700;
-  letter-spacing: -0.02em;
+  font-stretch: 90%;
+  letter-spacing: -0.005em;
 }
+
+/* grão sutil no fundo, pra não ficar papel em branco */
+body::after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: .05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (prefers-color-scheme: dark) { body::after { mix-blend-mode: screen; opacity: .035 } }
+
+/* toque com resposta: tudo que é botão afunda um pouco */
+button, a { transition: scale .15s ease }
+button:active:not(:disabled), a:active { scale: .97 }
+
+/* chuva de moedas */
+@keyframes moeda-cai { 0% { transform: translateY(-40px) scaleX(1) } 25% { transform: translateY(25vh) scaleX(.3) } 50% { transform: translateY(50vh) scaleX(1) } 75% { transform: translateY(75vh) scaleX(.3) } 100% { transform: translateY(110vh) scaleX(1); opacity: 0 } }
+.moeda { position: fixed; top: 0; width: 20px; height: 20px; border-radius: 99px; background: #FFC23D; border: 2px solid #E2A21A; animation: moeda-cai 1.9s cubic-bezier(.4,0,.8,.6) forwards; z-index: 90; pointer-events: none }
+@media (prefers-reduced-motion: reduce) { .moeda { display: none } button:active, a:active { scale: 1 } }
 
 /* Liquid Glass (iOS 27): só na camada de navegação. Menos transparente, contorno definido, sombra leve */
 /* barra translúcida, sem desfoque (mais leve de rolar). "Sólida" nos Ajustes tira a transparência */

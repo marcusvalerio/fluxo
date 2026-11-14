@@ -20,7 +20,7 @@ const fmtDay = (iso: string) => `${Number(iso.slice(8))} ${MES[Number(iso.slice(
 const H = "mb-3 flex items-center justify-between px-1"
 
 export function CarteiraScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
-  const [seg, setSeg] = useState<Seg>("cartoes")
+  const [seg, setSeg] = useState<Seg>(() => { try { const v = sessionStorage.getItem("fluxo-seg"); sessionStorage.removeItem("fluxo-seg"); if (v === "metas") return "metas" } catch {} return "cartoes" })
   return (
     <div className="px-4 pt-[max(52px,env(safe-area-inset-top))]">
       <motion.header {...rise} transition={spring} className="px-1 pb-5">
