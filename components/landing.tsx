@@ -336,7 +336,7 @@ function Install() {
       <Reveal>
         <motion.div whileHover={{ rotate: -4, scale: 1.04 }} className="mx-auto size-[150px] overflow-hidden rounded-[36px] shadow-[0_30px_60px_-24px_rgb(226_64_28/0.75)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/icon-v4-512.png" alt="Ícone do Fluxo" className="size-full" />
+          <img src="/icon-v5-512.png" alt="Ícone do Fluxo" className="size-full" />
         </motion.div>
       </Reveal>
       <Reveal delay={0.1}>

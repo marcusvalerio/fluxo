@@ -132,7 +132,7 @@ export function InstallGuide({ open, onClose }: { open: boolean; onClose: () => 
                   <motion.span initial={{ scale: 0, rotate: -10 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 400, damping: 12, delay: 0.1 }}
                     className="relative aspect-square overflow-hidden rounded-[8px] shadow-[0_0_0_2px_#fff]">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/icon-v4-192.png" alt="" className="size-full" />
+                    <img src="/icon-v5-192.png" alt="" className="size-full" />
                   </motion.span>
                 </motion.div>
               )}
