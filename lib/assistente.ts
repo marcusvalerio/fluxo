@@ -80,7 +80,8 @@ function moneyIn(text: string) {
     const raw = m[0]; const at = m.index ?? 0
     const before = text.slice(Math.max(0, at - 5), at).toLowerCase()
     const after = text.slice(at + raw.length, at + raw.length + 9).toLowerCase()
-    if (/dia\s+$/.test(before) || /^\s*(x\b|vezes|parcela)/.test(after) || /^\//.test(after) || /\/$/.test(before)) continue
+    const big = /mil|k|r\$/i.test(raw)
+    if (/dia\s+$/.test(before) || (!big && /^\s*(x\b|vezes|parcela)/.test(after)) || /^\//.test(after) || /\/$/.test(before)) continue
     if (/^\d{1,2}$/.test(raw.trim()) && /\bem\s+$/.test(before) && !/^\s*(reais|r\$|mil)/.test(after)) continue // "em 10"
     const n = parseMoney(raw); if (n !== null) out.push({ raw, n })
   }
@@ -162,8 +163,8 @@ function cleanDescription(part: string, amounts: string[], cards: string[] = [])
 /** "quero comprar um notebook de 4.500 em 10x no nubank" */
 export function parsePurchase(text: string, cards: string[] = []): Purchase | null {
   const t = norm(text)
-  if (!/(comprar|compra|parcelar|pensando em|planejando|vale a pena|quero)/.test(t)) return null
-  const what = t.match(/(?:comprar|compra de|compra do|compra da|parcelar)\s+(?:um|uma|o|a)?\s*([a-z0-9 ]+?)(?=\s+(?:de|por|em|no|na|que|custando|r\$|\d)|$)/)
+  if (!/(comprar|compra|parcelar|pensando em|planejando|vale a pena|quero|avali|analis|consigo|devo|da pra|parcelad)/.test(t)) return null
+  const what = t.match(/(?:comprar|compra de|compra do|compra da|compra|parcelar|avaliacao de|avalia|analisa)\s+(?:um|uma|o|a|de um|de uma)?\s*([a-z][a-z0-9 ]*?)(?=\s+(?:de|por|em|no|na|que|custando|parcelad|r\$|\d)|$)/)
   const amounts = moneyIn(text)
   const total = amounts.length ? (amounts[amounts.length - 1].n as number) : undefined
   const desc = what?.[1]?.trim()

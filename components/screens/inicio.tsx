@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useState, useTransition } from "react"
-import { Check, ChevronRight, Crown, Gamepad2, PanelBottom, TreePine, Gauge, MessageCircle, PiggyBank, Smile, Zap, Send, KeyRound, Shield, Smartphone, LayoutGrid, LogOut, TrendingUp, Plus, RotateCcw, Sparkles } from "lucide-react"
+import { Check, ChevronRight, Crown, Gamepad2, PanelBottom, TreePine, Gauge, MessageCircle, PiggyBank, Smile, Zap, Send, Bell, KeyRound, Shield, Smartphone, LayoutGrid, LogOut, TrendingUp, Plus, RotateCcw, Sparkles } from "lucide-react"
 import type { Bill, Snapshot } from "@/lib/types"
 import { brl, CATEGORIES, insights, int, type Analysis } from "@/lib/finance"
 import { labelMonth, relativeDay } from "@/lib/dates"
@@ -20,6 +20,7 @@ import { natalPref, setNatalPref, type NatalPref } from "@/lib/natal"
 import { fxPrefs, type Deboche } from "../fluximetro"
 import { PlanSheet } from "../plan-sheet"
 import { Atalho } from "../atalho"
+import { useNotificacoes } from "../notificacoes"
 import { Convite } from "../convite"
 
 /** A saudação muda com o momento do mês. */
@@ -278,6 +279,7 @@ function SettingsSheet({ open, onClose, limit, email, admin, name, onPlan, onPla
               )}
             </AnimatePresence>
 
+            <NotifRow row={row} />
             <button className={row} onClick={() => setSub("atalho")}>
               <Zap size={18} className="text-smoke" /><span className="flex-1">Atalho do Apple Pay</span><span className="text-[13px] text-mute">lança sozinho</span><ChevronRight size={16} className="text-faint" />
             </button>
@@ -356,5 +358,20 @@ function Toggle({ on }: { on: boolean }) {
     <span className={`relative h-[26px] w-[44px] shrink-0 rounded-full transition-colors ${on ? "bg-otan" : "bg-sand-2"}`}>
       <span className={`absolute top-[3px] size-5 rounded-full bg-white shadow transition-transform ${on ? "translate-x-[21px]" : "translate-x-[3px]"}`} />
     </span>
+  )
+}
+
+function NotifRow({ row }: { row: string }) {
+  const n = useNotificacoes()
+  const [busy, setBusy] = useState(false)
+  const on = n.estado === "ligado"
+  const sub = { carregando: "", "sem-suporte": "Este aparelho não recebe notificações do app", instalar: "Adicione o Fluxo à tela de início pra ligar", negado: "Bloqueadas. Libere em Ajustes do iPhone, Notificações, Fluxo", ligado: "Um recado por dia, no estilo dele", desligado: "Um recado por dia, no estilo dele" }[n.estado]
+  const can = n.estado === "ligado" || n.estado === "desligado"
+  return (
+    <button className={row} role="switch" aria-checked={on} disabled={!can || busy}
+      onClick={async () => { setBusy(true); try { if (on) await n.desligar(); else await n.ligar() } finally { setBusy(false) } }}>
+      <Bell size={18} className="text-smoke" /><span className="flex-1">Recados do Fluximetro<small className="block text-[12px] font-normal text-mute">{sub}</small></span>
+      {can && <Toggle on={on} />}
+    </button>
   )
 }

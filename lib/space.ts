@@ -21,7 +21,11 @@ export const ensurePlanColumn = () => (planColumn ??= sql`alter table spaces add
 export async function loadSnapshot(): Promise<Snapshot | null> {
   const user = await currentUser()
   if (!user) return null
-  const id = user.spaceId
+  return snapshotOf(user.spaceId, { name: user.name, email: user.email, role: user.role, mustChangePassword: user.mustChangePassword })
+}
+
+/** Os dados de um espaço (também usado pelos recados do Fluximetro, sem sessão). */
+export async function snapshotOf(id: string, user: Snapshot["user"]): Promise<Snapshot | null> {
   await ensurePlanColumn()
   const [spaces, txs, goals, bills, cards, subs, limits] = await Promise.all([
     sql`select id, name, monthly_limit, onboarded, plan from spaces where id = ${id}`,
@@ -39,7 +43,7 @@ export async function loadSnapshot(): Promise<Snapshot | null> {
   const mk = monthKey()
   return {
     space: { id: s.id, name: s.name, limit: num(s.monthly_limit), onboarded: s.onboarded, plan: s.plan ?? null },
-    user: { name: user.name, email: user.email, role: user.role, mustChangePassword: user.mustChangePassword },
+    user,
     txs: txs.map((t) => ({
       id: num(t.id), kind: t.kind, amount: num(t.amount), description: t.description,
       category: t.category, date: day(t.occurred_on), cardId: t.card_id ? num(t.card_id) : null,

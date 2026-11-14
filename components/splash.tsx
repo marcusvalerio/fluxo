@@ -23,30 +23,30 @@ export function LogoF({ size = 40, f = "#FF4E20", fold = "#B83312", coin = "#1F2
 export function Splash({ onDone, natal = false }: { onDone: () => void; natal?: boolean }) {
   const reduced = !!useReducedMotion()
   useEffect(() => {
-    const t = setTimeout(onDone, reduced ? 900 : natal ? 4800 : 2100)
+    const t = setTimeout(onDone, reduced ? 500 : natal ? 3600 : 1350)
     return () => clearTimeout(t)
   }, [onDone, reduced, natal])
   const r = reduced
   return (
     <motion.div className="fixed inset-0 z-[80] grid place-items-center bg-otan" aria-hidden
-      initial={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.04 }} transition={{ duration: 0.4 }}>
+      initial={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.04 }} transition={{ duration: 0.28 }}>
       {natal && <NatalDrop />}
       <div className={`flex flex-col items-center gap-6 ${natal ? "translate-y-[30vh]" : ""}`}>
         <svg viewBox="0 0 100 100" width={120} height={120} style={{ overflow: "visible" }}>
           <g transform="translate(11 0) skewX(-12)">
             <motion.path d={STEM} fill="#FFF6EF" style={{ transformBox: "fill-box", originY: 1 }}
-              initial={r ? false : { y: 110, scaleY: 0.6, opacity: 0 }} animate={{ y: 0, scaleY: 1, opacity: 1 }} transition={{ duration: 0.5, ease }} />
+              initial={r ? false : { y: 110, scaleY: 0.6, opacity: 0 }} animate={{ y: 0, scaleY: 1, opacity: 1 }} transition={{ duration: 0.34, ease }} />
             <motion.path d={ARM} fill="#FFF6EF"
-              initial={r ? false : { x: 90, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.45, delay: 0.4, ease }} />
+              initial={r ? false : { x: 90, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.3, delay: 0.24, ease }} />
             <motion.path d={FOLD} fill="#FFD8C4"
-              initial={r ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25, delay: 0.8 }} />
+              initial={r ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.18, delay: 0.5 }} />
           </g>
           <motion.circle cx="57" cy="52" r="11" fill="#1F282E"
             initial={r ? false : { y: -140, opacity: 0 }} animate={{ y: [-140, 0, -10, 0], opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.95, times: [0, 0.6, 0.8, 1], ease: "easeOut" }} />
+            transition={{ duration: 0.45, delay: 0.56, times: [0, 0.6, 0.8, 1], ease: "easeOut" }} />
         </svg>
         <motion.span className="ttl text-[40px] italic leading-none text-[#FFF6EF]"
-          initial={r ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 1.45 }}>fluxo</motion.span>
+          initial={r ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, delay: 0.85 }}>fluxo</motion.span>
       </div>
     </motion.div>
   )
