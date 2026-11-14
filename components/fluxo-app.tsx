@@ -14,6 +14,7 @@ import { Lancar } from "./lancar"
 import { InstallGuide, useInstallPrompt } from "./install-guide"
 
 import { Splash } from "./splash"
+import { ChuvaMoedas } from "./festa"
 import { isNatal } from "@/lib/natal"
 const Neve = dynamic(() => import("./natal").then((m) => m.Neve), { ssr: false })
 import { falaDoLancamento, fxPrefs, reagir, type FxReaction } from "./fluximetro"
@@ -148,11 +149,13 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
 
       <InstallGuide open={install.open} onClose={install.close} />
       <AnimatePresence>{splash && <Splash key="splash" onDone={endSplash} natal={natal} />}</AnimatePresence>
+      <ChuvaMoedas />
       {natal && a.budget > 0 && a.free < 0 && <Neve />}
       <Jogo open={jogo} onClose={() => setJogo(false)} />
       <Lancar open={lancar} seed={seed} onClose={() => { setLancar(false); setSeed(undefined) }} snap={snap} a={a} onDone={(r) => {
         setDone({ ...r, id: Date.now() })
         const tight = r.kind === "expense" && a.budget > 0 && a.free - r.amount < 0
+        try { navigator.vibrate?.(10) } catch {}
         setTimeout(() => reagir(falaDoLancamento(r.kind, r.label, tight, !fxPrefs.humor())), 900)
       }} />
 

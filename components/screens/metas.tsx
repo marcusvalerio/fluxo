@@ -9,6 +9,7 @@ import { diffDays, labelDay } from "@/lib/dates"
 import { field, Label, Primary, rise, Sheet, spring } from "../ui"
 import { Piggy } from "../piggy"
 import { addGoal, contributeGoal, deleteGoal } from "@/app/actions"
+import { festa } from "../festa"
 
 const COLORS = ["var(--c-ink)", "#FF4E20", "var(--c-smoke)", "var(--c-faint)"]
 
@@ -97,7 +98,7 @@ function ContributeSheet({ goal, onClose }: { goal: Goal | null; onClose: () => 
   const [v, setV] = useState("")
   const [pending, start] = useTransition()
   const n = Number(v.replace(/\./g, "").replace(",", ".")) || 0
-  const act = (sign: 1 | -1) => goal && start(async () => { await contributeGoal(goal.id, sign * n); setV(""); onClose() })
+  const act = (sign: 1 | -1) => goal && start(async () => { await contributeGoal(goal.id, sign * n); if (sign > 0 && goal.saved < goal.target && goal.saved + n >= goal.target) festa(); setV(""); onClose() })
   return (
     <Sheet open={!!goal} onClose={onClose} title={goal?.name}>
       {goal && (

@@ -1,10 +1,10 @@
 import { Analytics } from "@vercel/analytics/next"
 import type { Metadata, Viewport } from "next"
-import { DM_Sans, Inter } from "next/font/google"
+import { Anybody, Inter } from "next/font/google"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
-const dm = DM_Sans({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-dm" })
+const dm = Anybody({ subsets: ["latin"], axes: ["wdth"], variable: "--font-dm" })
 
 export const metadata: Metadata = {
   title: "Fluxo",
@@ -18,7 +18,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: "cover",
-  themeColor: [{ media: "(prefers-color-scheme: light)", color: "#E4E3DC" }, { media: "(prefers-color-scheme: dark)", color: "#101519" }],
+  themeColor: [{ media: "(prefers-color-scheme: light)", color: "#FFF6EF" }, { media: "(prefers-color-scheme: dark)", color: "#0F1418" }],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

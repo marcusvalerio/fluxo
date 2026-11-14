@@ -22,6 +22,19 @@ import { PlanSheet } from "../plan-sheet"
 import { Atalho } from "../atalho"
 import { Convite } from "../convite"
 
+/** A saudação muda com o momento do mês. */
+function saudacao(snap: Snapshot, a: Analysis, nome: string) {
+  const dia = Number(snap.today.slice(8, 10))
+  const salario = snap.txs.some((t) => t.kind === "income" && t.date === snap.today && /sal[aá]rio|pagamento|holerite/i.test(t.description))
+  if (salario) return `Dia de salário, ${nome}`
+  if (a.free < 0) return `Segura firme, ${nome}`
+  if (a.daysLeft <= 1 && a.free > 0) return `Mês no azul, ${nome}`
+  if (a.budget > 0 && a.free / a.budget < 0.2) return `Faltam ${a.daysLeft} dias, ${nome}`
+  if (dia === 1) return `Mês novo, ${nome}`
+  const h = new Date().getHours()
+  return `${h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite"}, ${nome}`
+}
+
 const WEEK = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" })
 
 export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Analysis; go: (t: Tab) => void; goAgenda: (v: AgendaView) => void }) {
@@ -43,12 +56,19 @@ export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Ana
       <motion.header {...rise} transition={spring} className="flex items-center justify-between px-1 pb-6">
         <div>
           <p className="text-[13px] text-mute first-letter:uppercase">{today}</p>
-          <h1 className="ttl text-[30px] leading-tight">Oi, {first}</h1>
+          <h1 suppressHydrationWarning className="ttl text-[30px] leading-tight">{saudacao(snap, a, first)}</h1>
         </div>
         <button onClick={() => setSettings(true)} className="ttl grid size-[46px] place-items-center rounded-full bg-card text-[16px]" aria-label="Ajustes">
           {first[0]?.toUpperCase()}
         </button>
       </motion.header>
+
+      {/* acessos rápidos */}
+      <motion.nav {...rise} transition={{ ...spring, delay: 0.03 }} aria-label="Acessos rápidos" className="no-scrollbar -mx-4 -mt-1 mb-5 flex gap-2 overflow-x-auto px-4">
+        {([["Hoje", () => goAgenda("dia")], ["Contas a pagar", () => go("agenda")], ["Posso comprar?", () => window.dispatchEvent(new Event("fluxo:comprar"))], ["Metas", () => { try { sessionStorage.setItem("fluxo-seg", "metas") } catch {} go("carteira") }]] as const).map(([t, fn], i) => (
+          <button key={t} onClick={fn} className={`shrink-0 rounded-full px-[18px] py-[11px] text-[14px] ${i === 0 ? "bg-ink font-semibold text-cotton" : "bg-card font-medium text-ink"}`}>{t}</button>
+        ))}
+      </motion.nav>
 
       <div className="flex flex-col gap-7">
         {/* Livre até o fim do mês */}
