@@ -46,17 +46,17 @@ interface Slide { bg: string; dark?: boolean; tag: string; big: React.ReactNode;
 
 function slides(c: Ciclo, nome: string): Slide[] {
   const out: Slide[] = [
-    { bg: "linear-gradient(170deg,#FF5A2C,#B83312)", tag: `De um salário ao outro · ${fmt(c.from)} → ${fmt(c.to)}`, big: <>Seu ciclo,<br />sem filtro.</>, sub: `Eu vi tudo, ${nome}. Agora você também vai ver.`, fala: "Respira fundo. Vai ter dado que dói.", st: "normal" },
+    { bg: "linear-gradient(170deg,#FF5A2C,#5A2C46)", tag: `De um salário ao outro · ${fmt(c.from)} → ${fmt(c.to)}`, big: <>Seu ciclo,<br />sem filtro.</>, sub: `Eu vi tudo, ${nome}. Agora você também vai ver.`, fala: "Respira fundo. Vai ter dado que dói.", st: "normal" },
     { bg: "#1F282E", tag: "Entrou e saiu", big: brl(c.entrou, false), sub: `entraram. Saíram ${brl(c.saiu, false)}.`, fala: c.saiu < c.entrou ? "Saiu menos do que entrou. Isso tem nome: milagre." : "Saiu mais do que entrou. A gente precisa conversar.", st: c.saiu < c.entrou ? "feliz" : "apertado" },
   ]
   if (c.rival) out.push({ bg: "linear-gradient(170deg,#C9302C,#5E1410)", tag: "Seu maior rival", big: <>{c.rival.nome}<br />{c.rival.vezes}x</>, sub: `${brl(c.rival.total, false)} no ciclo.`, fala: /ifood|delivery|rappi|lanche|pizza/i.test(c.rival.nome) ? "O motoboy vai te convidar pro casamento dele." : `${c.rival.nome} já te conhece pelo nome.`, st: "pensando" })
   if (c.diaCaro) out.push({ bg: "#2B2140", tag: "Dia mais caro", big: <>{fmt(c.diaCaro.dia)}<br />{brl(c.diaCaro.total, false)}</>, sub: "Esse dia foi intenso.", fala: "O que aconteceu nesse dia? Não precisa responder. Eu já sei.", st: "conta" })
   out.push(c.sobrou > 0
     ? { bg: "linear-gradient(170deg,#1F8A5B,#0F4A31)", tag: "Sobrou", big: brl(c.sobrou, false), sub: "no fim do ciclo.", fala: "Seu eu do futuro mandou um abraço.", st: "guardou" }
-    : { bg: "linear-gradient(170deg,#B83312,#6E1D08)", tag: "Faltou", big: brl(-c.sobrou, false), sub: "além do que entrou.", fala: "O mês sentou em mim. Esse ciclo a gente acerta.", st: "apertado" })
-  out.push({ bg: "#F4F3EE", dark: true, tag: "Nota do ciclo", big: <span style={{ color: "#FF4E20", fontSize: 140 }}>{c.nota}</span>, sub: c.nota.startsWith("A") ? "Gastou com consciência. Pode se gabar." : c.nota.startsWith("B") ? "Gastou com consciência. Quase sempre." : "Dá pra melhorar. E eu tô aqui pra isso.",
+    : { bg: "linear-gradient(170deg,#5A2C46,#6E1D08)", tag: "Faltou", big: brl(-c.sobrou, false), sub: "além do que entrou.", fala: "O mês sentou em mim. Esse ciclo a gente acerta.", st: "apertado" })
+  out.push({ bg: "#F4F3EE", dark: true, tag: "Nota do ciclo", big: <span style={{ color: "var(--c-accent)", fontSize: 140 }}>{c.nota}</span>, sub: c.nota.startsWith("A") ? "Gastou com consciência. Pode se gabar." : c.nota.startsWith("B") ? "Gastou com consciência. Quase sempre." : "Dá pra melhorar. E eu tô aqui pra isso.",
     fala: c.nota === "A" ? "Nota A. Vou emoldurar." : c.nota.startsWith("B") ? "Dava pra ser A se não fosse aquele delivery." : "Sem julgamento. Tá, um pouquinho.", st: c.nota <= "B+" ? "feliz" : "normal" })
-  out.push({ bg: "linear-gradient(170deg,#FF5A2C,#B83312)", tag: "Novo ciclo começou", big: <>Bora repetir?</>, sub: "Eu fico de olho. Você fica longe do delivery.", fala: "Combinado?", st: "feliz" })
+  out.push({ bg: "linear-gradient(170deg,#FF5A2C,#5A2C46)", tag: "Novo ciclo começou", big: <>Bora repetir?</>, sub: "Eu fico de olho. Você fica longe do delivery.", fala: "Combinado?", st: "feliz" })
   return out
 }
 

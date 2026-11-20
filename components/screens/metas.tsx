@@ -11,7 +11,7 @@ import { Piggy } from "../piggy"
 import { addGoal, contributeGoal, deleteGoal } from "@/app/actions"
 import { festa } from "../festa"
 
-const COLORS = ["var(--c-ink)", "#FF4E20", "var(--c-smoke)", "var(--c-faint)"]
+const COLORS = ["var(--c-ink)", "var(--c-accent)", "var(--c-smoke)", "var(--c-faint)"]
 
 function monthlyNeed(g: Goal, today: string) {
   if (!g.deadline) return null
@@ -70,7 +70,7 @@ export function MetasScreen({ snap, embedded }: { snap: Snapshot; embedded?: boo
               <span className="mt-2 flex items-baseline gap-1.5">
                 <span className="num text-[26px]">{brl(g.saved, false)}</span>
                 <span className="text-[13px] text-mute">de {brl(g.target, false)}</span>
-                <span className={`num ml-auto text-[15px] ${color === "#FF4E20" ? "text-gravy" : ""}`}>{Math.round(pct * 100)}%</span>
+                <span className={`num ml-auto text-[15px] ${color === "var(--c-accent)" ? "text-gravy" : ""}`}>{Math.round(pct * 100)}%</span>
               </span>
               <span className="mt-3 flex h-3.5 gap-[3px]" aria-hidden>
                 {Array.from({ length: 40 }, (_, k) => (

@@ -37,7 +37,7 @@ export function HeroCard({ snap, a, score }: { snap: Snapshot; a: Analysis; scor
   const tight = a.free < 0
   // a cor acompanha o mês: laranja com folga, esquenta conforme aperta, telha quando passa do teto
   const left = a.budget > 0 ? a.free / a.budget : 1
-  const bg = tight ? "#B83312" : left < 0.15 ? "#D23C16" : left < 0.35 ? "#EC4519" : "#FF4E20"
+  const bg = tight ? "#5A2C46" : left < 0.15 ? "#2B3E72" : left < 0.35 ? "#3A5290" : "var(--c-accent)"
   void score
 
   const peak = Math.max(a.dailyCap * 1.6, ...a.days.map((d) => d.total), 1)
@@ -56,7 +56,7 @@ export function HeroCard({ snap, a, score }: { snap: Snapshot; a: Analysis; scor
   const dots = <span className="text-[34px] tracking-[0.04em]">•••••</span>
 
   return (
-    <section className="relative isolate overflow-hidden rounded-[23px] px-5 pb-4 pt-4 text-white shadow-[0_24px_50px_-20px_rgb(255_78_32/0.55)]" style={{ background: bg, transition: "background 600ms" }}>
+    <section className="relative isolate overflow-hidden rounded-[23px] px-5 pb-4 pt-4 text-white shadow-[0_24px_50px_-20px_rgb(27_37_71/0.45)]" style={{ background: `radial-gradient(120% 90% at 85% 0%, rgb(255 255 255 / 0.18), transparent 55%), ${bg}`, transition: "background 600ms" }}>
       {/* revelação líquida: uma lente de vidro nasce do olho e atravessa o card */}
       <AnimatePresence>
         {wave > 0 && (

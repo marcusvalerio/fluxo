@@ -127,7 +127,7 @@ export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Ana
                       <span className={`text-[11.5px] ${hot ? "font-semibold text-gravy" : "text-mute"}`}>{Math.round(c.share * 100)}%</span>
                       <div className="relative h-[120px] w-full overflow-hidden rounded-[14px] bg-paper">
                         <motion.div className="absolute inset-x-0 bottom-0 origin-bottom rounded-[12px]" initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.3 + i * 0.06, type: "spring", stiffness: 160, damping: 20 }}
-                          style={{ height: `${h}%`, background: top ? "linear-gradient(180deg,#FF8A63,#FF4E20)" : "repeating-linear-gradient(-45deg,#FFB89E 0 2px,transparent 2px 6px),#FFE1D6" }} />
+                          style={{ height: `${h}%`, background: top ? "linear-gradient(180deg,#6F8BD6,var(--c-accent))" : "repeating-linear-gradient(-45deg,#A9B9DE 0 2px,transparent 2px 6px),#DCE4F3" }} />
                         <span className={`num absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] shadow-[0_1px_3px_rgb(0_0_0/0.08)] ${top ? "bg-ink text-cotton" : "bg-card text-ink"}`}
                           style={{ bottom: `calc(${h}% - 26px)` }}>{int(c.value)}</span>
                       </div>

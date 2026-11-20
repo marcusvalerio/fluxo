@@ -162,7 +162,7 @@ function Assinaturas({ snap }: { snap: Snapshot }) {
           <div className="flex h-3 gap-[3px] overflow-hidden rounded-full">
             {sorted.map((x, i) => (
               <motion.span key={x.id} initial={{ flexGrow: 0 }} animate={{ flexGrow: subMonthly(x) }} transition={{ delay: 0.1 + i * 0.04, type: "spring", stiffness: 70, damping: 16 }}
-                className="basis-0" style={{ background: i === 0 ? "#FF4E20" : ["var(--c-ink)", "var(--c-smoke)", "var(--c-faint)", "var(--c-sand-3)"][Math.min(3, i - 1)] }} title={x.name} />
+                className="basis-0" style={{ background: i === 0 ? "var(--c-accent)" : ["var(--c-ink)", "var(--c-smoke)", "var(--c-faint)", "var(--c-sand-3)"][Math.min(3, i - 1)] }} title={x.name} />
             ))}
           </div>
         </motion.div>
@@ -267,7 +267,7 @@ function Limites({ snap, a }: { snap: Snapshot; a: Analysis }) {
           <div className="rounded-[23px] bg-card px-5 py-1">
             {used.map((l) => {
               const pct = l.spent / l.lim
-              const tone = pct >= 1 ? "#FF4E20" : pct > expected + 0.1 ? "var(--c-gravy)" : "var(--c-ink)"
+              const tone = pct >= 1 ? "var(--c-accent)" : pct > expected + 0.1 ? "var(--c-gravy)" : "var(--c-ink)"
               return (
                 <button key={l.cat} onClick={() => setEdit(l.cat)} className="flex w-full items-center gap-3 border-t border-cotton py-3.5 text-left first:border-0">
                   <CatIcon category={l.cat} size={36} />

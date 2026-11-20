@@ -72,7 +72,7 @@ export function AgendaScreen({ snap, a, view, setView }: { snap: Snapshot; a: An
                   <span className={`num ${today && !on ? "font-bold" : ""}`}>{d}</span>
                   <span className="absolute bottom-1.5 flex gap-[3px]">
                     {kinds.slice(0, 3).map((k) => (
-                      <span key={k} className="size-[5px] rounded-full" style={{ background: k === "income" ? "var(--c-gravy)" : k === "invoice" ? "#FF4E20" : on ? "var(--c-cotton)" : "var(--c-ink)" }} />
+                      <span key={k} className="size-[5px] rounded-full" style={{ background: k === "income" ? "var(--c-gravy)" : k === "invoice" ? "var(--c-accent)" : on ? "var(--c-cotton)" : "var(--c-ink)" }} />
                     ))}
                   </span>
                 </motion.button>

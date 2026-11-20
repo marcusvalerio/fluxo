@@ -165,7 +165,7 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
         {done && (
           <motion.div key={`f${done.id}`} className="pointer-events-none fixed inset-0 z-[60] overflow-hidden" initial={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <span className="absolute bottom-0 left-1/2 size-[260vmax] rounded-full"
-              style={{ background: `radial-gradient(circle, ${done.kind === "income" ? "rgb(255 138 99 / 0.9)" : "rgb(255 78 32 / 0.9)"} 0%, rgb(255 78 32 / 0.25) 45%, transparent 70%)`, animation: "flood 900ms cubic-bezier(.2,.9,.2,1) forwards" }} />
+              style={{ background: `radial-gradient(circle, ${done.kind === "income" ? "rgb(var(--c-accent-rgb) / 0.7)" : "rgb(var(--c-accent-rgb) / 0.9)"} 0%, rgb(var(--c-accent-rgb) / 0.25) 45%, transparent 70%)`, animation: "flood 900ms cubic-bezier(.2,.9,.2,1) forwards" }} />
           </motion.div>
         )}
       </AnimatePresence>

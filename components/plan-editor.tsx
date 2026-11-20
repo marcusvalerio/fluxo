@@ -74,7 +74,7 @@ export function SaveEditor({ plan, onChange }: { plan: Plan; onChange: (p: Plan)
   const parts: Part[] = [
     { key: "fixed", label: "Gastos fixos", value: plan.fixed, color: "var(--c-ink)", icon: Pin },
     { key: "variable", label: "Gastos variáveis", value: plan.variable, color: "var(--c-faint)", icon: CreditCard },
-    { key: "save", label: "Guardar", value: plan.save, color: "#FF4E20", icon: PiggyBank },
+    { key: "save", label: "Guardar", value: plan.save, color: "var(--c-accent)", icon: PiggyBank },
   ]
   const fala = FALAS.find(([lim]) => plan.save <= lim)![1]
   const money = (pct: number) => (plan.income > 0 ? brl((plan.income * pct) / 100, false) : `${pct}%`)
@@ -106,7 +106,7 @@ export function SaveEditor({ plan, onChange }: { plan: Plan; onChange: (p: Plan)
   )
 }
 
-const GOAL_COLORS = ["#1F8A5B", "#FF4E20", "var(--c-ink)", "var(--c-faint)", "#B83312", "var(--c-smoke)"]
+const GOAL_COLORS = ["#1F8A5B", "var(--c-accent)", "var(--c-ink)", "var(--c-faint)", "#5A2C46", "var(--c-smoke)"]
 const goalIcon = (g: Goal) => (/reserva|emerg/i.test(g.name) ? Shield : /viag|trip|férias|ferias/i.test(g.name) ? Plane : Target)
 
 /** Divisão sugerida: quem está mais longe da meta recebe mais. */

@@ -25,7 +25,7 @@ export function HealthCard({ h }: { h: Health }) {
     )
   }
   const R = 34, C = 2 * Math.PI * R
-  const color = h.score >= 60 ? "var(--c-ink)" : h.score >= 40 ? "#FF4E20" : "var(--c-gravy)"
+  const color = h.score >= 60 ? "var(--c-ink)" : h.score >= 40 ? "var(--c-accent)" : "var(--c-gravy)"
   const worst = [...h.factors].filter((f) => f.points >= 0).sort((a, b) => a.points / a.max - b.points / b.max)[0]
   return (
     <section className="rounded-[23px] bg-card p-5">
@@ -56,7 +56,7 @@ export function HealthCard({ h }: { h: Health }) {
                     <span className="num text-[13px] text-mute">{f.points < 0 ? "sem dados" : `${f.points}/${f.max}`}</span>
                   </div>
                   <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-cotton">
-                    <motion.div className="h-full origin-left rounded-full" style={{ background: f.points / f.max >= 0.6 ? "var(--c-ink)" : "#FF4E20", width: `${(Math.max(0, f.points) / f.max) * 100}%` }}
+                    <motion.div className="h-full origin-left rounded-full" style={{ background: f.points / f.max >= 0.6 ? "var(--c-ink)" : "var(--c-accent)", width: `${(Math.max(0, f.points) / f.max) * 100}%` }}
                       initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.8, ease: [0.2, 0.9, 0.2, 1] }} />
                   </div>
                   <p className="mt-1 text-[12px] text-mute">{f.tip}</p>

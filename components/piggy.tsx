@@ -13,9 +13,9 @@ export function Piggy({ pct, size = 56 }: { pct: number; size?: number }) {
       <g transform="translate(50 64)">
         <rect x={-w * 0.55} y={-6} width={7} height={9} rx={3} fill="#E2401C" />
         <rect x={w * 0.38} y={-6} width={7} height={9} rx={3} fill="#E2401C" />
-        <motion.ellipse cx={0} cy={-h} fill="#FF4E20" initial={false} animate={{ rx: w, ry: h, cy: -h }} transition={{ type: "spring", stiffness: 140, damping: 14 }} />
+        <motion.ellipse cx={0} cy={-h} fill="var(--c-accent)" initial={false} animate={{ rx: w, ry: h, cy: -h }} transition={{ type: "spring", stiffness: 140, damping: 14 }} />
         <ellipse cx={w * 0.95} cy={-h * 0.95} rx={5} ry={6} fill="#E2401C" />
-        <rect x={-9} y={-h * 2 + 4} width={18} height={4} rx={2} fill="#B83312" />
+        <rect x={-9} y={-h * 2 + 4} width={18} height={4} rx={2} fill="#5A2C46" />
         {done ? (
           <path d={`M${-w * 0.35} ${-h * 1.1 + 1}q4-5 8 0M${w * 0.1} ${-h * 1.1 + 1}q4-5 8 0`} stroke="#fff" strokeWidth={2.6} fill="none" strokeLinecap="round" />
         ) : (

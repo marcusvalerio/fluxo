@@ -57,15 +57,15 @@ export function RitmoCard({ snap, a }: { snap: Snapshot; a: Analysis }) {
           <line x1="8" x2={W - 8} y1={Y(r.budget)} y2={Y(r.budget)} stroke="var(--c-sand-2)" strokeDasharray="3 4" />
           <text x="8" y={Y(r.budget) - 7} fontSize="11" fill="var(--c-mute)">teto {brl(r.budget, false)}</text>
         </>}
-        <motion.path d={`${line} L${lx} ${bot} L8 ${bot}Z`} fill="#FF4E20" fillOpacity={0.12} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} />
-        <motion.path d={line} fill="none" stroke="#FF4E20" strokeWidth="2.4" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.9, ease: [0.2, 0.9, 0.2, 1] }} />
-        <path d={`M${lx} ${ly} L${X(a.dim)} ${Y(r.projected)}`} fill="none" stroke="#FF4E20" strokeOpacity={0.55} strokeWidth="2" strokeDasharray="5 5" />
+        <motion.path d={`${line} L${lx} ${bot} L8 ${bot}Z`} fill="var(--c-accent)" fillOpacity={0.12} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} />
+        <motion.path d={line} fill="none" stroke="var(--c-accent)" strokeWidth="2.4" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.9, ease: [0.2, 0.9, 0.2, 1] }} />
+        <path d={`M${lx} ${ly} L${X(a.dim)} ${Y(r.projected)}`} fill="none" stroke="var(--c-accent)" strokeOpacity={0.55} strokeWidth="2" strokeDasharray="5 5" />
         <line x1={lx} x2={lx} y1={ly} y2={bot} stroke="var(--c-faint)" strokeDasharray="2 3" />
         {r.hitDay !== null && r.budget > 0 && <>
           <line x1={X(r.hitDay)} x2={X(r.hitDay)} y1={Y(r.budget)} y2={bot} stroke="var(--c-gravy)" strokeDasharray="2 3" />
           <circle cx={X(r.hitDay)} cy={Y(r.budget)} r="4.5" fill="var(--c-gravy)" stroke="var(--c-card)" strokeWidth="2" />
         </>}
-        <circle cx={lx} cy={ly} r="4.5" fill="#FF4E20" stroke="var(--c-card)" strokeWidth="2" />
+        <circle cx={lx} cy={ly} r="4.5" fill="var(--c-accent)" stroke="var(--c-card)" strokeWidth="2" />
         <text x="8" y={H - 2} fontSize="11" fill="var(--c-mute)">dia 1</text>
         <text x={lx} y={H - 2} fontSize="11" fontWeight="600" fill="var(--c-ink)" textAnchor="middle">hoje</text>
         {r.hitDay !== null && Math.abs(X(r.hitDay) - lx) > 30 && <text x={X(r.hitDay)} y={H - 2} fontSize="11" fontWeight="600" fill="var(--c-gravy)" textAnchor="middle">dia {r.hitDay}</text>}
@@ -79,7 +79,7 @@ export function RitmoCard({ snap, a }: { snap: Snapshot; a: Analysis }) {
   )
 }
 
-const SCALE = ["var(--c-paper)", "#FFE1D6", "#FFB89E", "#FF8A63", "#FF4E20"]
+const SCALE = ["var(--c-paper)", "#DCE4F3", "#A9B9DE", "#6F8BD6", "var(--c-accent)"]
 
 export function GastosDiaCard({ snap, a }: { snap: Snapshot; a: Analysis }) {
   const r = useRitmo(snap, a)

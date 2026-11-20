@@ -13,28 +13,31 @@
   --color-smoke: var(--c-smoke);
   --color-mute: var(--c-mute);
   --color-faint: var(--c-faint);
-  --color-otan: #FF4E20;
+  --color-otan: var(--c-accent);
   --color-gravy: var(--c-gravy);
   --color-peach: var(--c-peach);
 }
 
 :root {
   color-scheme: light;
-  --c-cotton: #FFF6EF; --c-sand: #F6E6DB; --c-sand-2: #EBD5C8; --c-sand-3: #D2BBAE; --c-paper: #FFFBF7; --c-card: #FFFFFF; --c-peach: #FFD8C4;
-  --c-ink: #1F282E; --c-smoke: #4A3F3A; --c-mute: #6B5A52; --c-faint: #9A8A82; --c-gravy: #B83312; --c-on-ink-2: #A9B1B7;
-  --glass-a: rgb(255 251 247 / 0.7); --glass-b: rgb(255 251 247 / 0.76); --glass-edge: rgb(31 40 46 / 0.08); --glass-hi: rgb(255 255 255 / 0.95); --glass-pill: rgb(255 255 255 / 0.8);
+  --c-cotton: #EEF1F7; --c-sand: #DFE5EF; --c-sand-2: #CDD6E4; --c-sand-3: #B1BED2; --c-paper: #F5F7FB; --c-card: rgb(255 255 255 / 0.66); --c-peach: #D9E1F0;
+  --c-ink: #1B2547; --c-smoke: #3A4567; --c-mute: #5E6889; --c-faint: #8E97B0; --c-gravy: #34509A; --c-on-ink-2: #A9B3CC;
+  --c-accent: #2F4478; --c-accent-rgb: 47 68 120; --c-bg-end: #A9B9D4;
+  --glass-a: rgb(246 248 252 / 0.9); --glass-b: rgb(255 255 255 / 0.7); --glass-edge: rgb(27 37 71 / 0.07); --glass-hi: rgb(255 255 255 / 0.95); --glass-pill: rgb(255 255 255 / 0.85);
 }
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --c-cotton: #0F1418; --c-sand: #252E35; --c-sand-2: #323C44; --c-sand-3: #4A565F; --c-paper: #1A2228; --c-card: #1A2228; --c-peach: #5A2A1C;
-    --c-ink: #ECEBE5; --c-smoke: #BAC2C8; --c-mute: #8F99A1; --c-faint: #66717A; --c-gravy: #FF8A63; --c-on-ink-2: #55606A;
-    --glass-a: rgb(44 53 60 / 0.66); --glass-b: rgb(44 53 60 / 0.62); --glass-edge: rgb(255 255 255 / 0.12); --glass-hi: rgb(255 255 255 / 0.22); --glass-pill: rgb(255 255 255 / 0.14);
+    --c-cotton: #0D1222; --c-sand: #1F2740; --c-sand-2: #2B3552; --c-sand-3: #3F4B6C; --c-paper: #151C30; --c-card: rgb(255 255 255 / 0.06); --c-peach: #26345C;
+    --c-ink: #E6EAF4; --c-smoke: #BAC3D8; --c-mute: #8E98B3; --c-faint: #66708C; --c-gravy: #9DB2EA; --c-on-ink-2: #55607E;
+    --c-accent: #6F8BD6; --c-accent-rgb: 111 139 214; --c-bg-end: #1C2850;
+    --glass-a: rgb(30 39 66 / 0.92); --glass-b: rgb(36 46 76 / 0.62); --glass-edge: rgb(255 255 255 / 0.1); --glass-hi: rgb(255 255 255 / 0.2); --glass-pill: rgb(255 255 255 / 0.12);
   }
 }
 
-html, body {
-  background: var(--color-cotton);
+html { background: var(--c-cotton) }
+body {
+  background: linear-gradient(180deg, var(--c-cotton) 0%, var(--c-cotton) 35%, var(--c-bg-end) 100%) fixed;
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -43,17 +46,15 @@ html, body {
 
 /* números e títulos: Anybody, com respiro (sem apertar demais as letras) */
 .num {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-stretch: 88%;
+  font-family: var(--font-sans);
+  font-weight: 400;
   font-feature-settings: "tnum" 1;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.035em;
 }
 .ttl {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-stretch: 90%;
-  letter-spacing: -0.005em;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
 /* grão sutil no fundo, pra não ficar papel em branco */
@@ -77,11 +78,11 @@ button:active:not(:disabled), a:active { scale: .97 }
 .lg {
   background: var(--glass-a);
   border: 1px solid var(--glass-edge);
-  box-shadow: 0 8px 24px -10px rgb(31 40 46 / 0.22);
+  box-shadow: 0 12px 32px -12px rgb(27 37 71 / 0.28), inset 0 1px 0 var(--glass-hi);
 }
 :root[data-bar="solid"] .lg { background: var(--c-card) }
-.lg-plus { background: rgb(255 78 32 / 0.78); color: #fff; box-shadow: 0 10px 24px -8px rgb(255 78 32 / 0.6) }
-:root[data-bar="solid"] .lg-plus { background: #FF4E20 }
+.lg-plus { background: radial-gradient(circle at 35% 30%, rgb(var(--c-accent-rgb) / 0.85), var(--c-accent)); color: #fff; box-shadow: 0 12px 26px -8px rgb(var(--c-accent-rgb) / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.25) }
+:root[data-bar="solid"] .lg-plus { background: var(--c-accent) }
 .lg-pill {
   background: var(--glass-pill);
   box-shadow: inset 0 0 0 1px var(--glass-edge);
@@ -129,3 +130,7 @@ input[type="date"]::-webkit-date-and-time-value { text-align: left; min-height: 
 .xm-glow { filter: blur(1.5px) }
 @keyframes xm-blink { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
 @media (prefers-reduced-motion: reduce) { .xm-bulb { animation: none } }
+
+/* cartões de vidro fosco (estilo azul-gelo) */
+.bg-card { border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-hi); }
+.bg-card .bg-card { border-color: transparent; box-shadow: none }

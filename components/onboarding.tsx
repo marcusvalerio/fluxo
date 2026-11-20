@@ -165,7 +165,7 @@ function Welcome() {
             {Array.from({ length: 30 }, (_, i) => (
               <motion.span key={i} initial={{ scaleY: 0 }} animate={{ scaleY: 1 }}
                 transition={{ delay: 0.4 + i * 0.025, type: "spring", stiffness: 500, damping: 14 }}
-                className="flex-1 origin-bottom rounded-[3px]" style={{ background: i < 6 ? "var(--c-ink)" : i === 6 ? "#FF4E20" : "var(--c-sand)" }} />
+                className="flex-1 origin-bottom rounded-[3px]" style={{ background: i < 6 ? "var(--c-ink)" : i === 6 ? "var(--c-accent)" : "var(--c-sand)" }} />
             ))}
           </div>
         </div>

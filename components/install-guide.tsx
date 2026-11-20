@@ -77,7 +77,7 @@ export function InstallGuide({ open, onClose }: { open: boolean; onClose: () => 
               {step < 3 ? (
                 <motion.div key="safari" className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   {/* página do Fluxo */}
-                  <div className="mx-2.5 mt-8 h-16 rounded-[10px]" style={{ background: "linear-gradient(160deg,#FF5A2C,#B83312)" }} />
+                  <div className="mx-2.5 mt-8 h-16 rounded-[10px]" style={{ background: "linear-gradient(160deg,#FF5A2C,#5A2C46)" }} />
                   <div className="mx-2.5 mt-2 h-10 rounded-[10px] bg-[#1F282E]" />
                   <div className="mx-2.5 mt-2 h-10 rounded-[10px] bg-[#1F282E]" />
                   {/* barra do Safari */}
@@ -142,7 +142,7 @@ export function InstallGuide({ open, onClose }: { open: boolean; onClose: () => 
 
         {/* passos */}
         <div className="mt-5 flex justify-center gap-1.5">
-          {STEPS.map((_, i) => <motion.span key={i} animate={{ width: i === step ? 20 : 6, backgroundColor: i === step ? "#FF4E20" : "var(--c-sand-2)" }} className="h-1.5 rounded-full" />)}
+          {STEPS.map((_, i) => <motion.span key={i} animate={{ width: i === step ? 20 : 6, backgroundColor: i === step ? "var(--c-accent)" : "var(--c-sand-2)" }} className="h-1.5 rounded-full" />)}
         </div>
         <AnimatePresence mode="wait">
           <motion.div key={step} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }} className="mt-3 text-center">
