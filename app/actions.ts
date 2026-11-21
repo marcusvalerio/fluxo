@@ -347,6 +347,13 @@ export async function subscribePush(sub: { endpoint: string; keys: { p256dh: str
   await sendTo(id, { title: "Fluximetro", body: "Pronto, agora eu falo com você por aqui. Prometo não ser chato. Muito." })
   return {}
 }
+/** Regrava a inscrição sem mandar recado (roda toda vez que o app abre). */
+export async function resyncPush(sub: { endpoint: string; keys: { p256dh: string; auth: string } }) {
+  const { saveSub } = await import("@/lib/push")
+  const id = await requireSpaceId()
+  if (!sub?.endpoint || !sub.keys?.p256dh || !sub.keys?.auth) return
+  await saveSub(id, sub)
+}
 export async function unsubscribePush(endpoint: string) {
   const { removeSub } = await import("@/lib/push")
   await requireSpaceId()

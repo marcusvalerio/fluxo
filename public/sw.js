@@ -14,3 +14,11 @@ self.addEventListener("notificationclick", (e) => {
     return self.clients.openWindow(url)
   }))
 })
+// o aparelho trocou a inscrição (acontece no iPhone): pede uma nova e avisa o servidor
+self.addEventListener("pushsubscriptionchange", (e) => {
+  const opts = (e.oldSubscription && e.oldSubscription.options) || null
+  if (!opts || !opts.applicationServerKey) return
+  e.waitUntil(self.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: opts.applicationServerKey })
+    .then((sub) => fetch("/api/push", { method: "POST", credentials: "include", headers: { "content-type": "application/json" }, body: JSON.stringify(sub) }))
+    .catch(() => {}))
+})

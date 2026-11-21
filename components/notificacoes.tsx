@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { pushPublicKey, subscribePush, unsubscribePush } from "@/app/actions"
+import { pushPublicKey, resyncPush, subscribePush, unsubscribePush } from "@/app/actions"
 
 type Estado = "carregando" | "sem-suporte" | "instalar" | "negado" | "ligado" | "desligado"
 
@@ -45,4 +45,23 @@ export function useNotificacoes() {
     setEstado("desligado")
   }
   return { estado, ligar, desligar }
+}
+
+/**
+ * Toda vez que o app abre: se a pessoa já deixou notificações, confere a inscrição e manda de novo pro servidor.
+ * O iPhone troca ou invalida a inscrição de tempos em tempos; sem isso o recado diário parava depois do primeiro.
+ */
+export function useManterNotificacoes() {
+  useEffect(() => {
+    (async () => {
+      if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) return
+      if (Notification.permission !== "granted") return
+      const key = await pushPublicKey()
+      if (!key) return
+      const reg = await navigator.serviceWorker.register("/sw.js")
+      await navigator.serviceWorker.ready
+      const sub = (await reg.pushManager.getSubscription()) ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(key) }))
+      await resyncPush(sub.toJSON() as { endpoint: string; keys: { p256dh: string; auth: string } })
+    })().catch(() => {})
+  }, [])
 }

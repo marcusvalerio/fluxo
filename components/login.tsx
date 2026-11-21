@@ -6,6 +6,7 @@ import { ArrowRight, Eye, EyeOff } from "lucide-react"
 import { login } from "@/app/actions"
 import { spring } from "./ui"
 import { Wordmark } from "./logo"
+import { StickField } from "./stick-field"
 
 export function Login() {
   const [email, setEmail] = useState("")
@@ -27,7 +28,9 @@ export function Login() {
   return (
     <main className="relative isolate flex min-h-dvh flex-col overflow-hidden bg-[#1B2440] text-[#F7F7F7]" style={{ colorScheme: "dark" }}>
       {/* aura com as cores da paleta, passando devagar */}
-      <div aria-hidden className="aura pointer-events-none absolute inset-[-20%] -z-10"><i className="a1" /><i className="a2" /><i className="a3" /><i className="a4" /></div>
+      <div aria-hidden className="aura pointer-events-none absolute inset-[-20%] -z-10 opacity-60"><i className="a1" /><i className="a4" /></div>
+      {/* campo de palitos: o mês inteiro em movimento, atrás do nome */}
+      <StickField className="pointer-events-none absolute inset-x-0 top-[8%] -z-10 h-[42%] w-full opacity-90" />
       <div aria-hidden className="grain-bg pointer-events-none absolute inset-0 -z-10" />
 
       <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col px-5 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(24px,env(safe-area-inset-top))]">

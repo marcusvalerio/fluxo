@@ -13,6 +13,7 @@ import { AgendaScreen } from "./screens/agenda"
 import { CarteiraScreen } from "./screens/carteira"
 import { Lancar } from "./lancar"
 import { InstallGuide, useInstallPrompt } from "./install-guide"
+import { useManterNotificacoes } from "./notificacoes"
 
 import { Splash } from "./splash"
 import { ChuvaMoedas } from "./festa"
@@ -39,6 +40,7 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
   const [tab, setTab] = useState<Tab>("inicio")
   const [lancar, setLancar] = useState(false)
   const install = useInstallPrompt()
+  useManterNotificacoes()
   // abertura com o logo uma vez a cada vez que o app é aberto; depois o Fluximetro cai em cima do +
   // a abertura já vem no primeiro quadro (sem esperar o app carregar); só toca uma vez por visita
   const [splash, setSplash] = useState<boolean>(!splashShown)

@@ -40,6 +40,8 @@ export async function sendTo(spaceId: string, msg: { title: string; body: string
       ok++
     } catch (e) {
       const code = (e as { statusCode?: number }).statusCode
+      console.warn("push falhou", code, String(s.endpoint).slice(0, 60))
+      // 404/410: o aparelho desfez a inscrição; o app regrava sozinho na próxima vez que abrir
       if (code === 404 || code === 410) await removeSub(s.endpoint)
     }
   }
