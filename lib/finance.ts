@@ -1,5 +1,6 @@
 import type { Snapshot, Tx } from "./types"
 import { addDays, daysInMonth } from "./dates"
+import { aEntrar } from "./entradas"
 
 export const brl = (n: number, cents = true) =>
   n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: cents ? 2 : 0, maximumFractionDigits: cents ? 2 : 0 })
@@ -13,7 +14,7 @@ export const CATEGORIES = {
 
 /** Tons da paleta, do mais forte ao mais fraco. A maior categoria ganha o grafite. */
 export const TONES = ["var(--c-ink)", "var(--c-smoke)", "var(--c-faint)", "var(--c-sand-3)"] as const
-export const ACCENT = "#FF4E20"
+export const ACCENT = "#3B5285"
 export const GRAVY = "var(--c-gravy)"
 
 const inMonth = (t: Tx, ym: string) => t.date.startsWith(ym)
@@ -36,7 +37,9 @@ export function analyze(s: Snapshot) {
   const upcomingBills = unpaid.reduce((a, b) => a + b.amount, 0) + unpaidSubs.reduce((a, x) => a + x.amount, 0)
 
   // Quanto ainda cabe: teto (limite, ou o que entrou) menos o que saiu e as contas que faltam.
-  const budget = s.space.limit > 0 ? s.space.limit : income
+  // entradas programadas que ainda vão cair este mês contam como renda prevista
+  const expected = aEntrar(s)
+  const budget = s.space.limit > 0 ? s.space.limit : income + expected
   const free = budget - expense - upcomingBills
   const perDay = Math.max(0, free) / Math.max(1, daysLeft)
   const fixed = s.bills.reduce((a, b) => a + b.amount, 0) + s.subs.filter((x) => x.dueThisMonth).reduce((a, x) => a + x.amount, 0)
@@ -78,7 +81,7 @@ export function analyze(s: Snapshot) {
   }
 
   const byCategory = Object.fromEntries(byCat)
-  return { byCategory, prevExpense, ym, income, expense, free, perDay, dailyCap, budget, upcomingBills, daysLeft, dayOfMonth, dim, categories, days, vsPrev }
+  return { expected, byCategory, prevExpense, ym, income, expense, free, perDay, dailyCap, budget, upcomingBills, daysLeft, dayOfMonth, dim, categories, days, vsPrev }
 }
 
 export type Analysis = ReturnType<typeof analyze>

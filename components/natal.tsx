@@ -8,10 +8,10 @@ import { BULBS, bulb, lightsBack, lightsFront } from "@/lib/natal"
 function coinSvg(happy: boolean, t: number) {
   const eyes = happy
     ? `<path d="M33 46q6-8 12 0M55 46q6-8 12 0" stroke="#fff" stroke-width="3.6" fill="none" stroke-linecap="round"/>`
-    : `<ellipse cx="40" cy="46" rx="6" ry="6.5" fill="#fff"/><ellipse cx="60" cy="46" rx="6" ry="6.5" fill="#fff"/><circle cx="40" cy="48" r="2.8" fill="#1F282E"/><circle cx="60" cy="48" r="2.8" fill="#1F282E"/>`
+    : `<ellipse cx="40" cy="46" rx="6" ry="6.5" fill="#fff"/><ellipse cx="60" cy="46" rx="6" ry="6.5" fill="#fff"/><circle cx="40" cy="48" r="2.8" fill="#1B2440"/><circle cx="60" cy="48" r="2.8" fill="#1B2440"/>`
   void t
   const body = "M50 18C72 18 86 31 86 48C86 63 74 74 54 75H46C26 74 14 63 14 48C14 31 28 18 50 18Z"
-  return `${lightsBack(50, 47, 34)}<path d="${body}" fill="#C7361A" transform="translate(0 2)"/><path d="${body}" fill="#FF4E20"/><rect x="40" y="23" width="20" height="4" rx="2" fill="#B83312"/>${eyes}${lightsFront(50, 47, 34, 1)}`
+  return `${lightsBack(50, 47, 34)}<path d="${body}" fill="#24345A" transform="translate(0 2)"/><path d="${body}" fill="#3B5285"/><rect x="40" y="23" width="20" height="4" rx="2" fill="#1B2440"/>${eyes}${lightsFront(50, 47, 34, 1)}`
 }
 
 /**
@@ -39,7 +39,7 @@ export function NatalDrop() {
       const lit = Math.min(1, t / 1.4)
       let d = "M" + fio[0]
       for (let i = 1; i < fio.length; i++) { const [x0, y0] = fio[i - 1], [x1, y1] = fio[i]; d += ` Q${(x0 + x1) / 2} ${Math.max(y0, y1) + 9} ${x1} ${y1}` }
-      h += `<path d="${d}" stroke="#2B3A2B" stroke-width="1.4" fill="none" stroke-dasharray="${W * 1.2}" stroke-dashoffset="${W * 1.2 * (1 - lit)}"/>`
+      h += `<path d="${d}" stroke="#1B2440" stroke-width="1.4" fill="none" stroke-dasharray="${W * 1.2}" stroke-dashoffset="${W * 1.2 * (1 - lit)}"/>`
       fio.forEach((p, i) => { if (i / 10 <= lit && i > 0 && i < 10) h += bulb(p[0] + (i % 2 ? 3 : -3), p[1] + 6, BULBS[i % BULBS.length], 3, i, i % 2 ? 12 : -12) })
       let x = cx, y: number, rot: number
       if (t < 1.6) { y = isl.y + isl.h - 6 + Math.sin(t * 8) * 2 - (1 - Math.min(1, t / 0.5)) * 30; rot = Math.sin(t * 5) * 8 }
@@ -50,7 +50,7 @@ export function NatalDrop() {
         if (f >= 1) { y = stopY + Math.sin(k * 9) * 28 * Math.exp(-k * 3); rot = 152 + Math.sin(k * 2.4) * 14 * Math.exp(-k * 0.5) }
         x = cx + Math.sin(k * 2.4) * 22 * Math.exp(-k * 0.4)
         const mx = (cx + x) / 2 + (x - cx) * 0.4, my = (isl.y + isl.h + y) / 2
-        h += `<path d="M${cx} ${isl.y + isl.h} Q${mx} ${my} ${x} ${y - R * 0.9}" stroke="#2B3A2B" stroke-width="1.4" fill="none"/>`
+        h += `<path d="M${cx} ${isl.y + isl.h} Q${mx} ${my} ${x} ${y - R * 0.9}" stroke="#1B2440" stroke-width="1.4" fill="none"/>`
         for (let i = 1; i < 7; i++) { const u = i / 7; const bx = (1 - u) ** 2 * cx + 2 * (1 - u) * u * mx + u * u * x, by = (1 - u) ** 2 * (isl.y + isl.h) + 2 * (1 - u) * u * my + u * u * (y - R * 0.9); h += bulb(bx + (i % 2 ? 3 : -3), by, BULBS[(i + 3) % BULBS.length], 3, i + 3, i % 2 ? 14 : -14) }
       }
       h += `<g transform="translate(${x} ${y}) rotate(${rot}) scale(${R / 40}) translate(-50 -48)">${coinSvg(t > 2.7, t)}</g>`

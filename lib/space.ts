@@ -26,8 +26,8 @@ export async function loadSnapshot(): Promise<Snapshot | null> {
 
 /** Os dados de um espaço (também usado pelos recados do Fluximetro, sem sessão). */
 export async function snapshotOf(id: string, user: Snapshot["user"]): Promise<Snapshot | null> {
-  await ensurePlanColumn()
-  const [spaces, txs, goals, bills, cards, subs, limits] = await Promise.all([
+  await ensurePlanColumn(); await ensureEntradas()
+  const [spaces, txs, goals, bills, cards, subs, limits, entradas] = await Promise.all([
     sql`select id, name, monthly_limit, onboarded, plan from spaces where id = ${id}`,
     sql`select id, kind, amount, description, category, occurred_on, card_id, installment_no, installment_total from transactions
         where space_id = ${id} and occurred_on > now() - interval '400 days'
@@ -37,6 +37,7 @@ export async function snapshotOf(id: string, user: Snapshot["user"]): Promise<Sn
     sql`select id, name, closing_day, due_day, credit_limit from cards where space_id = ${id} order by created_at, id`,
     sql`select id, name, amount, billing_day, cycle, billing_month, card_id, paid_month from subscriptions where space_id = ${id} order by billing_day, id`,
     sql`select category, amount from category_limits where space_id = ${id}`,
+    sql`select id, nome, tipo, partes, perguntar, recebidas from entradas where space_id = ${id} order by id`,
   ])
   const s = spaces[0]
   if (!s) return null
@@ -67,6 +68,15 @@ export async function snapshotOf(id: string, user: Snapshot["user"]): Promise<Sn
       }
     }),
     limits: Object.fromEntries(limits.map((l) => [l.category, num(l.amount)])),
+    entradas: entradas.map((e) => ({ id: num(e.id), nome: e.nome, tipo: e.tipo, partes: e.partes ?? [], perguntar: !!e.perguntar, recebidas: e.recebidas ?? [] })),
     today: todayISO(),
   }
 }
+
+/** Tabela das entradas programadas (criada sozinha na primeira vez). */
+let entradasTable: Promise<unknown> | null = null
+export const ensureEntradas = () => (entradasTable ??= sql`create table if not exists entradas (
+  id serial primary key, space_id uuid not null, nome text not null, tipo text not null default 'fixa',
+  partes jsonb not null default '[]', perguntar boolean not null default true, recebidas jsonb not null default '[]',
+  created_at timestamptz default now()
+)`.catch((e) => { entradasTable = null; throw e }))

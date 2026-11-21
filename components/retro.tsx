@@ -46,17 +46,17 @@ interface Slide { bg: string; dark?: boolean; tag: string; big: React.ReactNode;
 
 function slides(c: Ciclo, nome: string): Slide[] {
   const out: Slide[] = [
-    { bg: "linear-gradient(170deg,#FF5A2C,#5A2C46)", tag: `De um salário ao outro · ${fmt(c.from)} → ${fmt(c.to)}`, big: <>Seu ciclo,<br />sem filtro.</>, sub: `Eu vi tudo, ${nome}. Agora você também vai ver.`, fala: "Respira fundo. Vai ter dado que dói.", st: "normal" },
-    { bg: "#1F282E", tag: "Entrou e saiu", big: brl(c.entrou, false), sub: `entraram. Saíram ${brl(c.saiu, false)}.`, fala: c.saiu < c.entrou ? "Saiu menos do que entrou. Isso tem nome: milagre." : "Saiu mais do que entrou. A gente precisa conversar.", st: c.saiu < c.entrou ? "feliz" : "apertado" },
+    { bg: "linear-gradient(170deg,#3B5285,#24345A)", tag: `De um salário ao outro · ${fmt(c.from)} → ${fmt(c.to)}`, big: <>Seu ciclo,<br />sem filtro.</>, sub: `Eu vi tudo, ${nome}. Agora você também vai ver.`, fala: "Respira fundo. Vai ter dado que dói.", st: "normal" },
+    { bg: "#1B2440", tag: "Entrou e saiu", big: brl(c.entrou, false), sub: `entraram. Saíram ${brl(c.saiu, false)}.`, fala: c.saiu < c.entrou ? "Saiu menos do que entrou. Isso tem nome: milagre." : "Saiu mais do que entrou. A gente precisa conversar.", st: c.saiu < c.entrou ? "feliz" : "apertado" },
   ]
   if (c.rival) out.push({ bg: "linear-gradient(170deg,#C9302C,#5E1410)", tag: "Seu maior rival", big: <>{c.rival.nome}<br />{c.rival.vezes}x</>, sub: `${brl(c.rival.total, false)} no ciclo.`, fala: /ifood|delivery|rappi|lanche|pizza/i.test(c.rival.nome) ? "O motoboy vai te convidar pro casamento dele." : `${c.rival.nome} já te conhece pelo nome.`, st: "pensando" })
   if (c.diaCaro) out.push({ bg: "#2B2140", tag: "Dia mais caro", big: <>{fmt(c.diaCaro.dia)}<br />{brl(c.diaCaro.total, false)}</>, sub: "Esse dia foi intenso.", fala: "O que aconteceu nesse dia? Não precisa responder. Eu já sei.", st: "conta" })
   out.push(c.sobrou > 0
     ? { bg: "linear-gradient(170deg,#1F8A5B,#0F4A31)", tag: "Sobrou", big: brl(c.sobrou, false), sub: "no fim do ciclo.", fala: "Seu eu do futuro mandou um abraço.", st: "guardou" }
-    : { bg: "linear-gradient(170deg,#5A2C46,#6E1D08)", tag: "Faltou", big: brl(-c.sobrou, false), sub: "além do que entrou.", fala: "O mês sentou em mim. Esse ciclo a gente acerta.", st: "apertado" })
+    : { bg: "linear-gradient(170deg,#24345A,#6E1D08)", tag: "Faltou", big: brl(-c.sobrou, false), sub: "além do que entrou.", fala: "O mês sentou em mim. Esse ciclo a gente acerta.", st: "apertado" })
   out.push({ bg: "#F4F3EE", dark: true, tag: "Nota do ciclo", big: <span style={{ color: "var(--c-accent)", fontSize: 140 }}>{c.nota}</span>, sub: c.nota.startsWith("A") ? "Gastou com consciência. Pode se gabar." : c.nota.startsWith("B") ? "Gastou com consciência. Quase sempre." : "Dá pra melhorar. E eu tô aqui pra isso.",
     fala: c.nota === "A" ? "Nota A. Vou emoldurar." : c.nota.startsWith("B") ? "Dava pra ser A se não fosse aquele delivery." : "Sem julgamento. Tá, um pouquinho.", st: c.nota <= "B+" ? "feliz" : "normal" })
-  out.push({ bg: "linear-gradient(170deg,#FF5A2C,#5A2C46)", tag: "Novo ciclo começou", big: <>Bora repetir?</>, sub: "Eu fico de olho. Você fica longe do delivery.", fala: "Combinado?", st: "feliz" })
+  out.push({ bg: "linear-gradient(170deg,#3B5285,#24345A)", tag: "Novo ciclo começou", big: <>Bora repetir?</>, sub: "Eu fico de olho. Você fica longe do delivery.", fala: "Combinado?", st: "feliz" })
   return out
 }
 
@@ -80,11 +80,11 @@ export function Retro({ open, onClose, ciclo, nome }: { open: boolean; onClose: 
       {open && (
         <motion.div className="fixed inset-0 z-[70] mx-auto flex max-w-[480px] flex-col" role="dialog" aria-modal aria-label="Retrospectiva do ciclo"
           initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1, background: s.bg }} exit={{ opacity: 0, scale: 0.96 }} transition={{ duration: 0.35 }}
-          style={{ color: s.dark ? "#1F282E" : "#fff" }}>
+          style={{ color: s.dark ? "#1B2440" : "#fff" }}>
           <div className="flex gap-1 px-3.5 pt-[max(14px,env(safe-area-inset-top))]">
             {ss.map((_, k) => (
-              <span key={k} className="h-[3px] flex-1 overflow-hidden rounded-full" style={{ background: s.dark ? "rgb(31 40 46/.2)" : "rgb(255 255 255/.3)" }}>
-                <motion.span key={k === i ? `a${i}` : k} className="block h-full" style={{ background: s.dark ? "#1F282E" : "#fff" }}
+              <span key={k} className="h-[3px] flex-1 overflow-hidden rounded-full" style={{ background: s.dark ? "rgb(27 36 64/.2)" : "rgb(255 255 255/.3)" }}>
+                <motion.span key={k === i ? `a${i}` : k} className="block h-full" style={{ background: s.dark ? "#1B2440" : "#fff" }}
                   initial={{ width: k < i ? "100%" : "0%" }} animate={{ width: k < i ? "100%" : k === i ? "100%" : "0%" }} transition={{ duration: k === i && !reduced ? 5.2 : 0, ease: "linear" }} />
               </span>
             ))}

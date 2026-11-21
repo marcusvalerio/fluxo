@@ -9,18 +9,19 @@ import { cardSummary, invoiceKey, subMonthly, subsSummary } from "@/lib/plan"
 import { field, Label, Primary, rise, Sheet, spring } from "../ui"
 import { CatIcon } from "../cat-icon"
 import { MetasScreen } from "./metas"
+import { Entradas } from "../entradas"
 import { addCard, addSubscription, deleteCard, deleteSubscription, setCategoryLimit, toggleSubscription } from "@/app/actions"
 
-type Seg = "cartoes" | "assinaturas" | "limites" | "metas"
+type Seg = "cartoes" | "entradas" | "assinaturas" | "limites" | "metas"
 const SEGS: { id: Seg; label: string }[] = [
-  { id: "cartoes", label: "Cartões" }, { id: "assinaturas", label: "Assinaturas" }, { id: "limites", label: "Limites" }, { id: "metas", label: "Metas" },
+  { id: "cartoes", label: "Cartões" }, { id: "entradas", label: "Entradas" }, { id: "assinaturas", label: "Assinaturas" }, { id: "limites", label: "Limites" }, { id: "metas", label: "Metas" },
 ]
 const MES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
 const fmtDay = (iso: string) => `${Number(iso.slice(8))} ${MES[Number(iso.slice(5, 7)) - 1]}`
 const H = "mb-3 flex items-center justify-between px-1"
 
 export function CarteiraScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
-  const [seg, setSeg] = useState<Seg>(() => { try { const v = sessionStorage.getItem("fluxo-seg"); sessionStorage.removeItem("fluxo-seg"); if (v === "metas") return "metas" } catch {} return "cartoes" })
+  const [seg, setSeg] = useState<Seg>(() => { try { const v = sessionStorage.getItem("fluxo-seg"); sessionStorage.removeItem("fluxo-seg"); if (v === "metas" || v === "entradas") return v } catch {} return "cartoes" })
   return (
     <div className="px-4 pt-[max(52px,env(safe-area-inset-top))]">
       <motion.header {...rise} transition={spring} className="px-1 pb-5">
@@ -40,6 +41,7 @@ export function CarteiraScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
       <AnimatePresence mode="wait">
         <motion.div key={seg} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.2 }}>
           {seg === "cartoes" && <Cartoes snap={snap} />}
+          {seg === "entradas" && <Entradas snap={snap} />}
           {seg === "assinaturas" && <Assinaturas snap={snap} />}
           {seg === "limites" && <Limites snap={snap} a={a} />}
           {seg === "metas" && <MetasScreen snap={snap} embedded />}

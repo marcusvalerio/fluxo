@@ -370,3 +370,53 @@ export async function joinWaitlist(email: string): Promise<{ ok?: true; error?: 
   await sql`insert into waitlist (email) values (${e}) on conflict (email) do nothing`
   return { ok: true }
 }
+
+// ---------- entradas programadas ----------
+
+type ParteIn = { dia: number; util?: boolean; valor: number; rotulo?: string }
+function cleanPartes(ps: ParteIn[]) {
+  return (Array.isArray(ps) ? ps : []).slice(0, 6).map((p) => ({
+    dia: p.util ? Math.min(23, Math.max(1, Math.round(Number(p.dia) || 5))) : dayOf(p.dia),
+    util: !!p.util, valor: money(p.valor), rotulo: text(p.rotulo ?? "", 30),
+  })).filter((p) => p.valor > 0)
+}
+
+export async function saveEntrada(input: { id?: number; nome: string; tipo: "fixa" | "varia"; partes: ParteIn[]; perguntar: boolean }): Promise<{ error?: string }> {
+  const { ensureEntradas } = await import("@/lib/space")
+  const id = await requireSpaceId(); await ensureEntradas()
+  const nome = text(input.nome, 40)
+  const partes = cleanPartes(input.partes)
+  if (!nome) return { error: "Dá um nome pra entrada, tipo Salário." }
+  if (!partes.length) return { error: "Coloca o valor de pelo menos uma parte." }
+  const tipo = input.tipo === "varia" ? "varia" : "fixa"
+  if (input.id) await sql`update entradas set nome = ${nome}, tipo = ${tipo}, partes = ${JSON.stringify(partes)}::jsonb, perguntar = ${!!input.perguntar} where id = ${input.id} and space_id = ${id}`
+  else await sql`insert into entradas (space_id, nome, tipo, partes, perguntar) values (${id}, ${nome}, ${tipo}, ${JSON.stringify(partes)}::jsonb, ${!!input.perguntar})`
+  done(); return {}
+}
+
+export async function deleteEntrada(entradaId: number) {
+  const { ensureEntradas } = await import("@/lib/space")
+  const id = await requireSpaceId(); await ensureEntradas()
+  await sql`delete from entradas where id = ${entradaId} and space_id = ${id}`
+  done()
+}
+
+/** "Caiu?": lança a entrada com o valor confirmado e marca a parte como recebida neste mês. */
+export async function confirmarEntrada(entradaId: number, parte: number, valor: number) {
+  const { ensureEntradas } = await import("@/lib/space")
+  const id = await requireSpaceId(); await ensureEntradas()
+  const [e] = await sql`select nome, partes from entradas where id = ${entradaId} and space_id = ${id}`
+  if (!e) return
+  const today = todayISO(), key = `${today.slice(0, 7)}:${Math.max(0, Math.round(parte))}`
+  const p = (e.partes ?? [])[parte]
+  const desc = (e.partes ?? []).length > 1 && p?.rotulo ? `${e.nome} · ${p.rotulo}` : e.nome
+  await sql`insert into transactions (space_id, kind, amount, description, category, occurred_on) values (${id}, 'income', ${money(valor)}, ${desc}, ${/sal[aá]rio|adiant/i.test(e.nome) ? "Salário" : "Outros"}, ${today})`
+  await sql`update entradas set recebidas = (select jsonb_agg(distinct x) from jsonb_array_elements(recebidas || ${JSON.stringify([key])}::jsonb) x) where id = ${entradaId} and space_id = ${id}`
+  done()
+}
+
+/** "Ainda não": empurra a pergunta pra amanhã sem lançar nada (só some do aviso de hoje). */
+export async function adiarEntrada(entradaId: number, parte: number) {
+  void entradaId; void parte
+  done()
+}

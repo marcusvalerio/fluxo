@@ -188,12 +188,12 @@ export function Lancar({ open, onClose, snap, a, onDone, seed }: { open: boolean
         </>}
         {typed ? (
           <motion.button whileTap={{ scale: 0.97 }} disabled={!kept.length || missingCard || pending} onClick={submitText}
-            className="mt-4 h-[58px] rounded-[29px] bg-otan text-[16px] font-semibold text-white shadow-[inset_0_1px_1px_rgb(255_255_255/0.4),0_10px_24px_-10px_rgb(255_78_32/0.8)] disabled:opacity-35">
+            className="mt-4 h-[58px] rounded-[29px] bg-otan text-[16px] font-semibold text-white shadow-[inset_0_1px_1px_rgb(255_255_255/0.4),0_10px_24px_-10px_rgb(59_82_133/0.8)] disabled:opacity-35">
             {pending ? "Lançando…" : kept.length > 1 ? `Lançar ${kept.length}` : "Lançar"}
           </motion.button>
         ) : (
         <motion.button whileTap={{ scale: 0.97 }} disabled={!amount || pending} onClick={submit}
-          className="mt-2.5 h-[58px] rounded-[29px] bg-otan text-[16px] font-semibold text-white shadow-[inset_0_1px_1px_rgb(255_255_255/0.4),0_10px_24px_-10px_rgb(255_78_32/0.8)] disabled:opacity-35">
+          className="mt-2.5 h-[58px] rounded-[29px] bg-otan text-[16px] font-semibold text-white shadow-[inset_0_1px_1px_rgb(255_255_255/0.4),0_10px_24px_-10px_rgb(59_82_133/0.8)] disabled:opacity-35">
           {pending ? "Lançando…" : amount ? `Lançar ${brl(amount)}` : "Digite o valor"}
         </motion.button>
         )}
@@ -331,7 +331,7 @@ function Simular({ snap, a, plan, onBack, onDone, onClose }: { snap: Snapshot; a
         <p className="mt-3 text-[11.5px] leading-snug text-faint">Estimativa: o que entra no mês menos contas, assinaturas, parcelas já agendadas e o gasto do dia a dia do mês passado.</p>
       </div>
       <motion.button whileTap={{ scale: 0.97 }} disabled={pending || !total} onClick={launch}
-        className="mt-4 h-[58px] rounded-[29px] bg-otan text-[16px] font-semibold text-white shadow-[inset_0_1px_1px_rgb(255_255_255/0.4),0_10px_24px_-10px_rgb(255_78_32/0.8)] disabled:opacity-35">
+        className="mt-4 h-[58px] rounded-[29px] bg-otan text-[16px] font-semibold text-white shadow-[inset_0_1px_1px_rgb(255_255_255/0.4),0_10px_24px_-10px_rgb(59_82_133/0.8)] disabled:opacity-35">
         {pending ? "Lançando…" : `Fechei · lançar ${n}x`}
       </motion.button>
       <button onClick={onBack} className="mt-1 h-11 text-[14px] font-semibold text-mute">Ainda não</button>

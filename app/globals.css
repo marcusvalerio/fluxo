@@ -71,7 +71,7 @@ button:active:not(:disabled), a:active { scale: .97 }
 
 /* chuva de moedas */
 @keyframes moeda-cai { 0% { transform: translateY(-40px) scaleX(1) } 25% { transform: translateY(25vh) scaleX(.3) } 50% { transform: translateY(50vh) scaleX(1) } 75% { transform: translateY(75vh) scaleX(.3) } 100% { transform: translateY(110vh) scaleX(1); opacity: 0 } }
-.moeda { position: fixed; top: 0; width: 20px; height: 20px; border-radius: 99px; background: #FFC23D; border: 2px solid #E2A21A; animation: moeda-cai 1.9s cubic-bezier(.4,0,.8,.6) forwards; z-index: 90; pointer-events: none }
+.moeda { position: fixed; top: 0; width: 20px; height: 20px; border-radius: 99px; background: #F7F7F7; border: 2px solid #8FA4D0; animation: moeda-cai 1.9s cubic-bezier(.4,0,.8,.6) forwards; z-index: 90; pointer-events: none }
 @media (prefers-reduced-motion: reduce) { .moeda { display: none } button:active, a:active { scale: 1 } }
 
 /* Liquid Glass (iOS 27): só na camada de navegação. Menos transparente, contorno definido, sombra leve */

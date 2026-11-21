@@ -71,48 +71,48 @@ export function InstallGuide({ open, onClose }: { open: boolean; onClose: () => 
 
         {/* animação: um iPhone em miniatura mostrando cada passo */}
         <div className="mt-5 flex justify-center">
-          <div className="relative h-[300px] w-[170px] overflow-hidden rounded-[30px] border-[5px] border-ink bg-[#101519] shadow-[0_20px_40px_-20px_rgb(31_40_46/0.6)]" aria-hidden>
+          <div className="relative h-[300px] w-[170px] overflow-hidden rounded-[30px] border-[5px] border-ink bg-[#0F1524] shadow-[0_20px_40px_-20px_rgb(27_36_64/0.6)]" aria-hidden>
             <div className="absolute left-1/2 top-1.5 h-3.5 w-14 -translate-x-1/2 rounded-full bg-black" />
             <AnimatePresence mode="wait">
               {step < 3 ? (
                 <motion.div key="safari" className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   {/* página do Fluxo */}
-                  <div className="mx-2.5 mt-8 h-16 rounded-[10px]" style={{ background: "linear-gradient(160deg,#FF5A2C,#5A2C46)" }} />
-                  <div className="mx-2.5 mt-2 h-10 rounded-[10px] bg-[#1F282E]" />
-                  <div className="mx-2.5 mt-2 h-10 rounded-[10px] bg-[#1F282E]" />
+                  <div className="mx-2.5 mt-8 h-16 rounded-[10px]" style={{ background: "linear-gradient(160deg,#3B5285,#24345A)" }} />
+                  <div className="mx-2.5 mt-2 h-10 rounded-[10px] bg-[#1B2440]" />
+                  <div className="mx-2.5 mt-2 h-10 rounded-[10px] bg-[#1B2440]" />
                   {/* barra do Safari */}
                   <div className="absolute inset-x-2 bottom-3 flex items-center gap-1.5">
-                    <span className="grid h-7 w-9 place-items-center rounded-full bg-[#2A333A] text-[#E4E3DC]"><ChevronLeft size={12} /></span>
-                    <span className="relative flex h-7 flex-1 items-center gap-1 rounded-full bg-[#2A333A] px-2 text-[8px] text-[#E4E3DC]">
+                    <span className="grid h-7 w-9 place-items-center rounded-full bg-[#24345A] text-[#E4E8EF]"><ChevronLeft size={12} /></span>
+                    <span className="relative flex h-7 flex-1 items-center gap-1 rounded-full bg-[#24345A] px-2 text-[8px] text-[#E4E8EF]">
                       <motion.span animate={step === 0 ? { scale: [1, 1.35, 1] } : { scale: 1 }} transition={{ duration: 0.8, repeat: step === 0 ? Infinity : 0 }}
                         className={`grid size-4 place-items-center rounded-full ${step === 0 ? "bg-otan text-white" : ""}`}><Menu size={9} /></motion.span>
                       fluxo-app…
                       <RotateCw size={8} className="ml-auto" />
                     </span>
-                    <span className="grid h-7 w-7 place-items-center rounded-full bg-[#2A333A] text-[#E4E3DC]"><Copy size={10} /></span>
+                    <span className="grid h-7 w-7 place-items-center rounded-full bg-[#24345A] text-[#E4E8EF]"><Copy size={10} /></span>
                   </div>
                   {step === 0 && <Finger x={58} y={262} />}
 
                   {/* menu e folha de compartilhar */}
                   <AnimatePresence>
                     {step >= 1 && (
-                      <motion.div key="sheet" className="absolute inset-x-1.5 bottom-1.5 rounded-[18px] bg-[#E4E3DC] p-2 text-[#1F282E]"
+                      <motion.div key="sheet" className="absolute inset-x-1.5 bottom-1.5 rounded-[18px] bg-[#E4E8EF] p-2 text-[#1B2440]"
                         initial={{ y: "110%" }} animate={{ y: 0 }} exit={{ y: "110%" }} transition={spring}>
                         {step === 1 ? (
                           <div className="space-y-1">
                             {["Copiar", "Compartilhar", "Favoritos", "Leitor"].map((r) => (
-                              <motion.div key={r} animate={r === "Compartilhar" ? { backgroundColor: ["#FFFFFF", "#FFD9C9", "#FFFFFF"] } : {}} transition={{ duration: 1, repeat: Infinity }}
+                              <motion.div key={r} animate={r === "Compartilhar" ? { backgroundColor: ["#FFFFFF", "#D3DCEA", "#FFFFFF"] } : {}} transition={{ duration: 1, repeat: Infinity }}
                                 className="flex items-center gap-1.5 rounded-[8px] bg-white px-2 py-1.5 text-[8.5px] font-medium">
-                                {r === "Compartilhar" ? <Share size={9} className="text-otan" /> : <span className="size-[9px] rounded-full bg-[#DAD8CF]" />}{r}
+                                {r === "Compartilhar" ? <Share size={9} className="text-otan" /> : <span className="size-[9px] rounded-full bg-[#D3DCEA]" />}{r}
                               </motion.div>
                             ))}
                           </div>
                         ) : (
                           <div className="space-y-1">
                             {["Copiar", "Adicionar à Tela de Início", "Adicionar aos Favoritos"].map((r) => (
-                              <motion.div key={r} animate={r.startsWith("Adicionar à") ? { backgroundColor: ["#FFFFFF", "#FFD9C9", "#FFFFFF"] } : {}} transition={{ duration: 1, repeat: Infinity }}
+                              <motion.div key={r} animate={r.startsWith("Adicionar à") ? { backgroundColor: ["#FFFFFF", "#D3DCEA", "#FFFFFF"] } : {}} transition={{ duration: 1, repeat: Infinity }}
                                 className="flex items-center gap-1.5 rounded-[8px] bg-white px-2 py-1.5 text-[8.5px] font-medium">
-                                {r.startsWith("Adicionar à") ? <SquarePlus size={9} className="text-otan" /> : <span className="size-[9px] rounded-full bg-[#DAD8CF]" />}{r}
+                                {r.startsWith("Adicionar à") ? <SquarePlus size={9} className="text-otan" /> : <span className="size-[9px] rounded-full bg-[#D3DCEA]" />}{r}
                               </motion.div>
                             ))}
                           </div>
@@ -125,9 +125,9 @@ export function InstallGuide({ open, onClose }: { open: boolean; onClose: () => 
               ) : (
                 <motion.div key="home" className="absolute inset-0 grid grid-cols-4 content-start gap-x-2 gap-y-3 px-3 pt-10"
                   initial={{ opacity: 0, scale: 1.08 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-                  style={{ background: "radial-gradient(120% 80% at 50% 0%, #3A4A55, #101519)" }}>
+                  style={{ background: "radial-gradient(120% 80% at 50% 0%, #3A4A55, #0F1524)" }}>
                   {Array.from({ length: 11 }, (_, i) => (
-                    <span key={i} className="aspect-square rounded-[8px]" style={{ background: ["#5BA9F5", "#7AC7A0", "#F5F5F5", "#8A5BE8", "#F5C04B", "#E4E3DC"][i % 6], opacity: 0.85 }} />
+                    <span key={i} className="aspect-square rounded-[8px]" style={{ background: ["#5BA9F5", "#7AC7A0", "#F5F5F5", "#8A5BE8", "#F5C04B", "#E4E8EF"][i % 6], opacity: 0.85 }} />
                   ))}
                   <motion.span initial={{ scale: 0, rotate: -10 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 400, damping: 12, delay: 0.1 }}
                     className="relative aspect-square overflow-hidden rounded-[8px] shadow-[0_0_0_2px_#fff]">

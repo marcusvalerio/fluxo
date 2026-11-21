@@ -50,7 +50,7 @@ export function AdminPanel({ data }: { data: AdminData }) {
 
   return (
     <div className="relative mx-auto min-h-dvh max-w-[1100px] overflow-x-clip px-4 pb-16 pt-[max(28px,env(safe-area-inset-top))] sm:px-8">
-      <div className="blob pointer-events-none absolute -right-20 -top-16 size-72 rounded-full bg-[radial-gradient(circle,rgb(255_78_32/0.22),transparent_70%)]" />
+      <div className="blob pointer-events-none absolute -right-20 -top-16 size-72 rounded-full bg-[radial-gradient(circle,rgb(59_82_133/0.22),transparent_70%)]" />
 
       <motion.header {...rise} transition={spring} className="relative flex flex-wrap items-center justify-between gap-3 pb-6">
         <div className="flex items-center gap-3">

@@ -67,6 +67,19 @@ export interface Space {
   plan: Plan | null
 }
 
+/** Uma parte de uma entrada programada: dia fixo do mês ou N-ésimo dia útil. */
+export interface EntradaParte { dia: number; util: boolean; valor: number; rotulo?: string }
+export interface Entrada {
+  id: number
+  nome: string
+  /** fixa: valor certo; varia: valor é uma média e a pessoa confirma quanto caiu */
+  tipo: "fixa" | "varia"
+  partes: EntradaParte[]
+  perguntar: boolean
+  /** chaves "YYYY-MM:parte" já confirmadas */
+  recebidas: string[]
+}
+
 export interface Snapshot {
   space: Space
   user: { name: string; email: string; role: "admin" | "user"; mustChangePassword: boolean }
@@ -76,5 +89,6 @@ export interface Snapshot {
   cards: Card[]
   subs: Subscription[]
   limits: Record<string, number>
+  entradas: Entrada[]
   today: string
 }

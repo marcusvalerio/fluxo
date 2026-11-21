@@ -11,7 +11,7 @@ const FOLD = "M20 32V16Q20 10 26 10H44V32Z"
 const ease = [0.2, 0.9, 0.3, 1.15] as const
 
 /** O F do Fluxo: boleto e nota numa peça, inclinada, e a moeda redonda. */
-export function LogoF({ size = 40, f = "#FF4E20", fold = "#B83312", coin = "#1F282E" }: { size?: number; f?: string; fold?: string; coin?: string }) {
+export function LogoF({ size = 40, f = "#3B5285", fold = "#1B2440", coin = "#1B2440" }: { size?: number; f?: string; fold?: string; coin?: string }) {
   return (
     <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden>
       <g transform="translate(11 0) skewX(-12)"><path d={STEM} fill={f} /><path d={ARM} fill={f} /><path d={FOLD} fill={fold} /></g>

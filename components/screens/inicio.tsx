@@ -14,6 +14,7 @@ import { addBill, changePassword, deleteBill, logout, setLimit, toggleBill } fro
 import type { AgendaView, Tab } from "../fluxo-app"
 import { useRitmo } from "../ritmo"
 import { Cofrinho } from "../cofrinho"
+import { CaiuCard, ProximasEntradas } from "../entradas"
 import { RetroCard } from "../retro"
 import { Planos } from "../planos"
 import { natalPref, setNatalPref, type NatalPref } from "@/lib/natal"
@@ -73,6 +74,8 @@ export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Ana
 
       <div className="flex flex-col gap-7">
         {/* Livre até o fim do mês */}
+        <CaiuCard snap={snap} />
+
         <motion.div {...rise} transition={{ ...spring, delay: 0.05 }}><HeroCard snap={snap} a={a} score={hs.score} /></motion.div>
 
         <RetroCard snap={snap} />
@@ -81,6 +84,8 @@ export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Ana
         <motion.div {...rise} transition={{ ...spring, delay: 0.07 }}>
           <FluximetroCard tip={tips[0]} />
         </motion.div>
+
+        <ProximasEntradas snap={snap} onOpen={() => { try { sessionStorage.setItem("fluxo-seg", "entradas") } catch {} ; go("carteira") }} />
 
         {/* atalhos pros gráficos da Agenda */}
         <motion.div {...rise} transition={{ ...spring, delay: 0.08 }} className="-mt-2 grid grid-cols-2 gap-3">

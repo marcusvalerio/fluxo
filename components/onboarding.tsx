@@ -157,7 +157,7 @@ function Welcome() {
   return (
     <div className="flex flex-1 flex-col justify-center gap-10">
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, ...spring }}
-        className="rounded-[30px] bg-paper p-1.5 shadow-[inset_0_1px_0_#fff,0_20px_40px_-24px_rgb(31_40_46/0.5)]">
+        className="rounded-[30px] bg-paper p-1.5 shadow-[inset_0_1px_0_#fff,0_20px_40px_-24px_rgb(27_36_64/0.5)]">
         <div className="flex justify-between px-3 pb-3 pt-2.5 text-sm text-smoke"><span>Livre até dia 30</span><span className="num text-mute">23 dias</span></div>
         <div className="rounded-[24px] bg-card p-5">
           <p className="num text-[44px] leading-none"><span className="mr-1 text-[20px] text-faint">R$</span>3.272<span className="text-[20px] text-faint">,40</span></p>
@@ -227,7 +227,7 @@ function DemoLancar() {
 
 function DemoNumero() {
   return (
-    <div className="rounded-[26px] bg-gradient-to-br from-[#FF5A2C] to-[#E2401C] p-5 text-center text-white">
+    <div className="rounded-[26px] bg-gradient-to-br from-[#3B5285] to-[#2D4170] p-5 text-center text-white">
       <p className="text-[13px] opacity-85">Livre até dia 30</p>
       <motion.p className="num mt-2 text-[48px] leading-none" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={spring}>R$ 2.158</motion.p>
       <p className="mt-2 text-[13px] opacity-90">Dá uns <b>R$ 113</b> por dia sem apertar.</p>

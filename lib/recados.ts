@@ -1,6 +1,7 @@
 // Recados do Fluximetro pras notificações: um por dia, o que for mais importante agora.
 import type { Snapshot } from "./types"
 import type { Analysis } from "./finance"
+import { perguntaDeHoje } from "./entradas"
 
 const brl = (n: number) => "R$ " + Math.round(n).toLocaleString("pt-BR")
 const pick = <T,>(a: T[], seed: number) => a[seed % a.length]
@@ -16,6 +17,10 @@ export function recadoDoDia(s: Snapshot, a: Analysis): { title: string; body: st
     const b = vence[0], hoje = b.dueDay === dia
     return { title: hoje ? `${b.name} vence hoje` : `${b.name} vence amanhã`, body: `${brl(b.amount)}. Eu lembro pra você poder esquecer. Mas não esquece.` }
   }
+  // entrada programada pra hoje (ou atrasada) que ainda não foi confirmada
+  const caiu = perguntaDeHoje(s)
+  if (caiu && (s.entradas.find((e) => e.id === caiu.entradaId)?.perguntar ?? true))
+    return { title: /sal[aá]rio/i.test(caiu.nome) ? "Caiu o salário?" : `Caiu ${caiu.nome}?`, body: `Era pra ser ${brl(caiu.valor)}${caiu.atrasada ? ` no dia ${caiu.dia}` : " hoje"}. Confirma no app que eu atualizo o mês.` }
   const salario = s.txs.some((t) => t.kind === "income" && t.date === s.today && /sal[aá]rio|pagamento|holerite/i.test(t.description))
   if (salario) return { title: "Caiu o salário", body: `Opa, ${nome}! Separa o das metas antes que o iFood veja.` }
   if (a.budget > 0 && a.free < 0) return { title: "O mês passou do teto", body: pick([`Tá ${brl(-a.free)} acima. Bora segurar até o próximo salário? Eu seguro sua mão.`, `${brl(-a.free)} acima do teto. Hoje o almoço é marmita, combinado?`], seed) }
