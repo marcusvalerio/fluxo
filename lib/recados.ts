@@ -56,10 +56,16 @@ export function recadoDaTarde(s: Snapshot, a: Analysis): Recado | null {
 /** Noite: conta de amanhã, ou um fechamento do dia quando passou do que cabe. */
 export function recadoDaNoite(s: Snapshot, a: Analysis): Recado | null {
   const dia = Number(s.today.slice(8, 10))
+  // contas sempre lembram (de manhã e de noite), sem a trava de 3 dias: a chave leva a data
+  const hojeVence = s.bills.filter((b) => !b.paid && b.dueDay === dia)
+  if (hojeVence.length) {
+    const total = hojeVence.reduce((x, b) => x + b.amount, 0)
+    return { key: `conta:${s.today}`, title: hojeVence.length > 1 ? `${hojeVence.length} contas vencem hoje` : `${hojeVence[0].name} vence hoje`, body: `${brl(total)}. Já pagou? Se sim, marca no app pra eu parar de lembrar.` }
+  }
   const amanha = s.bills.filter((b) => !b.paid && b.dueDay === dia + 1)
   if (amanha.length) {
     const total = amanha.reduce((x, b) => x + b.amount, 0)
-    return { key: `conta:${amanha[0].name}`, title: amanha.length > 1 ? `Amanhã vencem ${amanha.length} contas` : `Amanhã vence ${amanha[0].name}`, body: `${brl(total)} no total. Já tá separado?` }
+    return { key: `conta:${s.today}`, title: amanha.length > 1 ? `Amanhã vencem ${amanha.length} contas` : `Amanhã vence ${amanha[0].name}`, body: `${brl(total)} no total. Já tá separado?` }
   }
   const hoje = a.days.find((d) => d.today)?.total ?? 0
   if (a.budget > 0 && a.free < 0 && hoje > 0) return { key: "teto", title: "Fechando o dia", body: `Hoje saíram ${brl(hoje)} e o mês tá ${brl(-a.free)} acima do teto. Amanhã é dia de segurar.` }
