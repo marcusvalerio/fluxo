@@ -21,7 +21,7 @@ const FIM = [
 ] as const
 
 function itemHtml(k: Kind) {
-  if (k === "moeda") return `<span style="display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#FFC23D;box-shadow:inset 0 -3px 0 #E2A21A,inset 0 0 0 2px #E2A21A;font:700 12px var(--font-display),sans-serif;color:#9A6A00">R$</span>`
+  if (k === "moeda") return `<span style="display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#F7F7F7;box-shadow:inset 0 -3px 0 #8FA4D0,inset 0 0 0 2px #8FA4D0;font:700 12px var(--font-display),sans-serif;color:#3B5285">R$</span>`
   if (k === "nota") return `<span style="display:grid;place-items:center;width:46px;height:26px;border-radius:6px;background:#57B98A;box-shadow:inset 0 0 0 2px #2F8F62;font:700 12px var(--font-display),sans-serif;color:#fff">50</span>`
   return `<span style="display:grid;place-items:center;width:44px;height:34px;border-radius:6px;background:var(--c-ink);color:var(--c-cotton);font:600 10px var(--font-sans),sans-serif;letter-spacing:.02em">boleto</span>`
 }

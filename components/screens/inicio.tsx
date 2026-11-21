@@ -77,14 +77,9 @@ export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Ana
 
         <RetroCard snap={snap} />
 
-        {/* recado do Fluximetro: a leitura mais importante do mês, e o atalho pra simular uma compra */}
-        <motion.div {...rise} transition={{ ...spring, delay: 0.07 }} className="flex items-center gap-4 rounded-[26px] bg-card py-4 pl-3 pr-5">
-          <button onClick={() => window.dispatchEvent(new Event("fluxo:conversa"))} aria-label="Conversar com o Fluximetro" className="w-[58px] shrink-0"><Cofrinho state={tips[0]?.tone === "warn" ? "apertado" : tips[0]?.tone === "good" ? "feliz" : "normal"} label="" /></button>
-          <span className="min-w-0 text-[14px] leading-snug text-smoke">
-            <span className="mb-1 block text-[11.5px] font-semibold text-faint">Fluximetro</span>
-            {tips[0] ? <><b className="font-semibold text-ink">{tips[0].title}</b> {tips[0].text}</> : "Tudo tranquilo por aqui. Eu aviso se algo mudar."}
-            <button onClick={() => window.dispatchEvent(new Event("fluxo:comprar"))} className="mt-2.5 block rounded-full bg-ink px-3.5 py-1.5 text-[12.5px] font-semibold text-cotton">Posso comprar algo?</button>
-          </span>
+        {/* cartão do Fluximetro: ele mora aqui, pisca e recebe moeda; um toque e ele responde */}
+        <motion.div {...rise} transition={{ ...spring, delay: 0.07 }}>
+          <FluximetroCard tip={tips[0]} />
         </motion.div>
 
         {/* atalhos pros gráficos da Agenda */}
@@ -375,3 +370,36 @@ function NotifRow({ row }: { row: string }) {
     </button>
   )
 }
+
+/** Cartão retangular do Fluximetro: o cofrinho num palquinho, o recado mais importante e os atalhos. */
+function FluximetroCard({ tip }: { tip?: { tone?: string; title: string; text: string } }) {
+  const base = tip?.tone === "warn" ? "apertado" : tip?.tone === "good" ? "feliz" : "normal"
+  const [st, setSt] = useState<"normal" | "feliz" | "apertado" | "guardou">(base)
+  // de tempos em tempos cai uma moeda na fenda (ele fecha os olhos de feliz e volta)
+  useEffect(() => {
+    setSt(base)
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    let t2: ReturnType<typeof setTimeout>
+    const t = setInterval(() => { setSt("guardou"); t2 = setTimeout(() => setSt(base), 1700) }, 5200)
+    return () => { clearInterval(t); clearTimeout(t2) }
+  }, [base])
+  return (
+    <div className="flex items-stretch gap-3.5 rounded-[24px] border border-[var(--glass-edge)] bg-card p-2.5 pr-4">
+      <button onClick={() => window.dispatchEvent(new Event("fluxo:conversa"))} aria-label="Conversar com o Fluximetro"
+        className="relative grid w-[104px] shrink-0 place-items-center overflow-hidden rounded-[18px] bg-[linear-gradient(180deg,var(--c-sand),var(--c-sand-3))]">
+        <span className="w-[96px]"><Cofrinho state={st} label="" /></span>
+      </button>
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 py-1">
+        <span className="text-[11.5px] font-semibold text-faint">Fluximetro</span>
+        <p className="text-[13.5px] leading-snug text-smoke">
+          {tip ? <><b className="font-semibold text-ink">{tip.title}</b> {tip.text}</> : <>Tudo tranquilo por aqui. Se o dinheiro aprontar, eu dedo-duro na hora.</>}
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          <button onClick={() => window.dispatchEvent(new Event("fluxo:comprar"))} className="rounded-full bg-ink px-3 py-1.5 text-[12.5px] font-semibold text-cotton">Posso comprar algo?</button>
+          <button onClick={() => window.dispatchEvent(new Event("fluxo:conversa"))} className="rounded-full border border-[var(--glass-edge)] px-3 py-1.5 text-[12.5px] font-semibold text-ink">Conversar</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+

@@ -37,6 +37,7 @@ export const SHAPES: Record<CofrinhoState, ShapeSpec> = {
   apertado: { body: [SQUASH], eyes: "tight", eyeY: 58, legs: true },
 }
 
-export const COFRINHO_COLOR = "#FF4E20"
-export const COFRINHO_DARK = "#B83312"
-export const COFRINHO_LEGS = "#E2401C"
+// azul Tinta da marca; o escuro é o Marinho noite
+export const COFRINHO_COLOR = "#3B5285"
+export const COFRINHO_DARK = "#1B2440"
+export const COFRINHO_LEGS = "#2D4170"

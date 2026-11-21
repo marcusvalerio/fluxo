@@ -195,8 +195,8 @@ export function Cofrinho({ state = "normal", swing = false, follow = false, clas
         <g ref={open} style={{ transition: "opacity .3s ease" }}>
           <ellipse cx="40" cy="46" rx="6" ry="6.5" fill="#fff" />
           <ellipse cx="60" cy="46" rx="6" ry="6.5" fill="#fff" />
-          <circle cx="41.5" cy="44" r="2.8" fill="#1F282E" />
-          <circle cx="61.5" cy="44" r="2.8" fill="#1F282E" />
+          <circle cx="41.5" cy="44" r="2.8" fill="#1B2440" />
+          <circle cx="61.5" cy="44" r="2.8" fill="#1B2440" />
         </g>
         <g ref={happy} style={{ opacity: 0, transition: "opacity .3s ease" }}>
           <path d="M34 48q6-8 12 0M54 48q6-8 12 0" stroke="#fff" strokeWidth="3.6" fill="none" strokeLinecap="round" />
@@ -204,7 +204,7 @@ export function Cofrinho({ state = "normal", swing = false, follow = false, clas
       </g>
       {lights && <g dangerouslySetInnerHTML={{ __html: lightsFront(50, 47, 34) }} />}
       <g ref={coin} style={{ opacity: 0 }}>
-        <circle cx="50" cy="0" r="7" fill="#FFC23D" stroke="#E2A21A" strokeWidth="2" />
+        <circle cx="50" cy="0" r="7" fill="#F7F7F7" stroke="#8FA4D0" strokeWidth="2" /><path d="M47.5 -2.5h5" stroke="#8FA4D0" strokeWidth="1.6" strokeLinecap="round" />
       </g>
     </svg>
   )

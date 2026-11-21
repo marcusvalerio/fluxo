@@ -37,7 +37,7 @@ export function HeroCard({ snap, a, score }: { snap: Snapshot; a: Analysis; scor
   const tight = a.free < 0
   // a cor acompanha o mês: laranja com folga, esquenta conforme aperta, telha quando passa do teto
   const left = a.budget > 0 ? a.free / a.budget : 1
-  const bg = tight ? "#5A2C46" : left < 0.15 ? "#2B3E72" : left < 0.35 ? "#3A5290" : "var(--c-accent)"
+  const bg = tight ? "#5A2C46" : left < 0.15 ? "#2B3E72" : left < 0.35 ? "#3A5290" : "#3B5285"
   void score
 
   const peak = Math.max(a.dailyCap * 1.6, ...a.days.map((d) => d.total), 1)
