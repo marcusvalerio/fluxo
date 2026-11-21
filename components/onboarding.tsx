@@ -10,6 +10,8 @@ import { DEFAULT_PLAN, SaveEditor } from "./plan-editor"
 import type { Plan } from "@/lib/types"
 import { fxPrefs, type Deboche } from "./fluximetro"
 import { Cofrinho } from "./cofrinho"
+import { NatalCena } from "./natal-cena"
+import { isNatal } from "@/lib/natal"
 
 const DEBOCHE: [Deboche, string, string][] = [
   ["educado", "Educado", "Anotado: iFood, R$ 52."],
@@ -39,10 +41,13 @@ export function Onboarding({ name: initialName, needsPassword, preview = false }
     const r = await completeOnboarding({ name: name.trim() || "Você", limit: 0, demo, password: needsPassword ? password : undefined, plan: limitN > 0 ? { ...plan, income: limitN } : null })
     if (r.error) { setError(r.error); setStep(1) }
   })
+  const [natal, setNatal] = useState(false)
+  useEffect(() => { setNatal(isNatal(new Date().toISOString().slice(0, 10))) }, [])
   const blocked = step === 1 && needsPassword && password.length < 8
 
   return (
-    <main className="relative mx-auto flex min-h-dvh max-w-[480px] flex-col overflow-hidden px-5 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(20px,env(safe-area-inset-top))]">
+    <>{natal && <NatalCena className="!fixed inset-0 -z-0 opacity-90" />}
+    <main className="relative z-[1] mx-auto flex min-h-dvh max-w-[480px] flex-col overflow-hidden px-5 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(20px,env(safe-area-inset-top))]">
 
       <header className="relative flex h-12 items-center justify-between">
         <AnimatePresence>
@@ -149,7 +154,7 @@ export function Onboarding({ name: initialName, needsPassword, preview = false }
           {step === 0 ? "Começar" : step === 2 && !limitN ? "Pular" : "Continuar"} <ArrowRight size={18} />
         </motion.button>
       )}
-    </main>
+    </main></>
   )
 }
 

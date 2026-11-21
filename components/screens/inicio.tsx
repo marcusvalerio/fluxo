@@ -18,7 +18,9 @@ import { CaiuCard, ProximasEntradas } from "../entradas"
 import { CountUp, StripeBars } from "../kpis"
 import { RetroCard } from "../retro"
 import { Planos } from "../planos"
-import { natalPref, setNatalPref, type NatalPref } from "@/lib/natal"
+import { isNatal, natalPref, setNatalPref, type NatalPref } from "@/lib/natal"
+import { NatalCena } from "../natal-cena"
+import { ComprasNatal } from "../compras-natal"
 import { fxPrefs, type Deboche } from "../fluximetro"
 import { PlanSheet } from "../plan-sheet"
 import { Atalho } from "../atalho"
@@ -53,6 +55,9 @@ export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Ana
   const hs = health(snap, a)
   const paid = snap.bills.filter((b) => b.paid)
   const tips = insights(snap, a)
+  // modo Natal: cena e compras de fim de ano no topo
+  const [natalOn, setNatalOn] = useState(false)
+  useEffect(() => { const u = () => setNatalOn(isNatal(snap.today)); u(); window.addEventListener("fluxo:natal", u); return () => window.removeEventListener("fluxo:natal", u) }, [snap.today])
 
   return (
     <div className="px-4 pt-[max(52px,env(safe-area-inset-top))]">
@@ -80,6 +85,13 @@ export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Ana
         <motion.div {...rise} transition={{ ...spring, delay: 0.05 }}><HeroCard snap={snap} a={a} score={hs.score} /></motion.div>
 
         <RetroCard snap={snap} />
+
+        {natalOn && (
+          <motion.div {...rise} transition={{ ...spring, delay: 0.06 }} className="flex flex-col gap-3">
+            <NatalCena className="aspect-[1.5] w-full rounded-[24px]" />
+            <ComprasNatal />
+          </motion.div>
+        )}
 
         {/* cartão do Fluximetro: ele mora aqui, pisca e recebe moeda; um toque e ele responde */}
         <motion.div {...rise} transition={{ ...spring, delay: 0.07 }}>

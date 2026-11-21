@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion"
 import { useEffect } from "react"
-import { NatalDrop } from "./natal"
+import { NatalCena } from "./natal-cena"
 import { LogoRing } from "./logo"
 
 const STEM = "M20 16Q20 10 26 10H44V84Q44 90 38 90H26Q20 90 20 84Z"
@@ -31,8 +31,8 @@ export function Splash({ onDone, natal = false }: { onDone: () => void; natal?: 
   return (
     <motion.div className="fixed inset-0 z-[80] grid place-items-center bg-[linear-gradient(170deg,#3B5285_0%,#24345A_55%,#1B2440_100%)]" aria-hidden
       initial={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.04 }} transition={{ duration: 0.3 }}>
-      {natal && <NatalDrop />}
-      <div className={`flex flex-col items-center gap-5 ${natal ? "translate-y-[30vh]" : ""}`}>
+      {natal && <NatalCena className="!absolute inset-0" />}
+      <div className={`relative flex flex-col items-center gap-5 ${natal ? "-translate-y-[22vh] rounded-[28px] bg-[#1B2440]/60 px-8 py-5 backdrop-blur-md" : ""}`}>
         <LogoRing size={104} color="#F7F7F7" intro={!r} />
         <span className="ttl flex text-[44px] leading-none text-[#F7F7F7]">
           {"fluxo".split("").map((c, i) => (
