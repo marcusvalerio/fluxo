@@ -7,12 +7,12 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Quanto ainda cabe no seu mês, todo dia.",
     start_url: "/",
     display: "standalone",
-    background_color: "#E4E3DC",
-    theme_color: "#FF4E20",
+    background_color: "#F3F5F9",
+    theme_color: "#1B2440",
     icons: [
-      { src: "/icon-v6-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: "/icon-v6-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
-      { src: "/icon-v6-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      { src: "/icon-v7-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/icon-v7-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/icon-v7-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
   }
 }

@@ -3,7 +3,8 @@
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion"
 import dynamic from "next/dynamic"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { BarChart3, CalendarDays, Check, House, Plus, Wallet } from "lucide-react"
+import { Check, Plus } from "lucide-react"
+import { Icon, type IconName } from "./icons"
 import type { Snapshot } from "@/lib/types"
 import { analyze } from "@/lib/finance"
 import { InicioScreen } from "./screens/inicio"
@@ -27,11 +28,11 @@ const Jogo = dynamic(() => import("./jogo").then((m) => m.Jogo), { ssr: false })
 
 export type Tab = "inicio" | "fluxo" | "agenda" | "carteira"
 export type AgendaView = "ritmo" | "dia"
-const TABS: { id: Tab; label: string; icon: typeof House }[] = [
-  { id: "inicio", label: "Início", icon: House },
-  { id: "fluxo", label: "Fluxo", icon: BarChart3 },
-  { id: "agenda", label: "Agenda", icon: CalendarDays },
-  { id: "carteira", label: "Carteira", icon: Wallet },
+const TABS: { id: Tab; label: string; icon: IconName }[] = [
+  { id: "inicio", label: "Início", icon: "home" },
+  { id: "fluxo", label: "Fluxo", icon: "flux" },
+  { id: "agenda", label: "Agenda", icon: "agenda" },
+  { id: "carteira", label: "Carteira", icon: "wallet" },
 ]
 
 export function FluxoApp({ snap }: { snap: Snapshot }) {
@@ -120,13 +121,12 @@ export function FluxoApp({ snap }: { snap: Snapshot }) {
             className={`lg flex flex-1 items-center rounded-full p-1 ${mini ? "h-[52px]" : "h-[64px]"}`}>
             <LayoutGroup>
               {TABS.map((t) => {
-                const Icon = t.icon
                 const on = tab === t.id
                 return (
                   <button key={t.id} onClick={() => setTab(t.id)} aria-current={on ? "page" : undefined} aria-label={t.label}
-                    className={`relative flex h-full flex-1 flex-col items-center justify-center gap-0.5 rounded-full text-[11px] font-semibold ${on ? "text-otan" : "text-ink"}`}>
+                    className={`relative flex h-full flex-1 flex-col items-center justify-center gap-0.5 rounded-full text-[11px] font-semibold ${on ? "text-ink" : "text-faint"}`}>
                     {on && <motion.span layoutId="pill" className="lg-pill absolute inset-0 rounded-full" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
-                    <Icon size={mini ? 20 : 21} strokeWidth={on ? 2.3 : 1.9} fill={on ? "currentColor" : "none"} fillOpacity={0.16} className="relative" />
+                    <motion.span className="relative" animate={{ y: on ? -1 : 0, scale: on ? 1.08 : 1 }} transition={{ type: "spring", stiffness: 500, damping: 18 }}><Icon name={t.icon} size={mini ? 22 : 23} active={on} /></motion.span>
                     <AnimatePresence initial={false}>
                       {!mini && (
                         <motion.span initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}

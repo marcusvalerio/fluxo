@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion"
 import { useEffect } from "react"
 import { NatalDrop } from "./natal"
+import { LogoRing } from "./logo"
 
 const STEM = "M20 16Q20 10 26 10H44V84Q44 90 38 90H26Q20 90 20 84Z"
 const ARM = "M40 10H78Q84 10 84 16V26Q84 32 78 32H40Z"
@@ -19,34 +20,26 @@ export function LogoF({ size = 40, f = "#FF4E20", fold = "#B83312", coin = "#1F2
   )
 }
 
-/** Abertura: o F se monta (boleto sobe, nota encaixa, a moeda cai e quica) e o app abre. */
+/** Abertura: os palitos do anel nascem um a um, a onda começa a correr e o nome sobe. */
 export function Splash({ onDone, natal = false }: { onDone: () => void; natal?: boolean }) {
   const reduced = !!useReducedMotion()
   useEffect(() => {
-    const t = setTimeout(onDone, reduced ? 500 : natal ? 3600 : 1350)
+    const t = setTimeout(onDone, reduced ? 500 : natal ? 3600 : 1500)
     return () => clearTimeout(t)
   }, [onDone, reduced, natal])
   const r = reduced
   return (
-    <motion.div className="fixed inset-0 z-[80] grid place-items-center bg-otan" aria-hidden
-      initial={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.04 }} transition={{ duration: 0.28 }}>
+    <motion.div className="fixed inset-0 z-[80] grid place-items-center bg-[linear-gradient(170deg,#3B5285_0%,#24345A_55%,#1B2440_100%)]" aria-hidden
+      initial={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.04 }} transition={{ duration: 0.3 }}>
       {natal && <NatalDrop />}
-      <div className={`flex flex-col items-center gap-6 ${natal ? "translate-y-[30vh]" : ""}`}>
-        <svg viewBox="0 0 100 100" width={120} height={120} style={{ overflow: "visible" }}>
-          <g transform="translate(11 0) skewX(-12)">
-            <motion.path d={STEM} fill="#FFF6EF" style={{ transformBox: "fill-box", originY: 1 }}
-              initial={r ? false : { y: 110, scaleY: 0.6, opacity: 0 }} animate={{ y: 0, scaleY: 1, opacity: 1 }} transition={{ duration: 0.34, ease }} />
-            <motion.path d={ARM} fill="#FFF6EF"
-              initial={r ? false : { x: 90, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.3, delay: 0.24, ease }} />
-            <motion.path d={FOLD} fill="#FFD8C4"
-              initial={r ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.18, delay: 0.5 }} />
-          </g>
-          <motion.circle cx="57" cy="52" r="11" fill="#1F282E"
-            initial={r ? false : { y: -140, opacity: 0 }} animate={{ y: [-140, 0, -10, 0], opacity: 1 }}
-            transition={{ duration: 0.45, delay: 0.56, times: [0, 0.6, 0.8, 1], ease: "easeOut" }} />
-        </svg>
-        <motion.span className="ttl text-[40px] italic leading-none text-[#FFF6EF]"
-          initial={r ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, delay: 0.85 }}>fluxo</motion.span>
+      <div className={`flex flex-col items-center gap-5 ${natal ? "translate-y-[30vh]" : ""}`}>
+        <LogoRing size={104} color="#F7F7F7" intro={!r} />
+        <span className="ttl flex text-[44px] leading-none text-[#F7F7F7]">
+          {"fluxo".split("").map((c, i) => (
+            <motion.span key={i} initial={r ? false : { opacity: 0, y: 18, filter: "blur(6px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.5, delay: 0.45 + i * 0.05, ease }}>{c}</motion.span>
+          ))}
+        </span>
       </div>
     </motion.div>
   )

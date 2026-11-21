@@ -4,7 +4,7 @@ self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()))
 self.addEventListener("push", (e) => {
   let d = { title: "Fluximetro", body: "Tenho um recado pra você.", url: "/" }
   try { d = { ...d, ...e.data.json() } } catch {}
-  e.waitUntil(self.registration.showNotification(d.title, { body: d.body, icon: "/icon-v6-192.png", badge: "/icon-v6-192.png", data: { url: d.url || "/" } }))
+  e.waitUntil(self.registration.showNotification(d.title, { body: d.body, icon: "/icon-v7-192.png", badge: "/icon-v7-192.png", data: { url: d.url || "/" } }))
 })
 self.addEventListener("notificationclick", (e) => {
   e.notification.close()

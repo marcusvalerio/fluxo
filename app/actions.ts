@@ -352,3 +352,14 @@ export async function unsubscribePush(endpoint: string) {
   await requireSpaceId()
   await removeSub(endpoint)
 }
+
+/* lista de espera da landing: guarda o e-mail de quem quer acesso */
+let waitTable: Promise<unknown> | undefined
+export async function joinWaitlist(email: string): Promise<{ ok?: true; error?: string }> {
+  const e = String(email || "").trim().toLowerCase().slice(0, 200)
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return { error: "Esse e-mail não parece certo. Confere e tenta de novo." }
+  waitTable ??= sql`create table if not exists waitlist (email text primary key, created_at timestamptz not null default now())`
+  await waitTable
+  await sql`insert into waitlist (email) values (${e}) on conflict (email) do nothing`
+  return { ok: true }
+}
