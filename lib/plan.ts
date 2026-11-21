@@ -1,3 +1,4 @@
+import { previstas } from "./entradas"
 import type { Card, Snapshot, Subscription } from "./types"
 import { daysInMonth } from "./dates"
 import type { Analysis } from "./finance"
@@ -50,6 +51,8 @@ export function monthEvents(s: Snapshot, a: Analysis) {
   const map = new Map<number, DayEvent[]>()
   const push = (d: number, e: DayEvent) => map.set(d, [...(map.get(d) ?? []), e])
   for (const t of s.txs) if (t.kind === "income" && t.date.startsWith(a.ym)) push(Number(t.date.slice(8)), { kind: "income", label: t.description, amount: t.amount, done: true })
+  // entradas programadas que ainda não foram confirmadas aparecem no dia em que devem cair
+  for (const p of previstas(s)) if (!p.recebida) push(p.dia, { kind: "income", label: p.rotulo ? `${p.nome} · ${p.rotulo}` : p.nome, amount: p.valor, done: false })
   for (const b of s.bills) push(clampDay(a.ym, b.dueDay), { kind: "bill", label: b.name, amount: b.amount, done: b.paid })
   for (const x of s.subs) if (x.dueThisMonth) push(clampDay(a.ym, x.billingDay), { kind: "sub", label: x.name, amount: x.amount, done: x.paid })
   for (const c of s.cards) {

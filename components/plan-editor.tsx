@@ -106,7 +106,7 @@ export function SaveEditor({ plan, onChange }: { plan: Plan; onChange: (p: Plan)
   )
 }
 
-const GOAL_COLORS = ["#1F8A5B", "var(--c-accent)", "var(--c-ink)", "var(--c-faint)", "#24345A", "var(--c-smoke)"]
+const GOAL_COLORS = ["#3E8A6A", "var(--c-accent)", "var(--c-ink)", "var(--c-faint)", "#24345A", "var(--c-smoke)"]
 const goalIcon = (g: Goal) => (/reserva|emerg/i.test(g.name) ? Shield : /viag|trip|férias|ferias/i.test(g.name) ? Plane : Target)
 
 /** Divisão sugerida: quem está mais longe da meta recebe mais. */

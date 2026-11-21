@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion"
 import { useMemo, useState } from "react"
-import { ArrowDownLeft, CreditCard, Receipt, RotateCcw } from "lucide-react"
+import { Icon as Ic, type IconName } from "../icons"
 import type { Snapshot } from "@/lib/types"
 import { brl, int, type Analysis } from "@/lib/finance"
 import { labelMonth } from "@/lib/dates"
@@ -12,7 +12,7 @@ import { GastosDiaCard, RitmoCard } from "../ritmo"
 import type { AgendaView } from "../fluxo-app"
 
 const WD = ["D", "S", "T", "Q", "Q", "S", "S"]
-const ICON = { income: ArrowDownLeft, bill: Receipt, sub: RotateCcw, invoice: CreditCard }
+const ICON: Record<"income" | "bill" | "sub" | "invoice", IconName> = { income: "salary", bill: "bolt", sub: "bell", invoice: "wallet" }
 const NAME = { income: "Entrada", bill: "Conta", sub: "Assinatura", invoice: "Fatura" }
 
 export function AgendaScreen({ snap, a, view, setView }: { snap: Snapshot; a: Analysis; view: AgendaView; setView: (v: AgendaView) => void }) {
@@ -127,15 +127,14 @@ function EventRow({ e }: { e: DayEvent }) {
 }
 
 function EventBody({ e }: { e: DayEvent }) {
-  const Icon = ICON[e.kind]
   return (
     <>
-      <span className={`grid size-9 shrink-0 place-items-center rounded-full ${e.kind === "income" ? "bg-otan/12 text-gravy" : e.kind === "invoice" ? "bg-otan text-white" : "bg-cotton text-smoke"}`}><Icon size={16} /></span>
+      <span className={`grid size-10 shrink-0 place-items-center rounded-[13px] ${e.kind === "income" ? "bg-[var(--c-pos)]/12 text-[var(--c-pos)]" : e.kind === "invoice" ? "bg-otan text-white" : "bg-sand text-ink"}`}><Ic name={ICON[e.kind]} size={20} /></span>
       <span className="min-w-0 flex-1">
         <span className={`block truncate text-[15px] ${e.done && e.kind !== "income" ? "text-mute line-through" : ""}`}>{e.label}</span>
         <span className="block text-[12px] text-mute">{NAME[e.kind]}{e.done && e.kind !== "income" ? " · paga" : ""}</span>
       </span>
-      <span className={`num text-[15px] ${e.kind === "income" ? "text-gravy" : ""}`}>{e.kind === "income" ? "+" : "−"}{brl(e.amount)}</span>
+      <span className={`num text-[15px] ${e.kind === "income" ? "text-[var(--c-pos)]" : ""}`}>{e.kind === "income" ? (e.done ? "+" : "~") : "−"}{brl(e.amount)}</span>
     </>
   )
 }

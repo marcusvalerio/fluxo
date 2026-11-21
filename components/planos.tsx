@@ -23,7 +23,7 @@ export function Planos({ open, onClose }: { open: boolean; onClose: () => void }
     <Sheet open={open} onClose={onClose} title="Planos">
       <div className="flex flex-col gap-4 px-1">
         <h1 className="ttl text-[32px] leading-[1.05]">Escolha seu<br />nível de controle</h1>
-        <div className="flex items-center gap-3 rounded-[22px] bg-[#E3F3EA] p-4 dark:bg-[#173026]">
+        <div className="flex items-center gap-3 rounded-[22px] bg-[#E1EBE6] p-4 dark:bg-[#163126]">
           <span className="w-11 shrink-0"><Cofrinho state="feliz" label="" /></span>
           <p className="text-[14px] leading-snug text-ink"><b>Fase de testes:</b> tudo liberado, sem pagar nada. Quando os planos chegarem, eu te aviso antes.</p>
         </div>

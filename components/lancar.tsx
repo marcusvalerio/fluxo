@@ -238,12 +238,12 @@ function TextResults({ today, drafts, kept, purchase, cards, missingCard, onRemo
       <AnimatePresence initial={false}>
         {kept.map(({ d, i }) => (
           <motion.div key={i} layout initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }} className="flex items-center gap-3 rounded-[20px] bg-card py-3 pl-3.5 pr-1.5">
-            <span className={`ttl grid size-9 shrink-0 place-items-center rounded-full text-[13px] text-white ${d.kind === "income" ? "bg-[#2E8B57]" : "bg-ink"}`}>{d.category[0]}</span>
+            <span className={`ttl grid size-9 shrink-0 place-items-center rounded-full text-[13px] text-white ${d.kind === "income" ? "bg-[#3E8A6A]" : "bg-ink"}`}>{d.category[0]}</span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[15px] font-medium">{d.description}</span>
               <span className="block truncate text-[12px] text-mute">{d.category} · {WHEN(d.date, today)}{d.installments > 1 ? ` · ${d.installments}x de ${brl(d.amount / d.installments)}` : ""}{d.card ? ` · ${d.card}` : ""}</span>
             </span>
-            <span className={`num text-[16px] ${d.kind === "income" ? "text-[#2E8B57]" : ""}`}>{d.kind === "income" ? "+" : "−"}{brl(d.amount)}</span>
+            <span className={`num text-[16px] ${d.kind === "income" ? "text-[#3E8A6A]" : ""}`}>{d.kind === "income" ? "+" : "−"}{brl(d.amount)}</span>
             <button onClick={() => onRemove(i)} aria-label={`Remover ${d.description}`} className="grid size-9 place-items-center rounded-full text-faint"><X size={16} /></button>
           </motion.div>
         ))}
@@ -278,7 +278,7 @@ function Simular({ snap, a, plan, onBack, onDone, onClose }: { snap: Snapshot; a
   const rule = { name: card.name, closingDay: card.closingDay, dueDay: card.dueDay }
   const sim = simulate(total, n, rule, snap.today, room)
   const max = Math.max(1, ...sim.months.map((m) => m.freeBefore))
-  const tag = { tranquilo: ["Tranquilo", "bg-[#2E8B57]/12 text-[#2E8B57]"], aperta: ["Aperta", "bg-[#C98A00]/14 text-[#A87300]"], "nao-cabe": ["Não cabe", "bg-otan/12 text-gravy"] }[sim.verdict]
+  const tag = { tranquilo: ["Tranquilo", "bg-[#3E8A6A]/12 text-[#3E8A6A]"], aperta: ["Aperta", "bg-[#C98A00]/14 text-[#A87300]"], "nao-cabe": ["Não cabe", "bg-otan/12 text-gravy"] }[sim.verdict]
   const launch = () => start(async () => {
     await addTransaction({ kind: "expense", amount: total, description: plan.description, category: "Compras", date: snap.today, cardId: card.id, installments: n })
     if (navigator.vibrate) navigator.vibrate([8, 40, 12])

@@ -47,7 +47,7 @@ export function RitmoCard({ snap, a }: { snap: Snapshot; a: Analysis }) {
       <div className="flex items-baseline justify-between text-[14px] text-mute"><span>Ritmo do mês</span><span className="first-letter:uppercase">{new Date(a.ym + "-15T12:00:00Z").toLocaleDateString("pt-BR", { month: "long", timeZone: "UTC" })}</span></div>
       <div className="mt-2.5 flex items-center gap-2.5">
         <span className="num text-[34px] leading-none">{brl(r.spent, false)}</span>
-        {r.budget > 0 && <span className={`${pill} ${over ? "bg-otan/12 text-gravy" : "bg-[#E3F3EA] text-[#1F8A5B]"}`}>{over ? "Acima do ritmo" : "No ritmo"}</span>}
+        {r.budget > 0 && <span className={`${pill} ${over ? "bg-otan/12 text-gravy" : "bg-[#E1EBE6] text-[#3E8A6A]"}`}>{over ? "Acima do ritmo" : "No ritmo"}</span>}
       </div>
       <p className="mt-2 text-[13.5px] leading-snug text-mute">
         {r.budget <= 0 ? "Defina um teto pra ver quando o mês aperta." : over ? (r.spent >= r.budget ? `Você passou do teto no dia ${r.hitDay}.` : `Nesse ritmo, você chega no teto no dia ${r.hitDay}.`) : `Nesse ritmo, o mês fecha em ${brl(r.projected, false)} e sobra uns ${brl(r.budget - r.projected, false)}.`}
@@ -92,7 +92,7 @@ export function GastosDiaCard({ snap, a }: { snap: Snapshot; a: Analysis }) {
       <div className="flex items-baseline justify-between text-[14px] text-mute"><span>Gastos por dia</span><span>últimos 7 dias</span></div>
       <div className="mt-2.5 flex items-center gap-2.5">
         <span className="num text-[34px] leading-none">{brl(r.last7, false)}</span>
-        {delta !== null && <span className={`${pill} ${delta <= 0 ? "bg-[#E3F3EA] text-[#1F8A5B]" : "bg-otan/12 text-gravy"}`}>{delta > 0 ? "+" : "−"}{Math.abs(delta)}%</span>}
+        {delta !== null && <span className={`${pill} ${delta <= 0 ? "bg-[#E1EBE6] text-[#3E8A6A]" : "bg-otan/12 text-gravy"}`}>{delta > 0 ? "+" : "−"}{Math.abs(delta)}%</span>}
       </div>
       <p className="mt-2 text-[13.5px] text-mute">média de R$ {int(r.last7 / 7)} por dia</p>
       <div className="mt-4 grid grid-cols-7 gap-[5px]">

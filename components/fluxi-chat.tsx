@@ -162,7 +162,7 @@ export function FluxiChat({ open, onClose, snap, a }: { open: boolean; onClose: 
                       {m.rows.map((r) => (
                         <div key={r.mes} className="contents">
                           <span>{r.mes}</span><span className="num text-right">{brl(r.parcela)}</span>
-                          <span className={`num text-right ${r.depois < 0 ? "text-gravy" : r.depois < r.antes * 0.2 ? "text-[#A87300]" : "text-[#2E8B57]"}`}>{brl(r.depois, false)}</span>
+                          <span className={`num text-right ${r.depois < 0 ? "text-gravy" : r.depois < r.antes * 0.2 ? "text-[#A87300]" : "text-[#3E8A6A]"}`}>{brl(r.depois, false)}</span>
                         </div>
                       ))}
                     </div>

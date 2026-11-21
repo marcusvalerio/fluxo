@@ -8,6 +8,8 @@ import { brl, int, TONES, type Analysis } from "@/lib/finance"
 import { rise, spring } from "../ui"
 import { TxList } from "../tx-list"
 import { CatIcon } from "../cat-icon"
+import { CountUp, Gomos, HeatMap, RingStat, StripeBars } from "../kpis"
+import { Icon } from "../icons"
 
 type View = "mes" | "meses"
 const WD = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "short", timeZone: "UTC" })
@@ -86,6 +88,67 @@ export function FluxoScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
       </motion.header>
 
       <div className="flex flex-col gap-6">
+        {view === "mes" && (() => {
+          const used = a.budget > 0 ? Math.min(1, (a.expense + a.upcomingBills) / a.budget) : 0
+          const saved = a.income > 0 ? Math.max(0, (a.income - a.expense) / a.income) : 0
+          const better = a.vsPrev !== null && a.vsPrev < 0
+          const sub = snap.subs.find((x) => x.dueThisMonth && !x.paid)
+          return (
+            <>
+              <motion.div {...rise} transition={{ ...spring, delay: 0.03 }} className="flex items-center gap-3 rounded-[18px] bg-sand px-4 py-3 text-[13.5px] text-smoke">
+                <span className="text-otan"><Icon name="bolt" size={20} active /></span>
+                {a.vsPrev === null ? <span>Seu primeiro mês por aqui. Daqui a pouco eu comparo com o anterior.</span>
+                  : better ? <span>Você gastou <b className="text-otan">{Math.abs(Math.round(a.vsPrev * 100))}% menos</b> que nessa altura do mês passado.</span>
+                  : <span>Você gastou <b className="text-otan">{Math.round(a.vsPrev * 100)}% mais</b> que nessa altura do mês passado.</span>}
+              </motion.div>
+              {a.budget > 0 && (
+                <motion.section {...rise} transition={{ ...spring, delay: 0.05 }} className="flex flex-col gap-3 rounded-[23px] bg-card p-4">
+                  <div className="flex items-center justify-between"><b className="text-[14px] font-semibold">Teto do mês</b><span className="rounded-full bg-sand px-2.5 py-1 text-[11.5px] text-smoke">{a.daysLeft} dias</span></div>
+                  <div className="relative">
+                    <Gomos fill={used} className="block w-full" />
+                    <div className="absolute inset-x-0 bottom-1 text-center"><p className="num text-[44px] leading-none"><CountUp value={Math.round(used * 100)} suffix="%" /></p><small className="text-[12px] text-mute">do teto usado</small></div>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-faint"><span>R$ 0</span><span className="flex items-center gap-1.5 rounded-full bg-otan/12 px-2.5 py-1 text-otan"><span className="size-1.5 rounded-full bg-otan" />{brl(a.expense + a.upcomingBills, false)} de {brl(a.budget, false)}</span><span>{brl(a.budget, false)}</span></div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {([["Entrou", a.income, "+"], ["Saiu", a.expense, "−"]] as const).map(([t, v, sg]) => (
+                      <div key={t} className="flex flex-col gap-3 rounded-[16px] bg-sand/70 p-3">
+                        <span className="text-[12px] text-smoke">{t}</span>
+                        <p className={`num text-[22px] leading-none ${sg === "+" ? "text-[var(--c-pos)]" : ""}`}><CountUp value={Math.round(v)} prefix={`${sg}R$ `} /></p>
+                      </div>
+                    ))}
+                  </div>
+                </motion.section>
+              )}
+              <motion.div {...rise} transition={{ ...spring, delay: 0.07 }} className="grid grid-cols-[150px_1fr] items-center gap-3">
+                <RingStat pct={saved} label="guardado" />
+                {sub ? (
+                  <div className="flex flex-col gap-2 rounded-[22px] bg-[linear-gradient(160deg,#5A72A8,#3B5285)] p-3.5 text-[#F7F7F7]">
+                    <b className="text-[13.5px] font-semibold leading-tight">{sub.name} vem aí</b>
+                    <small className="text-[11px] text-[#D3DCEA]">assinatura · dia {sub.billingDay}</small>
+                    <p className="num mt-auto text-[20px] leading-none">{brl(sub.amount)}</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2 rounded-[22px] bg-[linear-gradient(160deg,#5A72A8,#3B5285)] p-3.5 text-[#F7F7F7]">
+                    <b className="text-[13.5px] font-semibold leading-tight">Por dia</b>
+                    <small className="text-[11px] text-[#D3DCEA]">{a.dailyCap > 0 ? `cabe ${brl(a.dailyCap, false)}` : "média do mês"}</small>
+                    <p className="num mt-auto text-[22px] leading-none">{brl(a.expense / Math.max(1, a.dayOfMonth), false)}</p>
+                  </div>
+                )}
+              </motion.div>
+              <motion.section {...rise} transition={{ ...spring, delay: 0.09 }} className="flex flex-col gap-3 rounded-[23px] bg-card p-4">
+                <div className="flex items-center justify-between"><b className="text-[14px] font-semibold">Gasto por dia</b><p className="num text-[20px]">{brl(a.expense / Math.max(1, a.dayOfMonth), false)}<small className="ml-0.5 text-[11px] text-faint">/dia</small></p></div>
+                <HeatMap days={a.days} />
+                <div className="flex items-center justify-end gap-1 text-[10.5px] text-faint">menos{[0, 1, 2, 3, 4].map((l) => <i key={l} className="block size-[9px] rounded-[2px]" style={{ background: `color-mix(in oklab, var(--c-accent) ${l * 24}%, var(--c-sand))` }} />)}mais</div>
+              </motion.section>
+              {catRows.length > 0 && (
+                <motion.section {...rise} transition={{ ...spring, delay: 0.11 }} className="flex flex-col gap-3 rounded-[23px] bg-card p-4">
+                  <div className="flex items-baseline justify-between"><b className="text-[14px] font-semibold">Para onde foi</b><p className="num text-[18px]">{brl(a.expense, false)}</p></div>
+                  <StripeBars items={catRows.map((c) => ({ name: c.name, value: c.value, delta: c.delta }))} />
+                </motion.section>
+              )}
+            </>
+          )
+        })()}
         <motion.section {...rise} transition={{ ...spring, delay: 0.05 }} className="rounded-[23px] bg-card px-[18px] pb-4 pt-5">
           <div className="flex items-baseline gap-2.5">
             <p className="num text-[36px] leading-none">{brl(view === "mes" ? a.expense : months.reduce((s, m) => s + m.total, 0), false)}</p>
