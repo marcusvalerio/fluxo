@@ -1,10 +1,12 @@
 import { Analytics } from "@vercel/analytics/next"
 import type { Metadata, Viewport } from "next"
-import { Inter, Syne } from "next/font/google"
+import { Inter } from "next/font/google"
+import localFont from "next/font/local"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
-const syne = Syne({ subsets: ["latin"], weight: ["600", "700", "800"], variable: "--font-syne" })
+// Syne embutida no projeto: não depende do Google Fonts no build
+const syne = localFont({ src: "./fonts/syne.woff2", weight: "600 800", variable: "--font-syne", display: "swap" })
 
 export const metadata: Metadata = {
   title: "Fluxo",
