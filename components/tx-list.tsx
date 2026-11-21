@@ -22,13 +22,13 @@ export function TxRow({ tx, meta, onOpen }: { tx: Tx; meta: string; onOpen: () =
       <motion.button drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={{ left: 0.5, right: 0 }} style={{ x }}
         onDragEnd={(_, i) => i.offset.x < -100 && start(() => deleteTransaction(tx.id))}
         onTap={onOpen} aria-label={`${tx.description}, ${brl(tx.amount)}`}
-        className="relative flex w-full items-center gap-3 bg-card py-3 text-left">
+        className="relative flex w-full items-center gap-3 bg-transparent py-3 text-left">
         <CatIcon category={tx.category} income={income} />
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[15px]">{tx.description}</span>
           <span className="block text-[12px] text-mute">{meta}</span>
         </span>
-        <span className={`num text-[16px] ${income ? "text-gravy" : ""}`}>{income ? "+" : "−"}{brl(tx.amount)}</span>
+        <span className={`num text-[16px] ${income ? "text-[var(--c-pos)]" : ""}`}>{income ? "+" : "−"}{brl(tx.amount)}</span>
       </motion.button>
     </motion.li>
   )

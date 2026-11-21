@@ -214,3 +214,12 @@ svg *{transform-box:fill-box}
 @keyframes au3 { 50% { transform: translate(25%, -30%) scale(1.2) } }
 .grain-bg { opacity: .22; mix-blend-mode: overlay; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") }
 @media (prefers-reduced-motion: reduce) { .aura i { animation: none } }
+
+/* Fluximetro do cartão do Início: pula, pisca e recebe moeda */
+.fx-body { transform-box: fill-box; transform-origin: 50% 100%; animation: fx-hop 3.2s ease-in-out infinite }
+@keyframes fx-hop { 0%,62%,100% { transform: translateY(0) } 70% { transform: translateY(-7px) rotate(-4deg) } 78% { transform: translateY(0) scale(1.06,.94) } 84% { transform: scale(.98,1.02) } }
+.fx-eyes { transform-box: fill-box; transform-origin: center; animation: fx-blink 4s infinite }
+@keyframes fx-blink { 0%,44%,50%,100% { transform: scaleY(1) } 47% { transform: scaleY(.1) } }
+.fx-coin { animation: fx-coin 3.2s cubic-bezier(.5,0,.8,.5) infinite }
+@keyframes fx-coin { 0% { transform: translateY(-14px); opacity: 0 } 20% { opacity: 1 } 50% { transform: translateY(16px); opacity: 1 } 56%,100% { transform: translateY(16px); opacity: 0 } }
+@media (prefers-reduced-motion: reduce) { .fx-body, .fx-eyes, .fx-coin { animation: none } .fx-coin { opacity: 0 } }

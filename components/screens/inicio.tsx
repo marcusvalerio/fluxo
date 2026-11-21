@@ -376,35 +376,38 @@ function NotifRow({ row }: { row: string }) {
   )
 }
 
-/** Cartão retangular do Fluximetro: o cofrinho num palquinho, o recado mais importante e os atalhos. */
+/** Cartão baixinho do Fluximetro: o cofrinho azul pula, pisca e recebe moeda; ao lado, o recado e os atalhos. */
 function FluximetroCard({ tip }: { tip?: { tone?: string; title: string; text: string } }) {
-  const base = tip?.tone === "warn" ? "apertado" : tip?.tone === "good" ? "feliz" : "normal"
-  const [st, setSt] = useState<"normal" | "feliz" | "apertado" | "guardou">(base)
-  // de tempos em tempos cai uma moeda na fenda (ele fecha os olhos de feliz e volta)
-  useEffect(() => {
-    setSt(base)
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
-    let t2: ReturnType<typeof setTimeout>
-    const t = setInterval(() => { setSt("guardou"); t2 = setTimeout(() => setSt(base), 1700) }, 5200)
-    return () => { clearInterval(t); clearTimeout(t2) }
-  }, [base])
+  const tight = tip?.tone === "warn"
   return (
-    <div className="flex items-stretch gap-3.5 rounded-[24px] border border-[var(--glass-edge)] bg-card p-2.5 pr-4">
+    <div className="flex items-center gap-3 rounded-[22px] border border-[var(--glass-edge)] bg-card py-2.5 pl-2.5 pr-3.5">
       <button onClick={() => window.dispatchEvent(new Event("fluxo:conversa"))} aria-label="Conversar com o Fluximetro"
-        className="relative grid w-[104px] shrink-0 place-items-center overflow-hidden rounded-[18px] bg-[linear-gradient(180deg,var(--c-sand),var(--c-sand-3))]">
-        <span className="w-[96px]"><Cofrinho state={st} label="" /></span>
+        className="grid size-[64px] shrink-0 place-items-center overflow-hidden rounded-[16px] bg-[linear-gradient(180deg,#F7F7F7,#D3DCEA)]">
+        <svg viewBox="0 0 100 84" className="fx-pig w-[52px] overflow-visible" aria-hidden>
+          <circle className="fx-coin" cx="50" cy="6" r="5.5" fill="#F7F7F7" stroke="#8FA4D0" strokeWidth="2" />
+          <g className="fx-body">
+            <ellipse cx="50" cy="48" rx="32" ry="25" fill="#3B5285" />
+            <ellipse cx="82" cy="47" rx="6" ry="7" fill="#3B5285" />
+            <ellipse cx="38" cy="37" rx="10" ry="5" fill="rgb(255 255 255/.2)" />
+            <rect x="41" y="20" width="18" height="4.5" rx="2.2" fill="#1B2440" />
+            <g className="fx-eyes">
+              <ellipse cx="42" cy={tight ? 49 : 46} rx="3.6" ry={tight ? 2.4 : 4.8} fill="#F7F7F7" />
+              <ellipse cx="58" cy={tight ? 49 : 46} rx="3.6" ry={tight ? 2.4 : 4.8} fill="#F7F7F7" />
+            </g>
+            <rect x="27" y="68" width="8" height="11" rx="4" fill="#2D4170" />
+            <rect x="63" y="68" width="8" height="11" rx="4" fill="#2D4170" />
+          </g>
+        </svg>
       </button>
-      <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 py-1">
-        <span className="text-[11.5px] font-semibold text-faint">Fluximetro</span>
-        <p className="text-[13.5px] leading-snug text-smoke">
-          {tip ? <><b className="font-semibold text-ink">{tip.title}</b> {tip.text}</> : <>Tudo tranquilo por aqui. Se o dinheiro aprontar, eu dedo-duro na hora.</>}
+      <div className="min-w-0 flex-1">
+        <p className="line-clamp-2 text-[13px] leading-snug text-smoke">
+          {tip ? <><b className="font-semibold text-ink">{tip.title}</b> {tip.text}</> : <>Tudo tranquilo. Se o dinheiro aprontar, eu dedo-duro na hora.</>}
         </p>
-        <div className="flex flex-wrap gap-1.5">
-          <button onClick={() => window.dispatchEvent(new Event("fluxo:comprar"))} className="rounded-full bg-ink px-3 py-1.5 text-[12.5px] font-semibold text-cotton">Posso comprar algo?</button>
-          <button onClick={() => window.dispatchEvent(new Event("fluxo:conversa"))} className="rounded-full border border-[var(--glass-edge)] px-3 py-1.5 text-[12.5px] font-semibold text-ink">Conversar</button>
+        <div className="mt-1.5 flex gap-1.5">
+          <button onClick={() => window.dispatchEvent(new Event("fluxo:comprar"))} className="rounded-full bg-ink px-2.5 py-1 text-[12px] font-semibold text-cotton">Posso comprar?</button>
+          <button onClick={() => window.dispatchEvent(new Event("fluxo:conversa"))} className="rounded-full border border-[var(--glass-edge)] px-2.5 py-1 text-[12px] font-semibold text-ink">Conversar</button>
         </div>
       </div>
     </div>
   )
 }
-
