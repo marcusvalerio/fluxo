@@ -11,7 +11,8 @@ const RR = (x: number, y: number, w: number, h: number, r: number) =>
   `M${x + r} ${y}H${x + w - r}A${r} ${r} 0 0 1 ${x + w} ${y + r}V${y + h - r}A${r} ${r} 0 0 1 ${x + w - r} ${y + h}H${x + r}A${r} ${r} 0 0 1 ${x} ${y + h - r}V${y + r}A${r} ${r} 0 0 1 ${x + r} ${y}Z`
 
 /** O cofrinho: a forma de sempre do Fluximetro. */
-export const COFRE = "M50 18C72 18 86 31 86 48C86 63 74 74 54 75H46C26 74 14 63 14 48C14 31 28 18 50 18Z"
+// corpo oval do Fluximetro novo (mesmo desenho do cartão do Início)
+export const COFRE = "M50 23C68 23 82 34 82 48C82 62 68 73 50 73C32 73 18 62 18 48C18 34 32 23 50 23Z"
 const SQUASH = "M50 34C76 34 94 42 94 56C94 68 78 75 54 75H46C22 75 6 68 6 56C6 42 24 34 50 34Z"
 export const MOEDA = C(50, 46, 32)
 const FELIZ = "M50 6C68 6 78 22 78 44C78 64 68 75 54 75H46C32 75 22 64 22 44C22 22 32 6 50 6Z"

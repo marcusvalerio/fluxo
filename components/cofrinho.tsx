@@ -15,7 +15,7 @@ let flubber: Flubber | null = null
 const loadFlubber = () => (flubber ? Promise.resolve(flubber) : import("flubber").then((m) => (flubber = (m.default ?? m) as Flubber)))
 
 function decoMarkup(d: ShapeSpec["deco"]) {
-  if (d === "slot") return `<rect x="40" y="23" width="20" height="4" rx="2" fill="${COFRINHO_DARK}"/>`
+  if (d === "slot") return `<ellipse cx="84" cy="47" rx="6" ry="7" fill="${COFRINHO_COLOR}"/><ellipse cx="38" cy="36" rx="10" ry="5" fill="#fff" opacity=".2"/><rect x="41" y="25" width="18" height="4.5" rx="2.2" fill="${COFRINHO_DARK}"/>`
   if (d === "ring") return `<circle cx="50" cy="46" r="26" fill="none" stroke="${COFRINHO_DARK}" stroke-opacity=".5" stroke-width="2.4"/>`
   if (d === "cal") return `<rect x="30" y="17" width="5" height="12" rx="2.5" fill="${COFRINHO_DARK}"/><rect x="65" y="17" width="5" height="12" rx="2.5" fill="${COFRINHO_DARK}"/><rect x="16" y="34" width="68" height="4" fill="${COFRINHO_DARK}"/>`
   if (d === "card") return `<rect x="6" y="40" width="88" height="7" fill="${COFRINHO_DARK}"/><rect x="72" y="62" width="14" height="6" rx="3" fill="#fff" opacity=".6"/>`
@@ -127,7 +127,7 @@ export function Cofrinho({ state = "normal", swing = false, follow = false, clas
     e.style.opacity = s.eyes === "none" ? "0" : "1"
     open.current!.style.opacity = s.eyes === "open" || s.eyes === "tight" ? "1" : "0"
     happy.current!.style.opacity = s.eyes === "happy" ? "1" : "0"
-    open.current!.querySelectorAll("ellipse").forEach((el) => el.setAttribute("ry", s.eyes === "tight" ? "3.5" : "6.5"))
+    open.current!.querySelectorAll("ellipse").forEach((el) => el.setAttribute("ry", s.eyes === "tight" ? "2.4" : "5"))
     legs.current!.style.opacity = s.legs && withLegs ? "1" : "0"
 
     // moeda caindo na fenda
@@ -193,10 +193,9 @@ export function Cofrinho({ state = "normal", swing = false, follow = false, clas
       <g ref={deco} className="text-ink" dangerouslySetInnerHTML={{ __html: decoMarkup("slot") }} />
       <g ref={eyes} style={{ transition: "transform .68s cubic-bezier(.65,0,.35,1), opacity .3s ease" }}>
         <g ref={open} style={{ transition: "opacity .3s ease" }}>
-          <ellipse cx="40" cy="46" rx="6" ry="6.5" fill="#fff" />
-          <ellipse cx="60" cy="46" rx="6" ry="6.5" fill="#fff" />
-          <circle cx="41.5" cy="44" r="2.8" fill="#1B2440" />
-          <circle cx="61.5" cy="44" r="2.8" fill="#1B2440" />
+          <ellipse cx="42" cy="47" rx="3.8" ry="5" fill="#F7F7F7" />
+          <ellipse cx="58" cy="47" rx="3.8" ry="5" fill="#F7F7F7" />
+
         </g>
         <g ref={happy} style={{ opacity: 0, transition: "opacity .3s ease" }}>
           <path d="M34 48q6-8 12 0M54 48q6-8 12 0" stroke="#fff" strokeWidth="3.6" fill="none" strokeLinecap="round" />

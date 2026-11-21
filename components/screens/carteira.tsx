@@ -2,7 +2,7 @@
 
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion"
 import { useState, useTransition } from "react"
-import { Check, CreditCard, Plus, RotateCcw, Trash2 } from "lucide-react"
+import { Check, CreditCard, Plus, Receipt, RotateCcw, Trash2 } from "lucide-react"
 import type { Card, Snapshot, Subscription } from "@/lib/types"
 import { brl, CATEGORIES, int, type Analysis } from "@/lib/finance"
 import { cardSummary, invoiceKey, subMonthly, subsSummary } from "@/lib/plan"
@@ -10,18 +10,19 @@ import { field, Label, Primary, rise, Sheet, spring } from "../ui"
 import { CatIcon } from "../cat-icon"
 import { MetasScreen } from "./metas"
 import { Entradas } from "../entradas"
+import { BillRow, BillSheet, PaidChip } from "./inicio"
 import { addCard, addSubscription, deleteCard, deleteSubscription, setCategoryLimit, toggleSubscription } from "@/app/actions"
 
-type Seg = "cartoes" | "entradas" | "assinaturas" | "limites" | "metas"
+type Seg = "cartoes" | "contas" | "entradas" | "assinaturas" | "limites" | "metas"
 const SEGS: { id: Seg; label: string }[] = [
-  { id: "cartoes", label: "Cartões" }, { id: "entradas", label: "Entradas" }, { id: "assinaturas", label: "Assinaturas" }, { id: "limites", label: "Limites" }, { id: "metas", label: "Metas" },
+  { id: "cartoes", label: "Cartões" }, { id: "contas", label: "Contas fixas" }, { id: "entradas", label: "Entradas" }, { id: "assinaturas", label: "Assinaturas" }, { id: "limites", label: "Limites" }, { id: "metas", label: "Metas" },
 ]
 const MES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
 const fmtDay = (iso: string) => `${Number(iso.slice(8))} ${MES[Number(iso.slice(5, 7)) - 1]}`
 const H = "mb-3 flex items-center justify-between px-1"
 
 export function CarteiraScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
-  const [seg, setSeg] = useState<Seg>(() => { try { const v = sessionStorage.getItem("fluxo-seg"); sessionStorage.removeItem("fluxo-seg"); if (v === "metas" || v === "entradas") return v } catch {} return "cartoes" })
+  const [seg, setSeg] = useState<Seg>(() => { try { const v = sessionStorage.getItem("fluxo-seg"); sessionStorage.removeItem("fluxo-seg"); if (v === "metas" || v === "entradas" || v === "contas") return v } catch {} return "cartoes" })
   return (
     <div className="px-4 pt-[max(52px,env(safe-area-inset-top))]">
       <motion.header {...rise} transition={spring} className="px-1 pb-5">
@@ -41,6 +42,7 @@ export function CarteiraScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
       <AnimatePresence mode="wait">
         <motion.div key={seg} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.2 }}>
           {seg === "cartoes" && <Cartoes snap={snap} />}
+          {seg === "contas" && <ContasFixas snap={snap} a={a} />}
           {seg === "entradas" && <Entradas snap={snap} />}
           {seg === "assinaturas" && <Assinaturas snap={snap} />}
           {seg === "limites" && <Limites snap={snap} a={a} />}
@@ -55,12 +57,14 @@ export function CarteiraScreen({ snap, a }: { snap: Snapshot; a: Analysis }) {
 
 function Cartoes({ snap }: { snap: Snapshot }) {
   const [adding, setAdding] = useState(false)
+  const [sel, setSel] = useState(0)
   return (
     <div className="flex flex-col gap-6">
       {snap.cards.length === 0 && (
         <Empty icon={<CreditCard size={22} />} title="Nenhum cartão" text="Cadastre seus cartões para ver a fatura de cada um, já com as parcelas dos próximos meses." action="Adicionar cartão" onClick={() => setAdding(true)} />
       )}
-      {snap.cards.map((c, i) => <CardBlock key={c.id} snap={snap} card={c} index={i} />)}
+      {snap.cards.length > 0 && <Deck snap={snap} sel={sel} setSel={setSel} />}
+      {snap.cards[sel] && <CardBlock key={snap.cards[sel].id} snap={snap} card={snap.cards[sel]} index={0} />}
       {snap.cards.length > 0 && (
         <button onClick={() => setAdding(true)} className="flex h-14 items-center justify-center gap-2 rounded-[23px] border-2 border-dashed border-sand-2 text-[14px] font-semibold text-smoke"><Plus size={16} /> Adicionar cartão</button>
       )}
@@ -77,28 +81,26 @@ function CardBlock({ snap, card, index }: { snap: Snapshot; card: Card; index: n
   const dark = index % 2 === 0
   return (
     <motion.div {...rise} transition={{ ...spring, delay: index * 0.05 }}>
-      <div className={`relative overflow-hidden rounded-[23px] p-5 ${dark ? "bg-ink text-cotton" : "bg-otan text-white"}`}>
-        <div className="pointer-events-none absolute -right-10 -top-16 size-48 rounded-full bg-white/10" />
+      <div className={`relative overflow-hidden rounded-[23px] p-5 ${dark ? "bg-card text-ink" : "bg-card text-ink"}`}>
+        
         <div className="relative flex items-start justify-between">
           <div>
-            <p className="ttl text-[17px]">{card.name}</p>
-            <p className="text-[12px] opacity-70">fecha dia {card.closingDay} · vence dia {card.dueDay}</p>
+            <p className="text-[13px] font-semibold text-mute">Detalhes do {card.name}</p>
           </div>
           <button disabled={pending} onClick={() => confirm(`Remover o cartão ${card.name}? Os lançamentos continuam, só deixam de estar no cartão.`) && start(() => deleteCard(card.id))}
-            className="grid size-9 place-items-center rounded-full bg-white/10" aria-label={`Remover ${card.name}`}><Trash2 size={15} /></button>
+            className="grid size-9 place-items-center rounded-full bg-sand" aria-label={`Remover ${card.name}`}><Trash2 size={15} /></button>
         </div>
         {sum.closed && (
-          <div className="relative mt-5 flex items-center justify-between rounded-[16px] bg-white/12 px-3.5 py-2.5">
+          <div className="relative mt-5 flex items-center justify-between rounded-[16px] bg-sand px-3.5 py-2.5">
             <span className="text-[12px]">Fatura fechada · vence {fmtDay(sum.closed.due)}</span>
             <span className="num text-[16px]">{brl(sum.closed.total)}</span>
           </div>
         )}
-        <p className="relative mt-5 text-[12px] opacity-70">Fatura aberta · vence {fmtDay(sum.current.due)}</p>
-        <p className="num relative text-[34px] leading-tight">{brl(sum.current.total)}</p>
+        <p className="relative mt-3 text-[13px] text-smoke">Fatura aberta vence {fmtDay(sum.current.due)}</p>
         {card.limit > 0 && (
           <div className="relative mt-4">
-            <div className="h-1.5 overflow-hidden rounded-full bg-white/15">
-              <motion.div className="h-full origin-left rounded-full bg-current" initial={{ scaleX: 0 }} animate={{ scaleX: usedPct }} transition={{ duration: 1, ease: [0.2, 0.9, 0.2, 1] }} />
+            <div className="h-1.5 overflow-hidden rounded-full bg-sand">
+              <motion.div className="h-full origin-left rounded-full bg-otan" initial={{ scaleX: 0 }} animate={{ scaleX: usedPct }} transition={{ duration: 1, ease: [0.2, 0.9, 0.2, 1] }} />
             </div>
             <p className="mt-1.5 flex justify-between text-[12px] opacity-70"><span>usado {brl(sum.used, false)}</span><span>livre {brl(Math.max(0, sum.available ?? 0), false)}</span></p>
           </div>
@@ -344,6 +346,90 @@ function Empty({ icon, title, text, action, onClick }: { icon: React.ReactNode; 
       <p className="ttl mt-3 text-[18px]">{title}</p>
       <p className="mt-1 text-[14px] text-smoke">{text}</p>
       <button onClick={onClick} className="mt-4 h-11 rounded-full bg-ink px-5 text-[14px] font-semibold text-cotton">{action}</button>
+    </div>
+  )
+}
+
+
+/* ---------------- Cartões empilhados ---------------- */
+
+const FACES = [
+  "linear-gradient(150deg,#5A72A8,#3B5285 45%,#1B2440)",
+  "linear-gradient(150deg,#B9C8DD,#8FA4D0)",
+  "linear-gradient(150deg,#24345A,#111829)",
+  "linear-gradient(150deg,#D3DCEA,#B9C8DD)",
+]
+
+/** Os cartões um atrás do outro: toque num de trás e ele vem pra frente. */
+function Deck({ snap, sel, setSel }: { snap: Snapshot; sel: number; setSel: (i: number) => void }) {
+  const n = snap.cards.length
+  const order = [...snap.cards.keys()].filter((i) => i !== sel).concat(sel) // o escolhido por último = na frente
+  return (
+    <div className="relative" style={{ height: 196 + Math.min(3, n - 1) * 26 }}>
+      {order.map((i, pos) => {
+        const c = snap.cards[i], sum = cardSummary(snap, c)
+        const back = order.length - 1 - pos // 0 = frente
+        const light = i % 4 === 1 || i % 4 === 3
+        return (
+          <motion.button key={c.id} onClick={() => setSel(i)} aria-label={`Ver cartão ${c.name}`}
+            className={`absolute inset-x-0 flex h-[196px] flex-col justify-between rounded-[24px] p-5 text-left shadow-[0_22px_40px_-22px_rgb(27_36_64/0.7)] ${light ? "text-[#1B2440]" : "text-[#F7F7F7]"}`}
+            style={{ background: FACES[i % 4], zIndex: 10 - back }}
+            initial={false} animate={{ top: Math.min(3, back) === back ? (Math.min(3, n - 1) - back) * 26 : 0, scale: 1 - back * 0.045, opacity: back > 3 ? 0 : 1 }}
+            transition={{ type: "spring", stiffness: 380, damping: 32 }}>
+            <div className="flex w-full items-start justify-between">
+              <span className="ttl text-[18px]">{c.name}</span>
+              <span className="text-[11.5px] opacity-75">fecha {c.closingDay} · vence {c.dueDay}</span>
+            </div>
+            <div>
+              <span className="block text-[12px] opacity-75">Fatura aberta</span>
+              <span className="num block text-[30px] leading-tight">{brl(sum.current.total)}</span>
+              {c.limit > 0 && (
+                <>
+                  <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-current/20" style={{ background: "rgb(255 255 255/.25)" }}>
+                    <span className="block h-full rounded-full bg-current" style={{ width: `${Math.min(100, (sum.used / c.limit) * 100)}%` }} />
+                  </span>
+                  <span className="mt-1 block text-[11.5px] opacity-75">{brl(Math.max(0, sum.available ?? 0), false)} livres de {brl(c.limit, false)}</span>
+                </>
+              )}
+            </div>
+          </motion.button>
+        )
+      })}
+    </div>
+  )
+}
+
+/* ---------------- Contas fixas ---------------- */
+
+function ContasFixas({ snap, a }: { snap: Snapshot; a: Analysis }) {
+  const [adding, setAdding] = useState(false)
+  const upcoming = snap.bills.filter((b) => !b.paid).sort((x, y) => x.dueDay - y.dueDay)
+  const paid = snap.bills.filter((b) => b.paid)
+  const total = snap.bills.reduce((x, b) => x + b.amount, 0)
+  return (
+    <div className="flex flex-col gap-4">
+      {snap.bills.length === 0 ? (
+        <Empty icon={<Receipt size={22} />} title="Nenhuma conta fixa" text="Luz, água, internet, aluguel. Cadastre uma vez e o Fluxo lembra todo mês, de manhã e de noite no dia." action="Adicionar conta fixa" onClick={() => setAdding(true)} />
+      ) : (
+        <>
+          <div className="flex items-end justify-between rounded-[23px] bg-card p-4">
+            <div><p className="text-[12px] text-mute">Contas fixas por mês</p><p className="num text-[30px] leading-none">{brl(total, false)}</p></div>
+            <span className="rounded-full bg-sand px-2.5 py-1 text-[11.5px] text-smoke">{paid.length} de {snap.bills.length} pagas</span>
+          </div>
+          <section className="rounded-[23px] bg-card px-5 py-1">
+            {upcoming.length === 0 ? <p className="py-4 text-[14px] text-mute">Tudo pago este mês.</p> : upcoming.map((b) => <BillRow key={b.id} b={b} day={a.dayOfMonth} ym={a.ym} />)}
+            {paid.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 border-t border-cotton pb-3 pt-3">
+                <span className="mr-1 self-center text-[12px] text-mute">Pagas:</span>
+                {paid.map((b) => <PaidChip key={b.id} b={b} />)}
+              </div>
+            )}
+          </section>
+          <p className="px-2 text-center text-[12px] text-mute">Toque no ✓ quando pagar. O × apaga a conta.</p>
+          <button onClick={() => setAdding(true)} className="flex h-12 items-center justify-center gap-2 rounded-full border border-dashed border-sand-3 text-[14px] font-semibold text-ink"><Plus size={17} />Adicionar conta fixa</button>
+        </>
+      )}
+      <BillSheet open={adding} onClose={() => setAdding(false)} />
     </div>
   )
 }

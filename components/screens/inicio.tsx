@@ -15,6 +15,7 @@ import type { AgendaView, Tab } from "../fluxo-app"
 import { useRitmo } from "../ritmo"
 import { Cofrinho } from "../cofrinho"
 import { CaiuCard, ProximasEntradas } from "../entradas"
+import { CountUp, StripeBars } from "../kpis"
 import { RetroCard } from "../retro"
 import { Planos } from "../planos"
 import { natalPref, setNatalPref, type NatalPref } from "@/lib/natal"
@@ -102,12 +103,12 @@ export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Ana
           <div className="flex flex-col gap-3.5 rounded-[26px] bg-card p-5">
             <span className="flex items-start justify-between gap-2 text-[13.5px] text-mute">Entrou
 <span className="text-[11.5px]">neste mês</span></span>
-            <p className="num text-[24px] leading-none">{brl(a.income, false)}</p>
+            <p className="num text-[24px] leading-none text-[var(--c-pos)]"><CountUp value={Math.round(a.income)} prefix="+R$ " /></p>
           </div>
           <div className="flex flex-col gap-3.5 rounded-[26px] bg-card p-5">
             <span className="flex items-start justify-between gap-2 text-[13.5px] text-mute">Saiu
               {a.income > 0 && <span className="rounded-full bg-ink px-2.5 py-1 text-[11.5px] font-semibold text-cotton">{Math.round((a.expense / a.income) * 100)}%</span>}</span>
-            <p className="num text-[24px] leading-none">{brl(a.expense, false)}</p>
+            <p className="num text-[24px] leading-none"><CountUp value={Math.round(a.expense)} prefix="−R$ " /></p>
           </div>
         </motion.div>
 
@@ -117,25 +118,7 @@ export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Ana
             <div className="flex items-baseline justify-between text-[14px] text-mute"><span>Para onde foi</span><button onClick={() => go("fluxo")} className="font-semibold">Ver fluxo</button></div>
             <p className="num mt-2.5 text-[34px] leading-none">{brl(a.expense, false)}</p>
             {a.categories.length === 0 ? <p className="mt-4 text-[14px] text-mute">Nenhum gasto este mês ainda.</p> : (
-              <div className="mt-4 grid gap-2" style={{ gridTemplateColumns: `repeat(${a.categories.length}, minmax(0,1fr))` }}>
-                {a.categories.map((c, i) => {
-                  const h = Math.max(22, (c.value / a.categories[0].value) * 92)
-                  const top = i === 0
-                  const hot = c.prev > 0 && a.dayOfMonth >= 8 && c.value > c.prev * (a.dayOfMonth / a.dim) * 1.3
-                  return (
-                    <div key={c.name} className="flex flex-col items-center gap-2">
-                      <span className={`text-[11.5px] ${hot ? "font-semibold text-gravy" : "text-mute"}`}>{Math.round(c.share * 100)}%</span>
-                      <div className="relative h-[120px] w-full overflow-hidden rounded-[14px] bg-paper">
-                        <motion.div className="absolute inset-x-0 bottom-0 origin-bottom rounded-[12px]" initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.3 + i * 0.06, type: "spring", stiffness: 160, damping: 20 }}
-                          style={{ height: `${h}%`, background: top ? "linear-gradient(180deg,#6F8BD6,var(--c-accent))" : "repeating-linear-gradient(-45deg,#A9B9DE 0 2px,transparent 2px 6px),#DCE4F3" }} />
-                        <span className={`num absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] shadow-[0_1px_3px_rgb(0_0_0/0.08)] ${top ? "bg-ink text-cotton" : "bg-card text-ink"}`}
-                          style={{ bottom: `calc(${h}% - 26px)` }}>{int(c.value)}</span>
-                      </div>
-                      <span className={`max-w-full truncate text-[12px] ${top ? "font-semibold text-ink" : "text-mute"}`}>{c.name}</span>
-                    </div>
-                  )
-                })}
-              </div>
+              <div className="mt-4"><StripeBars items={a.categories.map((c) => ({ name: c.name, value: c.value, delta: c.prev > 0 ? (c.value - c.prev * (a.dayOfMonth / a.dim)) / (c.prev * (a.dayOfMonth / a.dim)) : null }))} /></div>
             )}
           </section>
         </motion.div>
@@ -143,8 +126,8 @@ export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Ana
         {/* Contas */}
         <motion.div {...rise} transition={{ ...spring, delay: 0.18 }}>
           <div className="mb-3 flex items-center justify-between px-1">
-            <p className="ttl text-[17px]">Pela frente <span className="num ml-1 text-[15px] text-mute">{brl(a.upcomingBills, false)}</span></p>
-            <button onClick={() => setBillSheet(true)} className="flex h-8 items-center gap-1 text-[13px] font-semibold text-mute" aria-label="Adicionar conta fixa"><Plus size={14} /> Conta</button>
+            <p className="ttl text-[17px]">Contas do mês <span className="num ml-1 text-[15px] text-mute">{brl(a.upcomingBills, false)}</span></p>
+            <button onClick={() => setBillSheet(true)} className="flex h-8 items-center gap-1 text-[13px] font-semibold text-mute" aria-label="Adicionar conta fixa"><Plus size={14} /> Conta fixa</button>
           </div>
           <section className="rounded-[23px] bg-card px-5 py-1">
           {upcoming.length === 0 ? <p className="py-4 text-[14px] text-mute">Nenhuma conta pendente este mês.</p> :
@@ -180,7 +163,7 @@ export function InicioScreen({ snap, a, go, goAgenda }: { snap: Snapshot; a: Ana
   )
 }
 
-function BillRow({ b, day, ym }: { b: Bill; day: number; ym: string }) {
+export function BillRow({ b, day, ym }: { b: Bill; day: number; ym: string }) {
   const [pending, start] = useTransition()
   const d = b.dueDay - day
   const when = d < 0 ? "Atrasada" : d === 0 ? "Vence hoje" : d === 1 ? "Amanhã" : `Em ${d} dias`
@@ -199,12 +182,12 @@ function BillRow({ b, day, ym }: { b: Bill; day: number; ym: string }) {
         className="grid size-9 place-items-center rounded-full border border-sand text-mute transition hover:border-ink hover:bg-ink hover:text-cotton">
         <Check size={15} />
       </button>
-      <button onClick={() => start(() => deleteBill(b.id))} className="hidden text-[12px] text-mute hover:text-gravy group-hover:block" aria-label={`Remover ${b.name}`}>×</button>
+      <button onClick={() => start(() => deleteBill(b.id))} className="grid size-7 place-items-center text-[16px] text-faint hover:text-gravy" aria-label={`Remover ${b.name}`}>×</button>
     </div>
   )
 }
 
-function PaidChip({ b }: { b: Bill }) {
+export function PaidChip({ b }: { b: Bill }) {
   const [pending, start] = useTransition()
   return (
     <button disabled={pending} onClick={() => start(() => toggleBill(b.id))} title="Desfazer pagamento" aria-label={`Desfazer pagamento de ${b.name}`}
@@ -325,7 +308,7 @@ function SettingsSheet({ open, onClose, limit, email, admin, name, onPlan, onPla
   )
 }
 
-function BillSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function BillSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [name, setName] = useState("")
   const [amount, setAmount] = useState("")
   const [due, setDue] = useState("10")
