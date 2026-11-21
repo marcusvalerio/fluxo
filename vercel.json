@@ -1,3 +1,7 @@
 {
-  "crons": [{ "path": "/api/cron/fluximetro", "schedule": "17 12 * * *" }]
+  "crons": [
+    { "path": "/api/cron/fluximetro?turno=manha", "schedule": "17 12 * * *" },
+    { "path": "/api/cron/fluximetro?turno=tarde", "schedule": "43 17 * * *" },
+    { "path": "/api/cron/fluximetro?turno=noite", "schedule": "7 23 * * *" }
+  ]
 }
